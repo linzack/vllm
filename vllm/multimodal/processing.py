@@ -1096,6 +1096,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
         mm_prompt_repls: Mapping[str, Sequence[BoundPromptReplacement]],
         mm_item_counts: Mapping[str, int],
     ) -> tuple[list[int], str, Mapping[str, list[PlaceholderFeaturesInfo]]]:
+        print(f"_apply_prompt_replacements() token_ids: {token_ids}, mm_prompt_repls: {mm_prompt_repls}, mm_item_counts: {mm_item_counts}")
         tokenizer = self.info.get_tokenizer()
 
         mm_token_matches = {
@@ -1139,6 +1140,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
                 modality: find_text_matches(text, prompt_repls)
                 for modality, prompt_repls in mm_prompt_repls.items()
             }
+            print(f"_apply_prompt_replacements() mm_text_matches: {mm_text_matches}")
             text = replace_text_matches(
                 text,
                 mm_text_matches,
@@ -1153,6 +1155,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
                 for modality, token_matches in mm_text_matches.items()
             }
 
+        print(f"_apply_prompt_replacements() matched_repls: {matched_repls}, ")
         placeholders = self._find_mm_placeholders(
             matched_repls,
             token_ids,
@@ -1220,6 +1223,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
         3. Extract information about the placeholder tokens from the
            processed token IDs.
         """
+        print(f"apply() prompt: {prompt}, mm_data: {mm_data}, hf_processor_mm_kwargs: {hf_processor_mm_kwargs}")
         mm_items = self._to_mm_items(mm_data)
 
         # Create MM hashes (only used in V1)
@@ -1321,6 +1325,7 @@ class EncDecMultiModalProcessor(BaseMultiModalProcessor[_I]):
         2. Apply the HF processor on encoder prompt.
         3. Copy the input prompt text as decoder prompt inputs.
         """
+        print(f"EncDecMultiModalProcessor apply() prompt: {prompt}, mm_data: {mm_data}, hf_processor_mm_kwargs: {hf_processor_mm_kwargs}")
         encoder_prompt = self.create_encoder_prompt(prompt, mm_data)
         encoder_inputs = super().apply(
             encoder_prompt,
