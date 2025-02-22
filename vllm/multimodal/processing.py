@@ -521,14 +521,17 @@ def _iter_placeholders(
 
     Note that empty matches are ignored.
     """
+    print(f"_iter_placeholders() ")
     prompt_len = len(prompt)
     item_idx_by_modality = defaultdict[str, int](lambda: 0)
+    print(f"_iter_placeholders() prompt: {prompt}, prompt_len: {prompt_len}")
 
     start_idx = 0
     while start_idx < prompt_len:
         found = False
 
         for modality, modality_repls in mm_prompt_repls.items():
+            print(f"_iter_placeholders() modality: {modality}, modality_repls: {modality_repls}, ")
             item_idx = item_idx_by_modality[modality]
             if item_idx >= mm_item_counts.get(modality, 0):
                 continue
@@ -538,6 +541,8 @@ def _iter_placeholders(
                 repl_tokens_full = replacement.full.token_ids
                 repl_len_full = len(repl_tokens_full)
                 end_idx_full = start_idx + repl_len_full
+                print(f"_iter_placeholders() repl_info: {repl_info}, replacement: {replacement}, ")
+                print(f"_iter_placeholders() repl_tokens_full: {repl_tokens_full}")
 
                 if repl_len_full == 0 or end_idx_full > prompt_len:
                     continue
@@ -564,6 +569,8 @@ def _iter_placeholders(
                     start_idx = end_idx_full
                     item_idx_by_modality[modality] += 1
                     found = True
+                    print(f"_iter_placeholders() start_idx: {start_idx}, item_idx_by_modality[modality]: {item_idx_by_modality[modality]}, ")
+                    print(f"_iter_placeholders() found: {found}")
                     break
 
             if found:
@@ -578,6 +585,7 @@ def find_mm_placeholders(
     prompt: list[int],
     mm_item_counts: Mapping[str, int],
 ) -> Mapping[str, list[PlaceholderFeaturesInfo]]:
+    print(f"find_mm_placeholders() ")
     it = _iter_placeholders(mm_prompt_repls, prompt, mm_item_counts)
     return dict(full_groupby_modality(it))
 
