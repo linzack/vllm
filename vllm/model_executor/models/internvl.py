@@ -148,7 +148,9 @@ def get_internvl_target_ratios(
     min_num: int,
     max_num: int,
 ) -> list[tuple[int, int]]:
-    print(f"internvl get_internvl_target_ratios() min_num: {min_num}, max_num: {max_num}")
+    #global DDDDDDEEEEEBBBBUUUG
+    #if DDDDDDEEEEEBBBBUUUG:
+    #    print(f"internvl get_internvl_target_ratios() min_num: {min_num}, max_num: {max_num}")
     target_ratios = {(i, j)
                      for n in range(min_num, max_num + 1)
                      for i in range(1, n + 1)
@@ -164,7 +166,9 @@ def calculate_internvl_targets(
     image_size: int,
     use_thumbnail: bool,
 ) -> tuple[int, int, int]:
-    print(f"internvl calculate_internvl_targets()")
+    global DDDDDDEEEEEBBBBUUUG
+    if DDDDDDEEEEEBBBBUUUG:
+        print(f"internvl calculate_internvl_targets()")
     aspect_ratio = orig_width / orig_height
 
     # find the closest aspect ratio to the target
