@@ -48,6 +48,7 @@ IMG_CONTEXT = '<IMG_CONTEXT>'
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
+print(f"enter model_executor/models/internvl.py")
 
 class InternVLImagePixelInputs(TypedDict):
     type: Literal["pixel_values"]
@@ -79,6 +80,8 @@ InternVLImageInputs = Union[InternVLImagePixelInputs,
 
 # adapted from https://huggingface.co/OpenGVLab/InternVL2-1B
 def build_transform(input_size: int):
+    print(f"internvl build_transform() input_size: {input_size}")
+
     MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
     return T.Compose([
         T.Lambda(lambda img: img.convert('RGB') if img.mode != 'RGB' else img),
@@ -98,6 +101,9 @@ def find_closest_aspect_ratio(
     height: int,
     image_size: int,
 ) -> tuple[int, int]:
+    print(f"internvl find_closest_aspect_ratio() aspect_ratio: {aspect_ratio}, target_ratios: {target_ratios}")
+    print(f"internvl find_closest_aspect_ratio() width: {width}, height: {height}, image_size: {image_size}")
+
     best_ratio_diff = float('inf')
     best_ratio = (1, 1)
     area = width * height
@@ -110,6 +116,7 @@ def find_closest_aspect_ratio(
         elif ratio_diff == best_ratio_diff:
             if area > 0.5 * image_size * image_size * ratio[0] * ratio[1]:
                 best_ratio = ratio
+    print(f"internvl find_closest_aspect_ratio() best_ratio: {best_ratio}")
     return best_ratio
 
 
@@ -120,6 +127,8 @@ def resolve_internvl_min_max_num(
     dynamic_image_size: bool,
     use_thumbnail: bool,
 ) -> tuple[int, int]:
+    print(f"internvl resolve_internvl_min_max_num() min_dynamic_patch: {min_dynamic_patch}, max_dynamic_patch: {max_dynamic_patch}")
+    print(f"internvl resolve_internvl_min_max_num() dynamic_image_size: {dynamic_image_size}, use_thumbnail: {use_thumbnail}")
     min_dynamic_patch = min_dynamic_patch if dynamic_image_size else 1
     max_dynamic_patch = max_dynamic_patch if dynamic_image_size else 1
 
@@ -133,6 +142,7 @@ def get_internvl_target_ratios(
     min_num: int,
     max_num: int,
 ) -> list[tuple[int, int]]:
+    print(f"internvl get_internvl_target_ratios() min_num: {min_num}, max_num: {max_num}")
     target_ratios = {(i, j)
                      for n in range(min_num, max_num + 1)
                      for i in range(1, n + 1)
@@ -148,6 +158,7 @@ def calculate_internvl_targets(
     image_size: int,
     use_thumbnail: bool,
 ) -> tuple[int, int, int]:
+    print(f"internvl calculate_internvl_targets()")
     aspect_ratio = orig_width / orig_height
 
     # find the closest aspect ratio to the target
@@ -179,6 +190,7 @@ def dynamic_preprocess_internvl(
     image_size: int,
     use_thumbnail: bool,
 ) -> list[Image.Image]:
+    print(f"internvl dynamic_preprocess_internvl() image: {image}")
     orig_width, orig_height = image.size
 
     # calculate the number of blocks without thumbnail
@@ -208,6 +220,7 @@ def dynamic_preprocess_internvl(
         thumbnail_img = image.resize((image_size, image_size))
         processed_images.append(thumbnail_img)
 
+    print(f"internvl dynamic_preprocess_internvl() processed_images: {processed_images}")
     return processed_images
 
 
@@ -220,6 +233,7 @@ def image_to_pixel_values_internvl(
     max_num: int,
     use_thumbnail: bool,
 ) -> torch.Tensor:
+    print(f"internvl image_to_pixel_values_internvl()")
     target_ratios = get_internvl_target_ratios(min_num, max_num)
 
     transform = build_transform(input_size=input_size)
@@ -231,6 +245,7 @@ def image_to_pixel_values_internvl(
     )
 
     pixel_values = torch.stack([transform(image) for image in images])
+    print(f"internvl image_to_pixel_values_internvl() pixel_values: {pixel_values}")
     return pixel_values
 
 
@@ -567,6 +582,7 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
         mm_data: Mapping[str, object],
         mm_kwargs: Mapping[str, object],
     ) -> BatchFeature:
+        print(f"InternVLMultiModalProcessor _call_hf_processor() prompt: {prompt}, mm_data: {mm_data}, mm_kwargs: {mm_kwargs}")
         processed_outputs = super()._call_hf_processor(
             prompt=prompt,
             mm_data=mm_data,
@@ -575,13 +591,15 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
 
         image_token_id = self.info.get_hf_processor(**mm_kwargs).image_token_id
         image_data = mm_data.get("images", [])
+        print(f"InternVLMultiModalProcessor _call_hf_processor() processed_outputs: {processed_outputs}, image_token_id: {image_token_id}, image_data: {image_data}")
         assert isinstance(image_data, list)
 
         # Since there may be extra tokens in the feature placeholders,
         # we need to pass the image token ID to the model to select the
         # tokens to merge from the vision encoder outputs
         processed_outputs["image_token_id"] = torch.tensor(image_token_id)
-
+        print(f"InternVLMultiModalProcessor _call_hf_processor() processed_outputs: {processed_outputs}")
+        
         return processed_outputs
 
     def _get_mm_fields_config(
@@ -589,8 +607,11 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
         hf_inputs: BatchFeature,
         hf_processor_mm_kwargs: Mapping[str, object],
     ) -> Mapping[str, MultiModalFieldConfig]:
+        print(f"InternVLMultiModalProcessor _get_mm_fields_config() hf_inputs: {hf_inputs}, hf_processor_mm_kwargs: {hf_processor_mm_kwargs}")
+
         image_num_patches = hf_inputs.get("image_num_patches", torch.empty(0))
         num_images = len(image_num_patches)
+        print(f"InternVLMultiModalProcessor _get_mm_fields_config() image_num_patches: {image_num_patches}, num_images: {num_images}")
 
         return dict(
             pixel_values_flat=MultiModalFieldConfig.flat_from_sizes(
@@ -606,22 +627,29 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
         hf_processor_mm_kwargs: Mapping[str, object],
         out_mm_kwargs: MultiModalKwargs,
     ) -> list[PromptReplacement]:
+        print(f"InternVLMultiModalProcessor _get_prompt_replacements() mm_items: {mm_items}, hf_processor_mm_kwargs: {hf_processor_mm_kwargs}, out_mm_kwargs: {out_mm_kwargs}")
+        
         hf_processor = self.info.get_hf_processor(**hf_processor_mm_kwargs)
 
         if "image_num_patches" in out_mm_kwargs:
             image_num_patches = out_mm_kwargs["image_num_patches"]
             assert isinstance(image_num_patches, torch.Tensor)
             image_num_patches = image_num_patches.tolist()
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_num_patches: {image_num_patches}
         elif "image_embeds" in out_mm_kwargs:
             # TODO: Use image size information in dictionary embedding inputs
             # to compute num_patches (similar to Qwen2-VL)
             image_num_patches = [None] * len(out_mm_kwargs["image_embeds"])
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_embeds image_num_patches: {image_num_patches}
         else:
             image_num_patches = []
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() else image_num_patches: {image_num_patches}
 
         def get_replacement_internvl(item_idx: int):
+            print(f"InternVLMultiModalProcessor get_replacement_internvl() item_idx: {item_idx}
             images = mm_items.get_items(
                 "image", (ImageEmbeddingItems, ImageProcessorItems))
+            print(f"InternVLMultiModalProcessor get_replacement_internvl() images: {images}
 
             if isinstance(images, ImageEmbeddingItems):
                 feature_size = images.get_feature_size(item_idx)
@@ -830,10 +858,12 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
 
     def _parse_and_validate_image_input(
             self, **kwargs: object) -> Optional[InternVLImageInputs]:
+        print(f"InternVLChatModel _parse_and_validate_image_input()")
         pixel_values_flat = kwargs.pop("pixel_values_flat", None)
         image_num_patches = kwargs.pop("image_num_patches", None)
         image_embeds = kwargs.pop("image_embeds", None)
 
+        print(f"InternVLChatModel _parse_and_validate_image_input() pixel_values_flat: {pixel_values_flat}, image_num_patches: {image_num_patches}, image_embeds: {image_embeds}")
         if pixel_values_flat is None and image_embeds is None:
             return None
 
@@ -848,6 +878,7 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
             )
 
         image_token_id = kwargs["image_token_id"]
+        print(f"InternVLChatModel _parse_and_validate_image_input() image_token_id: {image_token_id}")
         assert isinstance(image_token_id, torch.Tensor)
         self.img_context_token_id = image_token_id.flatten().unique().item()
 
@@ -871,6 +902,7 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
         self,
         image_input: InternVLImageInputs,
     ) -> tuple[torch.Tensor, ...]:
+        print(f"InternVLChatModel _process_image_input() image_input: {image_input}")
         if image_input["type"] == "image_embeds":
             return image_input["data"]
 
@@ -895,6 +927,7 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
             num_patches * feature_size for num_patches in patches_per_image
         ]
         image_embeds = image_embeds.split(image_feature_sizes)
+        print(f"InternVLChatModel _process_image_input() image_embeds: {image_embeds}")
         return image_embeds
 
     def _set_visual_token_mask(self, input_ids: torch.Tensor) -> None:
@@ -916,6 +949,7 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
         input_ids: torch.Tensor,
         multimodal_embeddings: Optional[NestedTensors] = None,
     ) -> torch.Tensor:
+        print(f"InternVLChatModel get_input_embeddings() input_ids: {input_ids}, multimodal_embeddings: {multimodal_embeddings}")
         inputs_embeds = self.language_model.get_input_embeddings(input_ids)
         if multimodal_embeddings is not None:
             assert self.img_context_token_id is not None
@@ -935,6 +969,9 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
         inputs_embeds: Optional[torch.Tensor] = None,
         **kwargs: object,
     ) -> Union[SamplerOutput, IntermediateTensors]:
+        print(f"InternVLChatModel forward() input_ids: {input_ids}, positions: {positions}")
+        print(f"InternVLChatModel forward() kv_caches: {kv_caches}, attn_metadata: {attn_metadata}")
+        print(f"InternVLChatModel forward() intermediate_tensors: {intermediate_tensors}, inputs_embeds: {inputs_embeds}")
 
         if intermediate_tensors is not None:
             input_ids = None
@@ -964,6 +1001,8 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
             self.visual_token_mask = None
 
         hidden_states = self.language_model.model(**forward_kwargs)
+        print(f"InternVLChatModel forward() hidden_states: {hidden_states}")
+
         return hidden_states
 
     def compute_logits(
