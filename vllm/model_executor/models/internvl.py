@@ -635,21 +635,21 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
             image_num_patches = out_mm_kwargs["image_num_patches"]
             assert isinstance(image_num_patches, torch.Tensor)
             image_num_patches = image_num_patches.tolist()
-            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_num_patches: {image_num_patches}
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_num_patches: {image_num_patches}")
         elif "image_embeds" in out_mm_kwargs:
             # TODO: Use image size information in dictionary embedding inputs
             # to compute num_patches (similar to Qwen2-VL)
             image_num_patches = [None] * len(out_mm_kwargs["image_embeds"])
-            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_embeds image_num_patches: {image_num_patches}
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() image_embeds image_num_patches: {image_num_patches}")
         else:
             image_num_patches = []
-            print(f"InternVLMultiModalProcessor _get_prompt_replacements() else image_num_patches: {image_num_patches}
+            print(f"InternVLMultiModalProcessor _get_prompt_replacements() else image_num_patches: {image_num_patches}")
 
         def get_replacement_internvl(item_idx: int):
-            print(f"InternVLMultiModalProcessor get_replacement_internvl() item_idx: {item_idx}
+            print(f"InternVLMultiModalProcessor get_replacement_internvl() item_idx: {item_idx}")
             images = mm_items.get_items(
                 "image", (ImageEmbeddingItems, ImageProcessorItems))
-            print(f"InternVLMultiModalProcessor get_replacement_internvl() images: {images}
+            print(f"InternVLMultiModalProcessor get_replacement_internvl() images: {images}")
 
             if isinstance(images, ImageEmbeddingItems):
                 feature_size = images.get_feature_size(item_idx)
