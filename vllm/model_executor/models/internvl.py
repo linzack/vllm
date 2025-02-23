@@ -706,7 +706,8 @@ class InternVLMultiModalProcessor(BaseMultiModalProcessor[_I]):
         return [
             PromptReplacement(
                 modality="image",
-                target="<image>",
+                ############zack target="<image>",
+                target="<IMG_CONTEXT>", #zack
                 replacement=get_replacement_internvl,
             )
         ]
@@ -894,8 +895,8 @@ class InternVLChatModel(nn.Module, SupportsMultiModal, SupportsPP):
         image_num_patches = kwargs.pop("image_num_patches", None)
         image_embeds = kwargs.pop("image_embeds", None)
         global DDDDDDEEEEEBBBBUUUG
-        if DDDDDDEEEEEBBBBUUUG:
-            print(f"InternVLChatModel _parse_and_validate_image_input() pixel_values_flat: {pixel_values_flat}, image_num_patches: {image_num_patches}, image_embeds: {image_embeds}")
+        #if DDDDDDEEEEEBBBBUUUG:
+        print(f"InternVLChatModel _parse_and_validate_image_input() pixel_values_flat: {pixel_values_flat}, image_num_patches: {image_num_patches}, image_embeds: {image_embeds}")
         if pixel_values_flat is None and image_embeds is None:
             return None
 
