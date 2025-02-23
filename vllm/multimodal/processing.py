@@ -1191,6 +1191,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
         mm_placeholders: Mapping[str, list[PlaceholderFeaturesInfo]],
         mm_item_counts: Mapping[str, int],
     ) -> None:
+        print(f"_validate_mm_placeholders() mm_placeholders: {mm_placeholders}, mm_item_counts: {mm_item_counts}")
         for modality, item_count in mm_item_counts.items():
             placeholders = mm_placeholders.get(modality, [])
 
@@ -1233,6 +1234,7 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
 
         if envs.VLLM_USE_V1:
             model_id = self.info.model_id
+            print(f"apply() envs.VLLM_USE_V1 model_id: {model_id}")
             mm_hashes = {
                 modality: [
                     MultiModalHasher.hash_kwargs(model_id=model_id,
@@ -1254,15 +1256,19 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
             mm_items,
             hf_processor_mm_kwargs,
         )
+        print(f"apply() _cached_apply_hf_processor prompt_ids: {prompt_ids}, mm_kwargs: {mm_kwargs}, is_repl_applied: {is_repl_applied}")
 
         unbound_prompt_repls = self._get_prompt_replacements(
             mm_items,
             hf_processor_mm_kwargs,
             mm_kwargs,
         )
+        print(f"apply() _get_prompt_replacements unbound_prompt_repls: {unbound_prompt_repls}")
         mm_prompt_repls = self._bind_and_group_repls(unbound_prompt_repls)
+        print(f"apply() _bind_and_group_repls mm_prompt_repls: {mm_prompt_repls}")
 
         mm_item_counts = mm_items.get_all_counts()
+        print(f"apply() get_all_counts mm_item_counts: {mm_item_counts}")
         self._validate_mm_kwargs(mm_kwargs, mm_item_counts)
 
         if is_repl_applied:
@@ -1271,10 +1277,12 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
                 prompt_ids,
                 mm_item_counts,
             )
+            print(f"apply() is_repl_applied _find_mm_placeholders mm_placeholders: {mm_placeholders}")
             self._validate_mm_placeholders(mm_placeholders, mm_item_counts)
 
             tokenizer = self.info.get_tokenizer()
             prompt = decode_tokens(tokenizer, prompt_ids)
+            print(f"apply() decode_tokens prompt: {prompt}")
         else:
             (
                 prompt_ids,
@@ -1285,12 +1293,15 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
                 mm_prompt_repls,
                 mm_item_counts,
             )
+            print(f"apply() else _apply_prompt_replacements prompt_ids: {prompt_ids}, prompt: {prompt}, mm_placeholders: {mm_placeholders}")
+
             self._validate_mm_placeholders(mm_placeholders, mm_item_counts)
 
         mm_placeholder_ranges = {
             modality: [item.to_range() for item in placeholders]
             for modality, placeholders in mm_placeholders.items()
         }
+        print(f"apply() mm_placeholder_ranges: {mm_placeholder_ranges}")
 
         return MultiModalInputs(
             type="multimodal",
