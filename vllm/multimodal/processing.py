@@ -531,7 +531,7 @@ def _iter_placeholders(
         found = False
 
         for modality, modality_repls in mm_prompt_repls.items():
-            print(f"_iter_placeholders() modality: {modality}, modality_repls: {modality_repls}, ")
+            #print(f"_iter_placeholders() modality: {modality}, modality_repls: {modality_repls}, ")
             item_idx = item_idx_by_modality[modality]
             if item_idx >= mm_item_counts.get(modality, 0):
                 continue
@@ -541,8 +541,8 @@ def _iter_placeholders(
                 repl_tokens_full = replacement.full.token_ids
                 repl_len_full = len(repl_tokens_full)
                 end_idx_full = start_idx + repl_len_full
-                print(f"_iter_placeholders() repl_info: {repl_info}, replacement: {replacement}, ")
-                print(f"_iter_placeholders() repl_tokens_full: {repl_tokens_full}")
+                #print(f"_iter_placeholders() repl_info: {repl_info}, replacement: {replacement}, ")
+                #print(f"_iter_placeholders() repl_tokens_full: {repl_tokens_full}")
 
                 if repl_len_full == 0 or end_idx_full > prompt_len:
                     continue
@@ -569,8 +569,8 @@ def _iter_placeholders(
                     start_idx = end_idx_full
                     item_idx_by_modality[modality] += 1
                     found = True
-                    print(f"_iter_placeholders() start_idx: {start_idx}, item_idx_by_modality[modality]: {item_idx_by_modality[modality]}, ")
-                    print(f"_iter_placeholders() found: {found}")
+                    #print(f"_iter_placeholders() start_idx: {start_idx}, item_idx_by_modality[modality]: {item_idx_by_modality[modality]}, ")
+                    #print(f"_iter_placeholders() found: {found}")
                     break
 
             if found:
@@ -761,10 +761,11 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
         for modality, items in mm_items.items():
             limit = mm_limits.get(modality, 1)
             if len(items) > limit:
-                raise ValueError(
-                    f"You set {modality}={limit} (or defaulted to 1) in "
-                    f"`--limit-mm-per-prompt`, but passed {len(items)} "
-                    f"{modality} items in the same prompt.")
+                print(f"[WARNING] You set {modality}={limit} (or defaulted to 1) in `--limit-mm-per-prompt`, but passed {len(items)} {modality} items in the same prompt.")
+                #zack raise ValueError(
+                #zack     f"You set {modality}={limit} (or defaulted to 1) in "
+                #zack     f"`--limit-mm-per-prompt`, but passed {len(items)} "
+                #zack     f"{modality} items in the same prompt.")
 
         return mm_items
 
