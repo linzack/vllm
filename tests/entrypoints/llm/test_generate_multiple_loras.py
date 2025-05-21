@@ -7,11 +7,18 @@ import pytest
 from huggingface_hub import snapshot_download
 
 from vllm import LLM
+<<<<<<< HEAD
 from vllm.config import LoadFormat
 from vllm.distributed import cleanup_dist_env_and_memory
 from vllm.lora.request import LoRARequest
 
 MODEL_NAME = "s3://vllm-ci-model-weights/zephyr-7b-beta"
+=======
+from vllm.distributed import cleanup_dist_env_and_memory
+from vllm.lora.request import LoRARequest
+
+MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 PROMPTS = [
     "Hello, my name is",
@@ -24,11 +31,30 @@ LORA_NAME = "typeof/zephyr-7b-beta-lora"
 
 
 @pytest.fixture(scope="module")
+<<<<<<< HEAD
 def llm():
     # pytest caches the fixture so we use weakref.proxy to
     # enable garbage collection
     llm = LLM(model=MODEL_NAME,
               load_format=LoadFormat.RUNAI_STREAMER,
+=======
+def monkeypatch_module():
+    from _pytest.monkeypatch import MonkeyPatch
+    mpatch = MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+@pytest.fixture(scope="module", params=[False, True])
+def llm(request, monkeypatch_module):
+
+    use_v1 = request.param
+    monkeypatch_module.setenv('VLLM_USE_V1', '1' if use_v1 else '0')
+
+    # pytest caches the fixture so we use weakref.proxy to
+    # enable garbage collection
+    llm = LLM(model=MODEL_NAME,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               tensor_parallel_size=1,
               max_model_len=8192,
               enable_lora=True,

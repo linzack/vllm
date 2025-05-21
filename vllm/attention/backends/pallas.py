@@ -8,8 +8,17 @@ import torch_xla.experimental.custom_kernel  # Required to register custom ops.
 
 from vllm.attention.backends.abstract import (AttentionBackend, AttentionImpl,
                                               AttentionLayer,
+<<<<<<< HEAD
                                               AttentionMetadata, AttentionType)
 from vllm.attention.backends.utils import CommonAttentionState
+=======
+                                              AttentionMetadata, AttentionType,
+                                              is_quantized_kv_cache)
+from vllm.attention.backends.utils import CommonAttentionState
+from vllm.logger import init_logger
+
+logger = init_logger(__name__)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class PallasAttentionBackend(AttentionBackend):
@@ -104,7 +113,16 @@ class PallasAttentionBackendImpl(AttentionImpl):
         blocksparse_params: Optional[Dict[str, Any]] = None,
         logits_soft_cap: Optional[float] = None,
         attn_type: str = AttentionType.DECODER,
+<<<<<<< HEAD
     ) -> None:
+=======
+        use_irope: bool = False,
+    ) -> None:
+        if use_irope:
+            logger.warning_once(
+                "Using irope in Pallas is not supported yet, it will fall back "
+                "to global attention for long context.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.num_heads = num_heads
         self.head_size = head_size
         self.scale = float(scale)
@@ -114,12 +132,21 @@ class PallasAttentionBackendImpl(AttentionImpl):
         self.num_queries_per_kv = self.num_heads // self.num_kv_heads
         self.logits_soft_cap = logits_soft_cap
         if head_size % 128 != 0:
+<<<<<<< HEAD
             raise NotImplementedError("Head size must be a multiple of 128.")
+=======
+            raise NotImplementedError(
+                f"Head size must be a multiple of 128, found {head_size}.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if alibi_slopes is not None:
             raise NotImplementedError("Alibi slopes is not supported.")
         if sliding_window is not None:
             raise NotImplementedError("Sliding window is not supported.")
+<<<<<<< HEAD
         if kv_cache_dtype != "auto":
+=======
+        if is_quantized_kv_cache(kv_cache_dtype):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             raise NotImplementedError("FP8 KV cache dtype is not supported.")
         if blocksparse_params is not None:
             raise NotImplementedError("Blocksparse is not supported.")

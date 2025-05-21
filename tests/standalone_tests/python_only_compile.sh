@@ -18,7 +18,11 @@ apt autoremove -y
 
 echo 'import os; os.system("touch /tmp/changed.file")' >> vllm/__init__.py
 
+<<<<<<< HEAD
 VLLM_USE_PRECOMPILED=1 pip3 install -vvv -e .
+=======
+VLLM_TEST_USE_PRECOMPILED_NIGHTLY_WHEEL=1 VLLM_USE_PRECOMPILED=1 pip3 install -vvv -e .
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # Run the script
 python3 -c 'import vllm'

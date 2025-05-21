@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union, final
+=======
+from typing import TYPE_CHECKING, Optional, Union, final
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from vllm_hpu_extension.ops import (dispatch_bgmv_embedding,
@@ -28,7 +32,11 @@ class PunicaWrapperHPU(PunicaWrapperBase):
     def _update_base_metadata(
         self,
         mapping: "LoRAMapping",
+<<<<<<< HEAD
         lora_index_to_id: List[Optional[int]],
+=======
+        lora_index_to_id: list[Optional[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         max_loras: int,
         vocab_size: int,
         extra_vocab_size: int,
@@ -48,9 +56,15 @@ class PunicaWrapperHPU(PunicaWrapperBase):
         # graph accumulation. Hence HPU appends `lora_offset` to a list and
         # converts it to a tensor only after it is ready.
         if long_lora_context:
+<<<<<<< HEAD
             index_mapping_indices: List[int] = list(
                 mapping.index_mapping).copy()
             long_lora_offsets: List[int] = []
+=======
+            index_mapping_indices: list[int] = list(
+                mapping.index_mapping).copy()
+            long_lora_offsets: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             for i in range(len(index_mapping_indices)):
                 lora_offset: int = long_lora_context.offsets_by_lora_id.get(
                     index_mapping_indices[i], 0)
@@ -85,6 +99,7 @@ class PunicaWrapperHPU(PunicaWrapperBase):
     def add_lora_linear(self,
                         y: torch.Tensor,
                         x: torch.Tensor,
+<<<<<<< HEAD
                         lora_a_stacked: Tuple[torch.Tensor, ...],
                         lora_b_stacked: Tuple[torch.Tensor, ...],
                         lora_bias_stacked: Optional[Tuple[torch.Tensor, ...]],
@@ -92,6 +107,15 @@ class PunicaWrapperHPU(PunicaWrapperBase):
                         output_slices: Tuple[int, ...],
                         *,
                         buffer: Optional[Tuple[torch.Tensor, ...]] = None,
+=======
+                        lora_a_stacked: tuple[torch.Tensor, ...],
+                        lora_b_stacked: tuple[torch.Tensor, ...],
+                        lora_bias_stacked: Optional[tuple[torch.Tensor, ...]],
+                        scale: float,
+                        output_slices: tuple[int, ...],
+                        *,
+                        buffer: Optional[tuple[torch.Tensor, ...]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         **kwargs) -> None:
         y_org = y
         x = x.view(-1, x.shape[-1])
@@ -122,9 +146,15 @@ class PunicaWrapperHPU(PunicaWrapperBase):
 
     def add_shrink(
         self,
+<<<<<<< HEAD
         y: Union[Tuple[torch.Tensor, ...], torch.Tensor],
         x: torch.Tensor,
         lora_a_stacked: Tuple[torch.Tensor, ...],
+=======
+        y: Union[tuple[torch.Tensor, ...], torch.Tensor],
+        x: torch.Tensor,
+        lora_a_stacked: tuple[torch.Tensor, ...],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         scale: float,
         **kwargs,
     ) -> None:
@@ -133,10 +163,17 @@ class PunicaWrapperHPU(PunicaWrapperBase):
     def add_expand(
         self,
         y: torch.Tensor,
+<<<<<<< HEAD
         x: Union[Tuple[torch.Tensor, ...], torch.Tensor],
         lora_b_stacked: Tuple[torch.Tensor, ...],
         lora_bias_stacked: Optional[Tuple[torch.Tensor, ...]],
         output_slices: Tuple[int, ...],
+=======
+        x: Union[tuple[torch.Tensor, ...], torch.Tensor],
+        lora_b_stacked: tuple[torch.Tensor, ...],
+        lora_bias_stacked: Optional[tuple[torch.Tensor, ...]],
+        output_slices: tuple[int, ...],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         offset_start: int = 0,
         add_inputs=True,
         **kwargs,

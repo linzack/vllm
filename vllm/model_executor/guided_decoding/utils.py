@@ -10,6 +10,7 @@ def has_xgrammar_unsupported_json_features(schema: dict) -> bool:
         if not isinstance(obj, dict):
             return False
 
+<<<<<<< HEAD
         # Check for pattern restrictions
         if "pattern" in obj:
             return True
@@ -24,6 +25,10 @@ def has_xgrammar_unsupported_json_features(schema: dict) -> bool:
                     "minimum", "maximum", "exclusiveMinimum",
                     "exclusiveMaximum", "multipleOf"
                 ]):
+=======
+        # Check for numeric ranges
+        if obj.get("type") in ("integer", "number") and ("multipleOf" in obj):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return True
 
         # Check for array unsupported keywords
@@ -33,6 +38,21 @@ def has_xgrammar_unsupported_json_features(schema: dict) -> bool:
         ]):
             return True
 
+<<<<<<< HEAD
+=======
+        # Unsupported keywords for strings
+        if obj.get("type") == "string" and any(
+                key in obj for key in ["minLength", "maxLength", "format"]):
+            return True
+
+        # Unsupported keywords for objects
+        if obj.get("type") == "object" and any(key in obj for key in [
+                "minProperties", "maxProperties", "propertyNames",
+                "patternProperties"
+        ]):
+            return True
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Recursively check all nested objects and arrays
         for value in obj.values():
             if isinstance(value, dict):

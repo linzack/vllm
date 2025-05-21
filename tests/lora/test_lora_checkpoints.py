@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 
 from vllm.lora.models import LoRAModel
@@ -31,7 +34,11 @@ def test_load_checkpoints(
     packed_modules_mapping = BaiChuanBaseForCausalLM.packed_modules_mapping
     embedding_modules = BaiChuanBaseForCausalLM.embedding_modules
     embed_padding_modules = BaiChuanBaseForCausalLM.embedding_padding_modules
+<<<<<<< HEAD
     expected_lora_modules: List[str] = []
+=======
+    expected_lora_modules: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for module in BAICHUAN_LORA_MODULES:
         if module in packed_modules_mapping:
             expected_lora_modules.extend(packed_modules_mapping[module])
@@ -99,7 +106,11 @@ def test_lora_weights_mapping(baichuan_lora_files):
     packed_modules_mapping = BaiChuanBaseForCausalLM.packed_modules_mapping
     embedding_modules = BaiChuanBaseForCausalLM.embedding_modules
     embed_padding_modules = BaiChuanBaseForCausalLM.embedding_padding_modules
+<<<<<<< HEAD
     expected_lora_modules: List[str] = []
+=======
+    expected_lora_modules: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for module in BAICHUAN_LORA_MODULES:
         if module in packed_modules_mapping:
             expected_lora_modules.extend(packed_modules_mapping[module])

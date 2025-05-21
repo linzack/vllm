@@ -2,14 +2,22 @@
 
 import random
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import List, Optional, Tuple, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 
 from vllm.engine.arg_utils import EngineArgs
+<<<<<<< HEAD
 from vllm.transformers_utils.tokenizer_group.base_tokenizer_group import (
     BaseTokenizerGroup)
+=======
+from vllm.transformers_utils.tokenizer_group import TokenizerGroup
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.v1.engine import EngineCoreOutput, FinishReason
 from vllm.v1.outputs import LogprobsLists, LogprobsTensors
 
@@ -20,7 +28,11 @@ NUM_SAMPLE_LOGPROBS_UNDER_TEST = 5
 # Number of prompt logprobs to request when testing prompt logprobs
 NUM_PROMPT_LOGPROBS_UNDER_TEST = 7
 
+<<<<<<< HEAD
 TOKENIZER_NAME = "mistralai/Mistral-7B-Instruct-v0.3"
+=======
+TOKENIZER_NAME = "meta-llama/Llama-3.2-1B"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 FULL_STRINGS = [
     "My name is Robert from Neural Magic and I love working on vLLM so much!",
@@ -30,9 +42,12 @@ FULL_STRINGS = [
 STOP_STRINGS = ["I love working on", "company by far", "brother in"]
 PROMPT_LEN = 5
 
+<<<<<<< HEAD
 PLP_APC_UNSUPPORTED_MSG = ("Prefix caching with prompt logprobs not yet "
                            "supported on VLLM V1.")
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 random.seed(42)
 
 
@@ -61,7 +76,11 @@ def _create_random_top_logprob_test_vector(
 
 
 def _create_random_top_logprob_test_matrix(
+<<<<<<< HEAD
     shape: Tuple,
+=======
+    shape: tuple,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     lower: float,
     upper: float,
 ) -> torch.Tensor:
@@ -90,7 +109,11 @@ def _create_random_top_token_test_vector(
         lower: int,
         upper: int,
         sampled_token_id: int,
+<<<<<<< HEAD
         adjust_num_logprobs: bool = True) -> Tuple[torch.Tensor, int]:
+=======
+        adjust_num_logprobs: bool = True) -> tuple[torch.Tensor, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Create a random vector of top logprob token indices
 
     Use to create fake sample logprobs for testing. The sampled token
@@ -141,11 +164,19 @@ def _create_random_top_token_test_vector(
 
 
 def _create_random_top_token_test_matrix(
+<<<<<<< HEAD
     shape: Tuple[int, int],
     lower: int,
     upper: int,
     tokens_list: List[int],
 ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+    shape: tuple[int, int],
+    lower: int,
+    upper: int,
+    tokens_list: list[int],
+) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Create a random matrix of top logprob token indices
 
     Use to create fake prompt logprobs for testing.
@@ -160,7 +191,11 @@ def _create_random_top_token_test_matrix(
       upper: upper range of token ids
 
     Returns:
+<<<<<<< HEAD
       Tuple containing:
+=======
+      tuple containing:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       - 2D num_tokens x num_logprobs+1 torch Tensor of token ids
       - 1D tensor of ranks of prompt tokens in their respective
         rows, or random values
@@ -206,10 +241,17 @@ def decode_token(
 
 
 def generate_dummy_sample_logprobs(
+<<<<<<< HEAD
     sampled_tokens_list: List,
     num_logprobs: int,
     tokenizer: PreTrainedTokenizer,
 ) -> List[Tuple[List[int], List[float], int]]:
+=======
+    sampled_tokens_list: list,
+    num_logprobs: int,
+    tokenizer: PreTrainedTokenizer,
+) -> list[tuple[list[int], list[float], int]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Generate dummy sample logprobs
 
     Generate a test data structure which imitates the list of sample logprobs
@@ -221,7 +263,11 @@ def generate_dummy_sample_logprobs(
       tokenizer: model tokenizer to use for detokenization
 
     Returns
+<<<<<<< HEAD
       List of (top token ids vector, logprobs vector, sampled token rank)
+=======
+      list of (top token ids vector, logprobs vector, sampled token rank)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       Python lists tuples; in each tuple the logprobs and top token ids
       vectors have the same length which is either `num_logprobs` or
       `num_logprobs+1`. Sampled token rank is the rank (index+1) of the
@@ -253,7 +299,11 @@ def generate_dummy_sample_logprobs(
 
 
 def generate_dummy_prompt_logprobs_tensors(
+<<<<<<< HEAD
     prompt_tokens_list: List,
+=======
+    prompt_tokens_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     num_logprobs: int,
     tokenizer: PreTrainedTokenizer,
 ) -> LogprobsTensors:
@@ -269,7 +319,11 @@ def generate_dummy_prompt_logprobs_tensors(
       tokenizer: model tokenizer to use for detokenization
 
     Returns
+<<<<<<< HEAD
       Single Tuple of (logprobs matrix, top token ids matrix) torch Tensor,
+=======
+      Single tuple of (logprobs matrix, top token ids matrix) torch Tensor,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       where both matrices have dimensions
       num_prompt_tokens x num_logprobs
     """
@@ -299,6 +353,7 @@ def generate_dummy_prompt_logprobs_tensors(
 class DummyOutputProcessorTestVectors:
     """Dummy test vectors for output processor tests"""
     tokenizer: GeneralTokenizerType
+<<<<<<< HEAD
     tokenizer_group: BaseTokenizerGroup
     vllm_config: EngineArgs
     full_tokens: List[List[int]]  # Prompt + generated tokens
@@ -314,6 +369,23 @@ class DummyOutputProcessorTestVectors:
     prompt_strings: List[str]
     prompt_strings_len: List[int]
     generation_strings: List[str]
+=======
+    tokenizer_group: TokenizerGroup
+    vllm_config: EngineArgs
+    full_tokens: list[list[int]]  # Prompt + generated tokens
+    prompt_tokens: list[list[int]]
+    generation_tokens: list[list[int]]
+    # Each request is associated with a tuple of
+    # (top tokens, top logprobs, ranks) prompt logprobs tensors
+    prompt_logprobs: list[LogprobsTensors]
+    # Each request is associated with a sample logprobs; a request's
+    # sample logprobs are a list of (top tokens, top logprobs, ranks)
+    # sample logprobs tensors at each sequence position
+    generation_logprobs: list[list[tuple[list[int], list[float], int]]]
+    prompt_strings: list[str]
+    prompt_strings_len: list[int]
+    generation_strings: list[str]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MockEngineCore:
@@ -321,34 +393,65 @@ class MockEngineCore:
 
     def __init__(
         self,
+<<<<<<< HEAD
         tokens_list: List[List[int]],
         # For each request, for each sampled token offset,
         # a tuple of
         # (list of topk token ids, list of sample logprob vals, rank)
         generated_logprobs_raw: Optional[List[List[Tuple[List[int],
                                                          List[float],
+=======
+        tokens_list: list[list[int]],
+        # For each request, for each sampled token offset,
+        # a tuple of
+        # (list of topk token ids, list of sample logprob vals, rank)
+        generated_logprobs_raw: Optional[list[list[tuple[list[int],
+                                                         list[float],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                          int]]]] = None,
         # For each request, a tuple of
         # (prompt logprob val matrix, prompt logprob tok id matrix);
         # each matrix has dimensions
         # (num prompt toks) x (num prompt logprobs+1)
+<<<<<<< HEAD
         prompt_logprobs_raw: Optional[List[LogprobsTensors]] = None,
     ) -> None:
+=======
+        prompt_logprobs_raw: Optional[list[LogprobsTensors]] = None,
+        eos_token_id: Optional[int] = None,
+        stop_token_ids: Optional[list[int]] = None,
+        ignore_eos: bool = False,
+    ) -> None:
+        self.num_requests = len(tokens_list)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.tokens_list = tokens_list
         self.current_idx = 0
         self.generated_logprobs_raw = generated_logprobs_raw
         self.do_logprobs = generated_logprobs_raw is not None
         self.prompt_logprobs_raw = prompt_logprobs_raw
         self.do_prompt_logprobs = prompt_logprobs_raw is not None
+<<<<<<< HEAD
 
     def get_outputs(self) -> List[EngineCoreOutput]:
+=======
+        self.request_finished = [False for _ in range(self.num_requests)]
+        self.eos_token_id = eos_token_id
+        self.stop_token_ids = stop_token_ids
+        self.ignore_eos = ignore_eos
+
+    def get_outputs(self) -> list[EngineCoreOutput]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         do_logprobs = self.do_logprobs
         do_prompt_logprobs = self.do_prompt_logprobs
         token_idx = self.current_idx
 
         outputs = []
         for req_idx, token_ids in enumerate(self.tokens_list):
+<<<<<<< HEAD
             if len(token_ids) > token_idx:
+=======
+            if not self.request_finished[req_idx]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 if do_logprobs:
                     assert self.generated_logprobs_raw is not None
                     (logprobs_token_ids_, logprobs_, sampled_token_ranks_) = (
@@ -368,14 +471,33 @@ class MockEngineCore:
                         prompt_logprobs = None
                 else:
                     prompt_logprobs = None
+<<<<<<< HEAD
                 output = EngineCoreOutput(
                     request_id=f"request-{req_idx}",
                     new_token_ids=[token_ids[token_idx]],
+=======
+                new_token_id = token_ids[token_idx]
+                output = EngineCoreOutput(
+                    request_id=f"request-{req_idx}",
+                    new_token_ids=[new_token_id],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     new_logprobs=logprobs,
                     new_prompt_logprobs_tensors=prompt_logprobs,
                 )
                 if token_idx == len(token_ids) - 1:
+<<<<<<< HEAD
                     output.finish_reason = FinishReason.STOP
+=======
+                    output.finish_reason = FinishReason.LENGTH
+                    self.request_finished[req_idx] = True
+                if not self.ignore_eos and new_token_id == self.eos_token_id:
+                    output.finish_reason = FinishReason.STOP
+                    self.request_finished[req_idx] = True
+                if new_token_id in (self.stop_token_ids or ()):
+                    output.finish_reason = FinishReason.STOP
+                    output.stop_reason = new_token_id
+                    self.request_finished[req_idx] = True
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 outputs.append(output)
 
         self.current_idx += 1

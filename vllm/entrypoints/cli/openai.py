@@ -5,7 +5,11 @@ import argparse
 import os
 import signal
 import sys
+<<<<<<< HEAD
 from typing import List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -23,7 +27,11 @@ def _register_signal_handlers():
     signal.signal(signal.SIGTSTP, signal_handler)
 
 
+<<<<<<< HEAD
 def _interactive_cli(args: argparse.Namespace) -> Tuple[str, OpenAI]:
+=======
+def _interactive_cli(args: argparse.Namespace) -> tuple[str, OpenAI]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     _register_signal_handlers()
 
     base_url = args.url
@@ -43,7 +51,11 @@ def _interactive_cli(args: argparse.Namespace) -> Tuple[str, OpenAI]:
 
 def chat(system_prompt: Optional[str], model_name: str,
          client: OpenAI) -> None:
+<<<<<<< HEAD
     conversation: List[ChatCompletionMessageParam] = []
+=======
+    conversation: list[ChatCompletionMessageParam] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if system_prompt is not None:
         conversation.append({"role": "system", "content": system_prompt})
 
@@ -100,10 +112,26 @@ class ChatCommand(CLISubcommand):
     def cmd(args: argparse.Namespace) -> None:
         model_name, client = _interactive_cli(args)
         system_prompt = args.system_prompt
+<<<<<<< HEAD
         conversation: List[ChatCompletionMessageParam] = []
         if system_prompt is not None:
             conversation.append({"role": "system", "content": system_prompt})
 
+=======
+        conversation: list[ChatCompletionMessageParam] = []
+
+        if system_prompt is not None:
+            conversation.append({"role": "system", "content": system_prompt})
+
+        if args.quick:
+            conversation.append({"role": "user", "content": args.quick})
+
+            chat_completion = client.chat.completions.create(
+                model=model_name, messages=conversation)
+            print(chat_completion.choices[0].message.content)
+            return
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         print("Please enter a message for the chat model:")
         while True:
             try:
@@ -126,7 +154,12 @@ class ChatCommand(CLISubcommand):
             subparsers: argparse._SubParsersAction) -> FlexibleArgumentParser:
         chat_parser = subparsers.add_parser(
             "chat",
+<<<<<<< HEAD
             help="Generate chat completions via the running API server",
+=======
+            help="Generate chat completions via the running API server.",
+            description="Generate chat completions via the running API server.",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             usage="vllm chat [options]")
         _add_query_options(chat_parser)
         chat_parser.add_argument(
@@ -135,6 +168,15 @@ class ChatCommand(CLISubcommand):
             default=None,
             help=("The system prompt to be added to the chat template, "
                   "used for models that support system prompts."))
+<<<<<<< HEAD
+=======
+        chat_parser.add_argument("-q",
+                                 "--quick",
+                                 type=str,
+                                 metavar="MESSAGE",
+                                 help=("Send a single prompt as MESSAGE "
+                                       "and print the response, then exit."))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return chat_parser
 
 
@@ -148,6 +190,16 @@ class CompleteCommand(CLISubcommand):
     @staticmethod
     def cmd(args: argparse.Namespace) -> None:
         model_name, client = _interactive_cli(args)
+<<<<<<< HEAD
+=======
+
+        if args.quick:
+            completion = client.completions.create(model=model_name,
+                                                   prompt=args.quick)
+            print(completion.choices[0].text)
+            return
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         print("Please enter prompt to complete:")
         while True:
             input_prompt = input("> ")
@@ -162,6 +214,7 @@ class CompleteCommand(CLISubcommand):
         complete_parser = subparsers.add_parser(
             "complete",
             help=("Generate text completions based on the given prompt "
+<<<<<<< HEAD
                   "via the running API server"),
             usage="vllm complete [options]")
         _add_query_options(complete_parser)
@@ -169,4 +222,22 @@ class CompleteCommand(CLISubcommand):
 
 
 def cmd_init() -> List[CLISubcommand]:
+=======
+                  "via the running API server."),
+            description=("Generate text completions based on the given prompt "
+                         "via the running API server."),
+            usage="vllm complete [options]")
+        _add_query_options(complete_parser)
+        complete_parser.add_argument(
+            "-q",
+            "--quick",
+            type=str,
+            metavar="PROMPT",
+            help=
+            "Send a single prompt and print the completion output, then exit.")
+        return complete_parser
+
+
+def cmd_init() -> list[CLISubcommand]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return [ChatCommand(), CompleteCommand()]

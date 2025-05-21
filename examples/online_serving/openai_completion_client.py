@@ -6,6 +6,7 @@ from openai import OpenAI
 openai_api_key = "EMPTY"
 openai_api_base = "http://localhost:8000/v1"
 
+<<<<<<< HEAD
 client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
     api_key=openai_api_key,
@@ -31,3 +32,38 @@ if stream:
         print(c)
 else:
     print(completion)
+=======
+
+def main():
+    client = OpenAI(
+        # defaults to os.environ.get("OPENAI_API_KEY")
+        api_key=openai_api_key,
+        base_url=openai_api_base,
+    )
+
+    models = client.models.list()
+    model = models.data[0].id
+
+    # Completion API
+    stream = False
+    completion = client.completions.create(
+        model=model,
+        prompt="A robot may not injure a human being",
+        echo=False,
+        n=2,
+        stream=stream,
+        logprobs=3)
+
+    print("-" * 50)
+    print("Completion results:")
+    if stream:
+        for c in completion:
+            print(c)
+    else:
+        print(completion)
+    print("-" * 50)
+
+
+if __name__ == "__main__":
+    main()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

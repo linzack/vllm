@@ -8,6 +8,12 @@ set -xe
 echo "🚧🚧 Warning: The usage of disaggregated prefill is experimental and subject to change 🚧🚧"
 sleep 1
 
+<<<<<<< HEAD
+=======
+# meta-llama/Meta-Llama-3.1-8B-Instruct or deepseek-ai/DeepSeek-V2-Lite
+MODEL_NAME=${HF_MODEL_NAME:-meta-llama/Meta-Llama-3.1-8B-Instruct}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Trap the SIGINT signal (triggered by Ctrl+C)
 trap 'cleanup' INT
 
@@ -44,18 +50,34 @@ wait_for_server() {
 # You can also adjust --kv-ip and --kv-port for distributed inference.
 
 # prefilling instance, which is the KV producer
+<<<<<<< HEAD
 CUDA_VISIBLE_DEVICES=0 vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct \
     --port 8100 \
     --max-model-len 100 \
     --gpu-memory-utilization 0.8 \
+=======
+CUDA_VISIBLE_DEVICES=0 vllm serve $MODEL_NAME \
+    --port 8100 \
+    --max-model-len 100 \
+    --gpu-memory-utilization 0.8 \
+    --trust-remote-code \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     --kv-transfer-config \
     '{"kv_connector":"PyNcclConnector","kv_role":"kv_producer","kv_rank":0,"kv_parallel_size":2}' &
 
 # decoding instance, which is the KV consumer
+<<<<<<< HEAD
 CUDA_VISIBLE_DEVICES=1 vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct \
     --port 8200 \
     --max-model-len 100 \
     --gpu-memory-utilization 0.8 \
+=======
+CUDA_VISIBLE_DEVICES=1 vllm serve $MODEL_NAME \
+    --port 8200 \
+    --max-model-len 100 \
+    --gpu-memory-utilization 0.8 \
+    --trust-remote-code \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     --kv-transfer-config \
     '{"kv_connector":"PyNcclConnector","kv_role":"kv_consumer","kv_rank":1,"kv_parallel_size":2}' &
 
@@ -78,7 +100,11 @@ sleep 1
 output1=$(curl -X POST -s http://localhost:8000/v1/completions \
 -H "Content-Type: application/json" \
 -d '{
+<<<<<<< HEAD
 "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+=======
+"model": "'"$MODEL_NAME"'",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 "prompt": "San Francisco is a",
 "max_tokens": 10,
 "temperature": 0
@@ -87,7 +113,11 @@ output1=$(curl -X POST -s http://localhost:8000/v1/completions \
 output2=$(curl -X POST -s http://localhost:8000/v1/completions \
 -H "Content-Type: application/json" \
 -d '{
+<<<<<<< HEAD
 "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+=======
+"model": "'"$MODEL_NAME"'",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 "prompt": "Santa Clara is a",
 "max_tokens": 10,
 "temperature": 0

@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from functools import cached_property
 from typing import (Any, Dict, Iterable, List, Literal, Mapping, Optional, Set,
                     Tuple, TypedDict, Union)
+=======
+from collections.abc import Iterable, Mapping, Sequence
+from functools import cached_property
+from typing import Any, Literal, Optional, TypedDict, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -10,7 +16,11 @@ import torch.nn.functional as F
 from transformers import (BatchFeature, ChameleonConfig, ChameleonProcessor,
                           ChameleonVQVAEConfig)
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import get_pp_group, get_tensor_model_parallel_world_size
 from vllm.logger import init_logger
@@ -22,7 +32,10 @@ from vllm.model_executor.layers.linear import (MergedColumnParallelLinear,
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.rotary_embedding import get_rope
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import (
@@ -30,6 +43,7 @@ from vllm.model_executor.model_loader.weight_utils import (
 from vllm.model_executor.sampling_metadata import SamplingMetadata
 from vllm.model_executor.utils import set_weight_attrs
 from vllm.multimodal import MULTIMODAL_REGISTRY
+<<<<<<< HEAD
 from vllm.multimodal.inputs import (MultiModalFieldConfig, MultiModalKwargs,
                                     NestedTensors)
 from vllm.multimodal.parse import MultiModalDataItems
@@ -41,6 +55,20 @@ from vllm.sequence import IntermediateTensors
 
 from .interfaces import SupportsMultiModal, SupportsPP
 from .utils import (is_pp_missing_parameter,
+=======
+from vllm.multimodal.inputs import (MultiModalDataDict, MultiModalFieldConfig,
+                                    MultiModalKwargs)
+from vllm.multimodal.parse import MultiModalDataItems
+from vllm.multimodal.processing import (BaseMultiModalProcessor,
+                                        BaseProcessingInfo, PromptReplacement,
+                                        PromptUpdate, PromptUpdateDetails)
+from vllm.multimodal.profiling import BaseDummyInputsBuilder
+from vllm.sequence import IntermediateTensors
+
+from .interfaces import (MultiModalEmbeddings, SupportsMultiModal, SupportsPP,
+                         SupportsQuant)
+from .utils import (flatten_bn, is_pp_missing_parameter,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     make_empty_intermediate_tensors_factory, make_layers,
                     maybe_prefix, merge_multimodal_embeddings)
 
@@ -64,6 +92,7 @@ class ChameleonProcessingInfo(BaseProcessingInfo):
     def get_supported_mm_limits(self) -> Mapping[str, Optional[int]]:
         return {"image": 1}
 
+<<<<<<< HEAD
     def get_mm_max_tokens_per_item(
         self,
         seq_len: int,
@@ -71,6 +100,8 @@ class ChameleonProcessingInfo(BaseProcessingInfo):
     ) -> Mapping[str, int]:
         return {"image": self.get_num_image_tokens()}
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_num_image_tokens(self) -> int:
         processor = self.get_hf_processor()
         return processor.image_seq_length
@@ -79,28 +110,51 @@ class ChameleonProcessingInfo(BaseProcessingInfo):
 class ChameleonDummyInputsBuilder(
         BaseDummyInputsBuilder[ChameleonProcessingInfo]):
 
+<<<<<<< HEAD
     def get_dummy_processor_inputs(
         self,
         seq_len: int,
         mm_counts: Mapping[str, int],
     ) -> ProcessorInputs:
+=======
+    def get_dummy_text(self, mm_counts: Mapping[str, int]) -> str:
+        num_images = mm_counts.get("image", 0)
+
+        processor = self.info.get_hf_processor()
+        image_token = processor.image_token
+
+        return image_token * num_images
+
+    def get_dummy_mm_data(
+        self,
+        seq_len: int,
+        mm_counts: Mapping[str, int],
+    ) -> MultiModalDataDict:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         config = self.info.get_hf_config()
 
         width = height = config.vq_config.resolution
         num_images = mm_counts.get("image", 0)
 
+<<<<<<< HEAD
         mm_data = {
+=======
+        return {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "image":
             self._get_dummy_images(width=width,
                                    height=height,
                                    num_images=num_images)
         }
 
+<<<<<<< HEAD
         return ProcessorInputs(
             prompt_text="<image>" * num_images,
             mm_data=mm_data,
         )
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class ChameleonMultiModalProcessor(
         BaseMultiModalProcessor[ChameleonProcessingInfo]):
@@ -141,12 +195,20 @@ class ChameleonMultiModalProcessor(
     ) -> Mapping[str, MultiModalFieldConfig]:
         return dict(pixel_values=MultiModalFieldConfig.batched("image"))
 
+<<<<<<< HEAD
     def _get_prompt_replacements(
+=======
+    def _get_prompt_updates(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self,
         mm_items: MultiModalDataItems,
         hf_processor_mm_kwargs: Mapping[str, object],
         out_mm_kwargs: MultiModalKwargs,
+<<<<<<< HEAD
     ) -> list[PromptReplacement]:
+=======
+    ) -> Sequence[PromptUpdate]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         processor = self.info.get_hf_processor(**hf_processor_mm_kwargs)
         tokenizer = self.info.get_tokenizer()
         vocab = tokenizer.get_vocab()
@@ -162,9 +224,15 @@ class ChameleonMultiModalProcessor(
             PromptReplacement(
                 modality="image",
                 target=[image_token_id],
+<<<<<<< HEAD
                 replacement=PromptReplacementDetails(
                     full=([image_start_id] + image_tokens + [image_end_id]),
                     features=image_tokens,
+=======
+                replacement=PromptUpdateDetails.select_token_id(
+                    [image_start_id] + image_tokens + [image_end_id],
+                    embed_token_id=image_token_id,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 ),
             )
         ]
@@ -233,7 +301,11 @@ class ChameleonAttention(nn.Module):
         num_heads: int,
         num_kv_heads: int,
         rope_theta: float = 10000,
+<<<<<<< HEAD
         rope_scaling: Optional[Dict[str, Any]] = None,
+=======
+        rope_scaling: Optional[dict[str, Any]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         max_position_embeddings: int = 4096,
         quant_config: Optional[QuantizationConfig] = None,
         bias: bool = False,
@@ -296,7 +368,11 @@ class ChameleonAttention(nn.Module):
                               prefix=f"{prefix}.attn")
 
     def _apply_qk_norm(self, q: torch.Tensor,
+<<<<<<< HEAD
                        k: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+                       k: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # reshape for layernorm
         q = q.reshape(-1, self.num_heads, self.head_dim)
         k = k.reshape(-1, self.num_kv_heads, self.head_dim)
@@ -310,15 +386,22 @@ class ChameleonAttention(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         qkv, _ = self.qkv_proj(hidden_states)
         q, k, v = qkv.split([self.q_size, self.kv_size, self.kv_size], dim=-1)
         q, k = self._apply_qk_norm(q, k)
 
         q, k = self.rotary_emb(positions, q, k)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output, _ = self.o_proj(attn_output)
         return output
 
@@ -372,10 +455,15 @@ class ChameleonDecoderLayer(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
         residual: Optional[torch.Tensor],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+        residual: Optional[torch.Tensor],
+    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if residual is None:
             residual = hidden_states
@@ -386,8 +474,11 @@ class ChameleonDecoderLayer(nn.Module):
         hidden_states = self.self_attn(
             positions=positions,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         # Fully Connected
@@ -447,17 +538,25 @@ class ChameleonSwinDecoderLayer(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
         residual: Optional[torch.Tensor],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+        residual: Optional[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         residual = hidden_states
         hidden_states = self.self_attn(
             positions=positions,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         hidden_states = self.input_layernorm(hidden_states)
@@ -787,7 +886,11 @@ class ChameleonVQVAE(nn.Module):
 
     def encode(
         self, pixel_values: torch.Tensor
+<<<<<<< HEAD
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+=======
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         hidden_states = self.encoder(pixel_values)
         hidden_states = self.quant_conv(hidden_states)
         quant, emb_loss, indices = self.quantize(hidden_states)
@@ -800,7 +903,11 @@ class ChameleonImageVocabularyMapping:
     A class for mapping discrete image tokens from VQGAN to BPE tokens.
     """
 
+<<<<<<< HEAD
     def __init__(self, vocab_map: Dict[str, int]):
+=======
+    def __init__(self, vocab_map: dict[str, int]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.vocab_map = vocab_map
         self.image_token_id = vocab_map.get("<image>")
 
@@ -861,7 +968,10 @@ class ChameleonModel(nn.Module):
         quant_config = vllm_config.quant_config
 
         self.config = config
+<<<<<<< HEAD
         self.padding_idx = config.pad_token_id
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.vocab_size = config.vocab_size
         self.embed_tokens = VocabParallelEmbedding(
             self.vocab_size,
@@ -906,8 +1016,11 @@ class ChameleonModel(nn.Module):
         self,
         input_ids: Optional[torch.Tensor],
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors],
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -921,6 +1034,7 @@ class ChameleonModel(nn.Module):
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
             residual = intermediate_tensors["residual"]
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             layer = self.layers[i]
             hidden_states, residual = layer(
@@ -928,6 +1042,12 @@ class ChameleonModel(nn.Module):
                 hidden_states,
                 kv_caches[i - self.start_layer],
                 attn_metadata,
+=======
+        for layer in self.layers[self.start_layer:self.end_layer]:
+            hidden_states, residual = layer(
+                positions,
+                hidden_states,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 residual,
             )
         if not get_pp_group().is_last_rank:
@@ -944,7 +1064,15 @@ class ChameleonModel(nn.Module):
     info=ChameleonProcessingInfo,
     dummy_inputs=ChameleonDummyInputsBuilder)
 class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
+<<<<<<< HEAD
                                         SupportsPP):
+=======
+                                        SupportsPP, SupportsQuant):
+    packed_modules_mapping = {
+        "qkv_proj": ["q_proj", "k_proj", "v_proj"],
+        "gate_up_proj": ["gate_proj", "up_proj"]
+    }
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
         super().__init__()
@@ -965,7 +1093,10 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
         logit_scale = getattr(config, "logit_scale", 1.0)
         self.logits_processor = LogitsProcessor(self.unpadded_vocab_size,
                                                 config.vocab_size, logit_scale)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.make_empty_intermediate_tensors = (
             self.model.make_empty_intermediate_tensors)
 
@@ -989,19 +1120,35 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
         if pixel_values is None:
             return None
 
+<<<<<<< HEAD
         if not isinstance(pixel_values, torch.Tensor):
             raise ValueError("Incorrect type of pixel values. "
                              f"Got type: {type(pixel_values)}")
 
         # Remove the N dimension until multiple images are supported.
         pixel_values = pixel_values.squeeze(1)
+=======
+        if not isinstance(pixel_values, (torch.Tensor, list)):
+            raise ValueError("Incorrect type of pixel values. "
+                             f"Got type: {type(pixel_values)}")
+
+        pixel_values = flatten_bn(pixel_values, concat=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return ChameleonImagePixelInputs(
             type="pixel_values",
             data=self._validate_pixel_values(pixel_values),
         )
 
+<<<<<<< HEAD
     def get_multimodal_embeddings(self, **kwargs) -> Optional[NestedTensors]:
+=======
+    def get_language_model(self) -> torch.nn.Module:
+        return self.model
+
+    def get_multimodal_embeddings(
+            self, **kwargs: object) -> Optional[MultiModalEmbeddings]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         image_input = self._parse_and_validate_image_input(**kwargs)
         if image_input is None:
             return None
@@ -1014,7 +1161,11 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
     def get_input_embeddings(
         self,
         input_ids: torch.Tensor,
+<<<<<<< HEAD
         multimodal_embeddings: Optional[NestedTensors] = None,
+=======
+        multimodal_embeddings: Optional[MultiModalEmbeddings] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
 
         inputs_embeds = self.model.get_input_embeddings(input_ids)
@@ -1028,8 +1179,11 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors] = None,
         inputs_embeds: Optional[torch.Tensor] = None,
         **kwargs,
@@ -1048,8 +1202,11 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
 
         hidden_states = self.model(input_ids,
                                    positions,
+<<<<<<< HEAD
                                    kv_caches,
                                    attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                    intermediate_tensors,
                                    inputs_embeds=inputs_embeds)
         return hidden_states
@@ -1070,6 +1227,7 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
 
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: torch.Tensor,
@@ -1080,6 +1238,10 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
 
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             (".qkv_proj", ".q_proj", "q"),
@@ -1089,7 +1251,11 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
             (".gate_up_proj", ".up_proj", 1),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for name, loaded_weight in weights:
             if "rotary_emb.inv_freq" in name:
                 continue
@@ -1137,10 +1303,17 @@ class ChameleonForConditionalGeneration(nn.Module, SupportsMultiModal,
                             ".kv_scale", ".attn.kv_scale")
                         if remapped_kv_scale_name not in params_dict:
                             logger.warning_once(
+<<<<<<< HEAD
                                 "Found kv scale in the checkpoint (e.g. "
                                 f"{name}), but not found the expected name in "
                                 f"the model (e.g. {remapped_kv_scale_name}). "
                                 "kv-scale is not loaded.")
+=======
+                                "Found kv scale in the checkpoint (e.g. %s), but not found the expected name in the model (e.g. %s). kv-scale is not loaded.",  # noqa: E501
+                                name,
+                                remapped_kv_scale_name,
+                            )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                             continue
                         else:
                             name = remapped_kv_scale_name

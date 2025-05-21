@@ -5,14 +5,24 @@
 # Copyright (c) Alibaba Cloud.
 # LICENSE: https://huggingface.co/Qwen/Qwen-7B/blob/main/LICENSE
 """Inference-only QWen model compatible with HuggingFace weights."""
+<<<<<<< HEAD
 
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+=======
+import json
+from collections.abc import Iterable
+from typing import Any, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import PretrainedConfig
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import get_pp_group, get_tensor_model_parallel_world_size
@@ -24,7 +34,10 @@ from vllm.model_executor.layers.linear import (MergedColumnParallelLinear,
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.rotary_embedding import get_rope
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
@@ -77,7 +90,11 @@ class QWenAttention(nn.Module):
         num_heads: int,
         max_position_embeddings: int,
         rope_theta: float = 10000,
+<<<<<<< HEAD
         rope_scaling: Optional[Dict[str, Any]] = None,
+=======
+        rope_scaling: Optional[dict[str, Any]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         cache_config: Optional[CacheConfig] = None,
         quant_config: Optional[QuantizationConfig] = None,
         prefix: str = "",
@@ -124,13 +141,20 @@ class QWenAttention(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         qkv, _ = self.c_attn(hidden_states)
         q, k, v = qkv.chunk(chunks=3, dim=-1)
         q, k = self.rotary_emb(positions, q, k)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output, _ = self.c_proj(attn_output)
         return output
 
@@ -168,10 +192,15 @@ class QWenBlock(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
         residual: Optional[torch.Tensor],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+        residual: Optional[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Self Attention
         if residual is None:
             residual = hidden_states
@@ -181,8 +210,11 @@ class QWenBlock(nn.Module):
         hidden_states = self.attn(
             positions=positions,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         # Fully Connected
@@ -225,8 +257,11 @@ class QWenModel(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors],
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -241,6 +276,7 @@ class QWenModel(nn.Module):
             hidden_states = intermediate_tensors["hidden_states"]
             residual = intermediate_tensors["residual"]
 
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             layer = self.h[i]
             hidden_states, residual = layer(
@@ -248,6 +284,12 @@ class QWenModel(nn.Module):
                 hidden_states,
                 kv_caches[i - self.start_layer],
                 attn_metadata,
+=======
+        for layer in self.h[self.start_layer:self.end_layer]:
+            hidden_states, residual = layer(
+                positions,
+                hidden_states,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 residual,
             )
         if not get_pp_group().is_last_rank:
@@ -284,7 +326,10 @@ class QWenBaseModel(nn.Module):
         if self.config.tie_word_embeddings:
             self.lm_head.weight = self.transformer.wte.weight
         self.logits_processor = LogitsProcessor(config.vocab_size)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.make_empty_intermediate_tensors = (
             self.transformer.make_empty_intermediate_tensors)
 
@@ -297,6 +342,7 @@ class QWenBaseModel(nn.Module):
                                        sampling_metadata)
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: torch.Tensor,
@@ -307,13 +353,21 @@ class QWenBaseModel(nn.Module):
 
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             ("gate_up_proj", "w2", 0),
             ("gate_up_proj", "w1", 1),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for name, loaded_weight in weights:
             if "rotary_emb.inv_freq" in name:
                 continue
@@ -365,7 +419,11 @@ class QWenLMHeadModel(QWenBaseModel, SupportsPP, SupportsLoRA):
                 "The configuration of this model indicates that it supports "
                 "vision inputs, but you instantiated the text-only version "
                 "of this model. Please use the vision model by setting "
+<<<<<<< HEAD
                 f"`--hf-overrides {hf_overrides!r}`")
+=======
+                f"`--hf-overrides '{json.dumps(hf_overrides)}'`")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         super().__init__(vllm_config=vllm_config, prefix=prefix)
 
@@ -373,6 +431,7 @@ class QWenLMHeadModel(QWenBaseModel, SupportsPP, SupportsLoRA):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
         intermediate_tensors: Optional[IntermediateTensors] = None,
@@ -381,4 +440,11 @@ class QWenLMHeadModel(QWenBaseModel, SupportsPP, SupportsLoRA):
         hidden_states = self.transformer(input_ids, positions, kv_caches,
                                          attn_metadata, intermediate_tensors,
                                          inputs_embeds)
+=======
+        intermediate_tensors: Optional[IntermediateTensors] = None,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> Union[torch.Tensor, IntermediateTensors]:
+        hidden_states = self.transformer(input_ids, positions,
+                                         intermediate_tensors, inputs_embeds)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return hidden_states

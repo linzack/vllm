@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """Minimal implementation of CLIPVisionModel intended to be only used
 within a vision language model."""
+<<<<<<< HEAD
 from typing import Iterable, Optional, Set, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -30,9 +35,12 @@ class CLIPEncoderInfo(VisionEncoderInfo[CLIPVisionConfig]):
     ) -> int:
         return self.get_patch_grid_length()**2 + 1
 
+<<<<<<< HEAD
     def get_max_image_tokens(self) -> int:
         return self.get_patch_grid_length()**2 + 1
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_image_size(self) -> int:
         return self.vision_config.image_size
 
@@ -371,8 +379,13 @@ class CLIPVisionModel(nn.Module, SupportsQuant):
 
     # (TODO) Add prefix argument for filtering out weights to be loaded
     #        ref: https://github.com/vllm-project/vllm/pull/7186#discussion_r1734163986
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             ("qkv_proj", "q_proj", "q"),
@@ -380,7 +393,11 @@ class CLIPVisionModel(nn.Module, SupportsQuant):
             ("qkv_proj", "v_proj", "v"),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         layer_count = len(self.vision_model.encoder.layers)
 
         for name, loaded_weight in weights:

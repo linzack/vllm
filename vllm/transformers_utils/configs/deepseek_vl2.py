@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # adapted from https://github.com/deepseek-ai/DeepSeek-VL2/blob/faf18023f24b962b32d9f0a2d89e402a8d383a78/deepseek_vl2/models/modeling_deepseek_vl_v2.py#L115-L268
+<<<<<<< HEAD
 from typing import Tuple
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from transformers.configuration_utils import PretrainedConfig
 
@@ -191,12 +194,20 @@ class DeepseekVLV2Config(PretrainedConfig):
 
     tile_tag: str = "2D"
     global_view_pos: str = "head"
+<<<<<<< HEAD
     candidate_resolutions: Tuple[Tuple[int, int]] = ((384, 384), )
+=======
+    candidate_resolutions: tuple[tuple[int, int]] = ((384, 384), )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self,
                  tile_tag: str = "tile_tag",
                  global_view_pos: str = "head",
+<<<<<<< HEAD
                  candidate_resolutions: Tuple[Tuple[int,
+=======
+                 candidate_resolutions: tuple[tuple[int,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                     int]] = ((384, 384), ),
                  **kwargs):
         super().__init__(**kwargs)

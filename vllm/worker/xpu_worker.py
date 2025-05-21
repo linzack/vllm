@@ -18,15 +18,25 @@ from vllm.model_executor import set_random_seed
 from vllm.platforms import current_platform
 from vllm.worker.cache_engine import CacheEngine
 from vllm.worker.worker import Worker
+<<<<<<< HEAD
 from vllm.worker.worker_base import LoraNotSupportedWorkerBase, WorkerBase
+=======
+from vllm.worker.worker_base import LoRANotSupportedWorkerBase, WorkerBase
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.worker.xpu_model_runner import XPUModelRunner
 
 logger = init_logger(__name__)
 
 
+<<<<<<< HEAD
 class XPUWorker(LoraNotSupportedWorkerBase, Worker):
     """A worker class that executes (a partition of) the model on a GPU.
     
+=======
+class XPUWorker(LoRANotSupportedWorkerBase, Worker):
+    """A worker class that executes (a partition of) the model on a GPU.
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     Each worker is associated with a single XPU device. The worker is 
     responsible for maintaining the KV cache and executing the model on the 
     XPU. In case of distributed inference, each worker is assigned a partition
@@ -93,9 +103,16 @@ class XPUWorker(LoraNotSupportedWorkerBase, Worker):
         Then, it calculate the maximum possible number of GPU and CPU blocks
         that can be allocated with the remaining free memory.
 
+<<<<<<< HEAD
         .. tip::
             You may limit the usage of GPU memory
             by adjusting the `gpu_memory_utilization` parameter.
+=======
+        :::{tip}
+        You may limit the usage of GPU memory
+        by adjusting the `gpu_memory_utilization` parameter.
+        :::
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         # Profile the memory usage of the model and get the maximum number of
         # cache blocks that can be allocated with the remaining free memory.
@@ -175,7 +192,12 @@ class XPUWorker(LoraNotSupportedWorkerBase, Worker):
 
         ensure_model_parallel_initialized(
             parallel_config.tensor_parallel_size,
+<<<<<<< HEAD
             parallel_config.pipeline_parallel_size)
+=======
+            parallel_config.pipeline_parallel_size,
+            parallel_config.enable_expert_parallel)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # global all_reduce needed for overall oneccl warm up
         torch.distributed.all_reduce(torch.zeros(1).xpu())
 

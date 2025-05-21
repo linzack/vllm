@@ -2,12 +2,17 @@
 """
 Simple KV Cache Connector for Distributed Machine Learning Inference
 
+<<<<<<< HEAD
 The SimpleConnector transfers KV caches between prefill vLLM worker (KV cache 
+=======
+The SimpleConnector transfers KV caches between prefill vLLM worker (KV cache
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 producer) and decode vLLM worker (KV cache consumer) using PyNcclPipe or
 MooncakePipe.
 
 But the logic can be extended to support other pipe and lookup buffer.
 """
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import torch
@@ -15,6 +20,16 @@ import torch
 from vllm import _custom_ops as ops
 from vllm.config import VllmConfig
 from vllm.distributed.kv_transfer.kv_connector.base import KVConnectorBase
+=======
+from typing import TYPE_CHECKING, Optional, Union
+
+import torch
+
+from vllm.config import VllmConfig
+from vllm.distributed.kv_transfer.kv_connector.base import KVConnectorBase
+from vllm.distributed.kv_transfer.kv_connector.utils import (
+    model_aware_kv_ops_helper as kv_helper)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.distributed.kv_transfer.kv_lookup_buffer.simple_buffer import (
     SimpleBuffer)
 from vllm.logger import init_logger
@@ -36,7 +51,11 @@ class SimpleConnector(KVConnectorBase):
     ):
 
         self.config = config.kv_transfer_config
+<<<<<<< HEAD
         self.tp_size = config.parallel_config.tensor_parallel_size
+=======
+        self.kv_helper = kv_helper(config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if self.config.kv_connector == "PyNcclConnector":
             from vllm.distributed.kv_transfer.kv_pipe.pynccl_pipe import (
@@ -132,7 +151,11 @@ class SimpleConnector(KVConnectorBase):
             )
 
     def select(self, input_tokens: Optional[torch.Tensor],
+<<<<<<< HEAD
                roi: Optional[torch.Tensor]) -> List[Optional[torch.Tensor]]:
+=======
+               roi: Optional[torch.Tensor]) -> list[Optional[torch.Tensor]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         assert self.consumer_buffer is not None, "Please initialize the "\
             "consumer buffer before calling select."
@@ -151,7 +174,11 @@ class SimpleConnector(KVConnectorBase):
         self,
         model_executable: torch.nn.Module,
         model_input: "ModelInputForGPUWithSamplingMetadata",
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
+=======
+        kv_caches: list[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         hidden_or_intermediate_states: Union[torch.Tensor,
                                              IntermediateTensors],
     ) -> None:
@@ -159,6 +186,7 @@ class SimpleConnector(KVConnectorBase):
         input_tokens_tensor = model_input.input_tokens
         seq_lens = model_input.attn_metadata.seq_lens
         slot_mapping_flat = model_input.attn_metadata.slot_mapping.flatten()
+<<<<<<< HEAD
         start_layer = model_executable.model.start_layer
         end_layer = model_executable.model.end_layer
 
@@ -167,6 +195,12 @@ class SimpleConnector(KVConnectorBase):
         hidden_size = model_config.hidden_size
         num_attention_heads = model_config.num_attention_heads
         head_size = int(hidden_size / num_attention_heads)
+=======
+        num_prefill_tokens = model_input.attn_metadata.num_prefill_tokens
+        start_layer = model_executable.model.start_layer
+        end_layer = model_executable.model.end_layer
+        num_heads, head_size = self.kv_helper.get_model_args(model_executable)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # query_lens contains new KV caches that are added to vLLM.
         # so we will send them to decode instance
@@ -174,15 +208,32 @@ class SimpleConnector(KVConnectorBase):
         for idx, slen in enumerate(seq_lens):
             start_pos = sum(seq_lens[:idx])
             end_pos = start_pos + slen
+<<<<<<< HEAD
+=======
+
+            if start_pos >= num_prefill_tokens:
+                # vllm/worker/model_runner.py::_prepare_model_input_tensors:
+                # - input_tokens[:num_prefill_tokens] contains prefill tokens.
+                # - input_tokens[num_prefill_tokens:] contains decode tokens.
+                logger.warning("You have some decode requests while using "
+                               "SimpleConnector. Their KVCache won't be sent.")
+                break
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             current_tokens = input_tokens_tensor[start_pos:end_pos]
 
             keys, values = [], []
 
             for layer_id in range(start_layer, end_layer):
                 kv_cache = kv_caches[layer_id - start_layer]
+<<<<<<< HEAD
 
                 key_cache = kv_cache[0].reshape(-1, num_heads, head_size)
                 value_cache = kv_cache[1].reshape(-1, num_heads, head_size)
+=======
+                key_cache, value_cache = self.kv_helper.get_kv_from_cache(
+                    kv_cache, num_heads, head_size)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
                 current_slot_mapping = slot_mapping_flat[start_pos:end_pos]
 
@@ -202,8 +253,13 @@ class SimpleConnector(KVConnectorBase):
     def recv_kv_caches_and_hidden_states(
         self, model_executable: torch.nn.Module,
         model_input: "ModelInputForGPUWithSamplingMetadata",
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor]
     ) -> Tuple[Union[torch.Tensor, IntermediateTensors], bool,
+=======
+        kv_caches: list[torch.Tensor]
+    ) -> tuple[Union[torch.Tensor, IntermediateTensors], bool,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                "ModelInputForGPUWithSamplingMetadata"]:
 
         # When bypass_model_exec is set to False, it means that at least for one
@@ -214,7 +270,14 @@ class SimpleConnector(KVConnectorBase):
 
         input_tokens_tensor = model_input.input_tokens
         seq_lens = model_input.attn_metadata.seq_lens
+<<<<<<< HEAD
         slot_mapping = model_input.attn_metadata.slot_mapping.flatten()
+=======
+        num_prefill_tokens = model_input.attn_metadata.num_prefill_tokens
+        slot_mapping = model_input.attn_metadata.slot_mapping.flatten()
+        start_layer = model_executable.model.start_layer
+        end_layer = model_executable.model.end_layer
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         hidden_or_intermediate_states_for_one_req = []
 
@@ -225,9 +288,27 @@ class SimpleConnector(KVConnectorBase):
         # enumerate different requests
         # FIXME(Kuntai): This impl assumes that all requests are prefill.
         for idx, slen in enumerate(seq_lens):
+<<<<<<< HEAD
 
             start_pos = sum(seq_lens[:idx])
             end_pos = start_pos + slen
+=======
+            start_pos = sum(seq_lens[:idx])
+            end_pos = start_pos + slen
+
+            if start_pos >= num_prefill_tokens:
+                # This can happen during inflight batching. See:
+                # vllm/worker/model_runner.py::_prepare_model_input_tensors:
+                # - input_tokens[:num_prefill_tokens] contains prefill tokens.
+                # - input_tokens[num_prefill_tokens:] contains decode tokens.
+                logger.warning("You should set --enable_chunked_prefill=False "
+                               "and --max_num_batched_tokens "
+                               "should be equal to --max_seq_len_to_capture")
+                bypass_model_exec = False
+                assert start_pos == num_prefill_tokens
+                break
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             current_tokens = input_tokens_tensor[start_pos:end_pos]
             num_tokens = slen
 
@@ -261,6 +342,7 @@ class SimpleConnector(KVConnectorBase):
             end_pos = start_pos + num_computed_tokens
 
             # put received KV caches into paged memory
+<<<<<<< HEAD
             for i in range(model_executable.model.start_layer,
                            model_executable.model.end_layer):
 
@@ -280,6 +362,21 @@ class SimpleConnector(KVConnectorBase):
                     layer.self_attn.attn._k_scale,
                     layer.self_attn.attn._v_scale,
                 )
+=======
+            for cur_layer in range(start_layer, end_layer):
+
+                layer_id = cur_layer - start_layer
+                kv_cache = kv_caches[layer_id]
+                layer = model_executable.model.layers[cur_layer]
+
+                # get remote kvcache
+                remote_k, remote_v = keys[layer_id], values[layer_id]
+
+                self.kv_helper.put_kv_to_cache(model_executable, remote_k,
+                                               remote_v, layer, kv_cache,
+                                               slot_mapping, start_pos,
+                                               end_pos)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             hidden_or_intermediate_states_for_one_req.append(hidden)
 
@@ -288,7 +385,11 @@ class SimpleConnector(KVConnectorBase):
             # Here we will fall back to normal model forwarding
             # But optionally you can adjust model_input so that you only do
             # prefilling on those tokens that are missing KV caches.
+<<<<<<< HEAD
             logger.debug(
+=======
+            logger.warning(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 "[rank%d]: Failed to receive all KVs and hidden "
                 "states, redo model forwarding.", torch.distributed.get_rank())
             hidden_or_intermediate_states = None

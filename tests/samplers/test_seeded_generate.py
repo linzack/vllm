@@ -17,7 +17,13 @@ RANDOM_SEEDS = list(range(5))
 
 
 @pytest.fixture
+<<<<<<< HEAD
 def vllm_model(vllm_runner):
+=======
+def vllm_model(vllm_runner, monkeypatch):
+    # This file relies on V0 internals.
+    monkeypatch.setenv("VLLM_USE_V1", "0")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with vllm_runner(MODEL, dtype="half") as vllm_model:
         yield vllm_model
 

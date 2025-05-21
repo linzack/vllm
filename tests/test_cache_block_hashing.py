@@ -3,7 +3,11 @@
 
 Run `pytest tests/test_cache_block_hashing.py`.
 """
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 
@@ -44,7 +48,11 @@ def flatten_2d(li):
 @pytest.mark.parametrize("concurrent_lora_int_ids",
                          [[None], [1], [None, 1], [None, 1, 2], [1, 2]])
 def test_auto_prefix_caching(model: str, block_size: int, max_num_seqs: int,
+<<<<<<< HEAD
                              concurrent_lora_int_ids: List[Optional[int]]):
+=======
+                             concurrent_lora_int_ids: list[Optional[int]]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     tokenizer = TokenizerGroup(
         tokenizer_id="facebook/opt-125m",
@@ -53,7 +61,11 @@ def test_auto_prefix_caching(model: str, block_size: int, max_num_seqs: int,
         max_input_length=None,
     )
 
+<<<<<<< HEAD
     hashes: List[List[List[int]]] = []
+=======
+    hashes: list[list[list[int]]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for prefix in prefixes:
         for lora_int_id in concurrent_lora_int_ids:

@@ -24,7 +24,10 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import math
+<<<<<<< HEAD
 from typing import List, Tuple
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torchvision.transforms as T
@@ -36,8 +39,13 @@ from transformers.processing_utils import ProcessorMixin
 class ImageTransform:
 
     def __init__(self,
+<<<<<<< HEAD
                  mean: Tuple[float, float, float] = (0.5, 0.5, 0.5),
                  std: Tuple[float, float, float] = (0.5, 0.5, 0.5),
+=======
+                 mean: tuple[float, float, float] = (0.5, 0.5, 0.5),
+                 std: tuple[float, float, float] = (0.5, 0.5, 0.5),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                  normalize: bool = True):
         self.mean = mean
         self.std = std
@@ -62,11 +70,19 @@ class DeepseekVLV2Processor(ProcessorMixin):
     def __init__(
         self,
         tokenizer: LlamaTokenizerFast,
+<<<<<<< HEAD
         candidate_resolutions: Tuple[Tuple[int, int]],
         patch_size: int,
         downsample_ratio: int,
         image_mean: Tuple[float, float, float] = (0.5, 0.5, 0.5),
         image_std: Tuple[float, float, float] = (0.5, 0.5, 0.5),
+=======
+        candidate_resolutions: tuple[tuple[int, int]],
+        patch_size: int,
+        downsample_ratio: int,
+        image_mean: tuple[float, float, float] = (0.5, 0.5, 0.5),
+        image_std: tuple[float, float, float] = (0.5, 0.5, 0.5),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         normalize: bool = True,
         image_token: str = "<image>",
         pad_token: str = "<｜▁pad▁｜>",
@@ -170,13 +186,21 @@ class DeepseekVLV2Processor(ProcessorMixin):
 
         return t
 
+<<<<<<< HEAD
     def decode(self, t: List[int], **kwargs) -> str:
+=======
+    def decode(self, t: list[int], **kwargs) -> str:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return self.tokenizer.decode(t, **kwargs)
 
     def process_one(
         self,
         prompt: str,
+<<<<<<< HEAD
         images: List[Image.Image],
+=======
+        images: list[Image.Image],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         inference_mode: bool = True,
         **kwargs,
     ):
@@ -184,8 +208,13 @@ class DeepseekVLV2Processor(ProcessorMixin):
 
         Args:
             prompt (str): the formatted prompt;
+<<<<<<< HEAD
             conversations (List[Dict]): conversations with a list of messages;
             images (List[ImageType]): the list of images;
+=======
+            conversations (list[dict]): conversations with a list of messages;
+            images (list[ImageType]): the list of images;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             inference_mode (bool): if True, then remove the last eos token;
             system_prompt (str): the system prompt;
             **kwargs:
@@ -196,7 +225,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
                 - target_ids (torch.LongTensor): [N + image tokens]
                 - pixel_values (torch.FloatTensor): [n_patches, 3, H, W]
                 - image_id (int): the id of the image token
+<<<<<<< HEAD
                 - num_image_tokens (List[int]): the number of image tokens
+=======
+                - num_image_tokens (list[int]): the number of image tokens
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
 
         assert (prompt is not None and images is not None
@@ -226,7 +259,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
         input_ids[input_ids < 0] = self.pad_id
 
         if inference_mode:
+<<<<<<< HEAD
             # 去掉结尾的eos token
+=======
+            # Remove the ending eos token
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             assert input_ids[-1] == self.eos_id
             input_ids = input_ids[:-1]
             target_ids = target_ids[:-1]
@@ -257,7 +294,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
         self,
         *,
         prompt: str,
+<<<<<<< HEAD
         images: List[Image.Image],
+=======
+        images: list[Image.Image],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         inference_mode: bool = True,
         **kwargs,
     ):
@@ -265,7 +306,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
 
         Args:
             prompt (str): the formatted prompt;
+<<<<<<< HEAD
             images (List[ImageType]): the list of images;
+=======
+            images (list[ImageType]): the list of images;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             inference_mode (bool): if True, then remove the last eos token;
             **kwargs:
 
@@ -274,7 +319,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
                 - input_ids (torch.LongTensor): [N + image tokens]
                 - images (torch.FloatTensor): [n_images, 3, H, W]
                 - image_id (int): the id of the image token
+<<<<<<< HEAD
                 - num_image_tokens (List[int]): the number of image tokens
+=======
+                - num_image_tokens (list[int]): the number of image tokens
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
 
         prepare = self.process_one(
@@ -288,7 +337,11 @@ class DeepseekVLV2Processor(ProcessorMixin):
     def tokenize_with_images(
         self,
         conversation: str,
+<<<<<<< HEAD
         images: List[Image.Image],
+=======
+        images: list[Image.Image],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         bos: bool = True,
         eos: bool = True,
         cropping: bool = True,

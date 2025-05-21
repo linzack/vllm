@@ -10,6 +10,7 @@ from vllm.utils import STR_DTYPE_TO_TORCH_DTYPE, FlexibleArgumentParser
 
 
 @torch.inference_mode()
+<<<<<<< HEAD
 def main(num_tokens: int,
          hidden_size: int,
          add_residual: bool,
@@ -18,6 +19,18 @@ def main(num_tokens: int,
          do_profile: bool = False,
          num_warmup_iters: int = 5,
          num_iters: int = 100) -> None:
+=======
+def main(
+    num_tokens: int,
+    hidden_size: int,
+    add_residual: bool,
+    dtype: torch.dtype,
+    seed: int = 0,
+    do_profile: bool = False,
+    num_warmup_iters: int = 5,
+    num_iters: int = 100,
+) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     current_platform.seed_everything(seed)
     torch.set_default_device("cuda")
 
@@ -40,7 +53,11 @@ def main(num_tokens: int,
 
         end_time = time.perf_counter()
         if profile:
+<<<<<<< HEAD
             torch.cuda.cudart().cudaProfilerStart()
+=======
+            torch.cuda.cudart().cudaProfilerStop()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return (end_time - start_time) / num_iters
 
     # Warmup.
@@ -56,6 +73,7 @@ def main(num_tokens: int,
     print(f"Kernel running time: {latency * 1000000:.3f} us")
 
 
+<<<<<<< HEAD
 if __name__ == '__main__':
     parser = FlexibleArgumentParser(
         description="Benchmark the layernorm kernel.")
@@ -74,10 +92,31 @@ if __name__ == '__main__':
                         default=100,
                         help="Number of benchmark iterations. "
                         "If --profile is set, this number is ignored")
+=======
+if __name__ == "__main__":
+    parser = FlexibleArgumentParser(description="Benchmark the layernorm kernel.")
+    parser.add_argument("--num-tokens", type=int, default=4096)
+    parser.add_argument("--hidden-size", type=int, default=8192)
+    parser.add_argument("--add-residual", action="store_true")
+    parser.add_argument(
+        "--dtype", type=str, choices=["half", "bfloat16", "float"], default="half"
+    )
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--profile", action="store_true")
+    parser.add_argument("--num-warmup-iters", type=int, default=5)
+    parser.add_argument(
+        "--num-iters",
+        type=int,
+        default=100,
+        help="Number of benchmark iterations. "
+        "If --profile is set, this number is ignored",
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     args = parser.parse_args()
     print(args)
 
+<<<<<<< HEAD
     main(num_tokens=args.num_tokens,
          hidden_size=args.hidden_size,
          add_residual=args.add_residual,
@@ -86,3 +125,15 @@ if __name__ == '__main__':
          do_profile=args.profile,
          num_warmup_iters=args.num_warmup_iters,
          num_iters=args.num_iters)
+=======
+    main(
+        num_tokens=args.num_tokens,
+        hidden_size=args.hidden_size,
+        add_residual=args.add_residual,
+        dtype=STR_DTYPE_TO_TORCH_DTYPE[args.dtype],
+        seed=args.seed,
+        do_profile=args.profile,
+        num_warmup_iters=args.num_warmup_iters,
+        num_iters=args.num_iters,
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

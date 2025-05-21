@@ -3,7 +3,10 @@
 # Adapted from
 # https://github.com/fmmoret/vllm/blob/fm-support-lora-on-quantized-models/tests/lora/test_llama.py
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 
@@ -19,7 +22,11 @@ class ModelWithQuantization:
     quantization: str
 
 
+<<<<<<< HEAD
 MODELS: List[ModelWithQuantization]
+=======
+MODELS: list[ModelWithQuantization]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #AWQ quantization is currently not supported in ROCm.
 if current_platform.is_rocm():
     MODELS = [
@@ -38,10 +45,25 @@ else:
     ]
 
 
+<<<<<<< HEAD
 def do_sample(llm: vllm.LLM,
               lora_path: str,
               lora_id: int,
               max_tokens: int = 256) -> List[str]:
+=======
+@pytest.fixture(autouse=True)
+def v1(run_with_both_engines_lora):
+    # Simple autouse wrapper to run both engines for each test
+    # This can be promoted up to conftest.py to run for every
+    # test in a package
+    pass
+
+
+def do_sample(llm: vllm.LLM,
+              lora_path: str,
+              lora_id: int,
+              max_tokens: int = 256) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     raw_prompts = [
         "Give me an orange-ish brown color",
         "Give me a neon pink color",
@@ -61,7 +83,11 @@ def do_sample(llm: vllm.LLM,
         lora_request=LoRARequest(str(lora_id), lora_id, lora_path)
         if lora_id else None)
     # Print the outputs.
+<<<<<<< HEAD
     generated_texts: List[str] = []
+=======
+    generated_texts: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text
@@ -70,6 +96,7 @@ def do_sample(llm: vllm.LLM,
     return generated_texts
 
 
+<<<<<<< HEAD
 @pytest.fixture(autouse=True)
 def v1(run_with_both_engines_lora):
     # Simple autouse wrapper to run both engines for each test
@@ -85,6 +112,10 @@ def test_quant_model_lora(tinyllama_lora_files, num_gpus_available, model,
     if num_gpus_available < tp_size and \
         tp_size > 1 and current_platform.is_cuda_alike():
         pytest.skip(f"Not enough GPUs for tensor parallelism {tp_size}")
+=======
+@pytest.mark.parametrize("model", MODELS)
+def test_quant_model_lora(tinyllama_lora_files, model):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     llm = vllm.LLM(
         model=model.model_path,
@@ -92,7 +123,10 @@ def test_quant_model_lora(tinyllama_lora_files, num_gpus_available, model,
         max_num_seqs=16,
         max_loras=4,
         max_model_len=400,
+<<<<<<< HEAD
         tensor_parallel_size=tp_size,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         gpu_memory_utilization=0.2,  #avoid OOM
         quantization=model.quantization,
         trust_remote_code=True,
@@ -179,13 +213,21 @@ def test_quant_model_tp_equality(tinyllama_lora_files, num_gpus_available,
                                  model):
     if num_gpus_available < 2:
         pytest.skip(f"Not enough GPUs for tensor parallelism {2}")
+<<<<<<< HEAD
 
+=======
+    if model.quantization == "GPTQ":
+        pytest.skip("GPTQ lora outputs are just incredibly unstable")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     llm_tp1 = vllm.LLM(
         model=model.model_path,
         enable_lora=True,
         max_num_seqs=16,
         max_loras=4,
+<<<<<<< HEAD
         tensor_parallel_size=1,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         gpu_memory_utilization=0.2,  #avoid OOM
         quantization=model.quantization,
         trust_remote_code=True,

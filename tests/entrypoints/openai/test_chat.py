@@ -3,7 +3,11 @@
 # imports for guided decoding tests
 import json
 import re
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import jsonschema
 import openai  # use the official client for correctness check
@@ -11,7 +15,11 @@ import pytest
 import pytest_asyncio
 import requests
 import torch
+<<<<<<< HEAD
 from openai import BadRequestError
+=======
+from openai import BadRequestError, OpenAI
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from ...utils import RemoteOpenAIServer
 from .test_completion import zephyr_lora_added_tokens_files  # noqa: F401
@@ -20,11 +28,33 @@ from .test_completion import zephyr_lora_files  # noqa: F401
 # any model with a chat template should work here
 MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
 
+<<<<<<< HEAD
 GUIDED_DECODING_BACKENDS = ["outlines", "lm-format-enforcer", "xgrammar"]
 
 
 @pytest.fixture(scope="module")
 def server(zephyr_lora_files, zephyr_lora_added_tokens_files):  # noqa: F811
+=======
+
+@pytest.fixture(scope="module")
+def monkeypatch_module():
+    from _pytest.monkeypatch import MonkeyPatch
+    mpatch = MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+@pytest.fixture(scope="module", params=[False, True])
+def server(
+        request,
+        monkeypatch_module,
+        zephyr_lora_files,  #noqa: F811
+        zephyr_lora_added_tokens_files):  # noqa: F811
+
+    use_v1 = request.param
+    monkeypatch_module.setenv('VLLM_USE_V1', '1' if use_v1 else '0')
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     args = [
         # use half precision for speed and memory savings in CI environment
         "--dtype",
@@ -49,6 +79,16 @@ def server(zephyr_lora_files, zephyr_lora_added_tokens_files):  # noqa: F811
         yield remote_server
 
 
+<<<<<<< HEAD
+=======
+@pytest.fixture
+def is_v1_server(server):
+    import os
+    assert os.environ['VLLM_USE_V1'] in ['0', '1']
+    return os.environ['VLLM_USE_V1'] == '1'
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest_asyncio.fixture
 async def client(server):
     async with server.get_async_client() as async_client:
@@ -190,7 +230,11 @@ async def test_too_many_chat_logprobs(client: openai.AsyncOpenAI,
 async def test_prompt_logprobs_chat(client: openai.AsyncOpenAI,
                                     model_name: str,
                                     prompt_logprobs: Optional[int]):
+<<<<<<< HEAD
     params: Dict = {
+=======
+    params: dict = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "messages": [{
             "role": "system",
             "content": "You are a helpful assistant."
@@ -232,7 +276,11 @@ async def test_prompt_logprobs_chat(client: openai.AsyncOpenAI,
 )
 async def test_more_than_one_prompt_logprobs_chat(client: openai.AsyncOpenAI,
                                                   model_name: str):
+<<<<<<< HEAD
     params: Dict = {
+=======
+    params: dict = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "messages": [{
             "role": "system",
             "content": "You are a helpful assistant."
@@ -343,7 +391,11 @@ async def test_chat_streaming(client: openai.AsyncOpenAI, model_name: str):
         temperature=0.0,
         stream=True,
     )
+<<<<<<< HEAD
     chunks: List[str] = []
+=======
+    chunks: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finish_reason_count = 0
     async for chunk in stream:
         delta = chunk.choices[0].delta
@@ -464,6 +516,7 @@ async def test_chat_completion_stream_options(client: openai.AsyncOpenAI,
     assert last_completion_tokens == 10
 
 
+<<<<<<< HEAD
 # NOTE: Not sure why, but when I place this after `test_guided_regex_chat`
 # (i.e. using the same ordering as in the Completions API tests), the test
 # will fail on the second `guided_decoding_backend` even when I swap their order
@@ -472,6 +525,10 @@ async def test_chat_completion_stream_options(client: openai.AsyncOpenAI,
 @pytest.mark.parametrize("guided_decoding_backend", GUIDED_DECODING_BACKENDS)
 async def test_guided_choice_chat(client: openai.AsyncOpenAI,
                                   guided_decoding_backend: str,
+=======
+@pytest.mark.asyncio
+async def test_guided_choice_chat(client: openai.AsyncOpenAI,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                   sample_guided_choice):
     messages = [{
         "role": "system",
@@ -487,8 +544,12 @@ async def test_guided_choice_chat(client: openai.AsyncOpenAI,
         messages=messages,
         max_completion_tokens=10,
         temperature=0.7,
+<<<<<<< HEAD
         extra_body=dict(guided_choice=sample_guided_choice,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_choice=sample_guided_choice))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     choice1 = chat_completion.choices[0].message.content
     assert choice1 in sample_guided_choice
 
@@ -502,18 +563,28 @@ async def test_guided_choice_chat(client: openai.AsyncOpenAI,
         messages=messages,
         max_completion_tokens=10,
         temperature=0.7,
+<<<<<<< HEAD
         extra_body=dict(guided_choice=sample_guided_choice,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_choice=sample_guided_choice))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     choice2 = chat_completion.choices[0].message.content
     assert choice2 in sample_guided_choice
     assert choice1 != choice2
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 @pytest.mark.parametrize("guided_decoding_backend", GUIDED_DECODING_BACKENDS)
 async def test_guided_json_chat(client: openai.AsyncOpenAI,
                                 guided_decoding_backend: str,
                                 sample_json_schema):
+=======
+async def test_guided_json_chat(client: openai.AsyncOpenAI,
+                                sample_json_schema):
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     messages = [{
         "role": "system",
         "content": "you are a helpful assistant"
@@ -528,8 +599,12 @@ async def test_guided_json_chat(client: openai.AsyncOpenAI,
         model=MODEL_NAME,
         messages=messages,
         max_completion_tokens=1000,
+<<<<<<< HEAD
         extra_body=dict(guided_json=sample_json_schema,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_json=sample_json_schema))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     message = chat_completion.choices[0].message
     assert message.content is not None
     json1 = json.loads(message.content)
@@ -546,8 +621,12 @@ async def test_guided_json_chat(client: openai.AsyncOpenAI,
         model=MODEL_NAME,
         messages=messages,
         max_completion_tokens=1000,
+<<<<<<< HEAD
         extra_body=dict(guided_json=sample_json_schema,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_json=sample_json_schema))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     message = chat_completion.choices[0].message
     assert message.content is not None
     json2 = json.loads(message.content)
@@ -557,9 +636,14 @@ async def test_guided_json_chat(client: openai.AsyncOpenAI,
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 @pytest.mark.parametrize("guided_decoding_backend", GUIDED_DECODING_BACKENDS)
 async def test_guided_regex_chat(client: openai.AsyncOpenAI,
                                  guided_decoding_backend: str, sample_regex):
+=======
+async def test_guided_regex_chat(client: openai.AsyncOpenAI, sample_regex):
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     messages = [{
         "role": "system",
         "content": "you are a helpful assistant"
@@ -573,8 +657,12 @@ async def test_guided_regex_chat(client: openai.AsyncOpenAI,
         model=MODEL_NAME,
         messages=messages,
         max_completion_tokens=20,
+<<<<<<< HEAD
         extra_body=dict(guided_regex=sample_regex,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_regex=sample_regex))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ip1 = chat_completion.choices[0].message.content
     assert ip1 is not None
     assert re.fullmatch(sample_regex, ip1) is not None
@@ -585,8 +673,12 @@ async def test_guided_regex_chat(client: openai.AsyncOpenAI,
         model=MODEL_NAME,
         messages=messages,
         max_completion_tokens=20,
+<<<<<<< HEAD
         extra_body=dict(guided_regex=sample_regex,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_regex=sample_regex))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ip2 = chat_completion.choices[0].message.content
     assert ip2 is not None
     assert re.fullmatch(sample_regex, ip2) is not None
@@ -615,10 +707,16 @@ async def test_guided_decoding_type_error(client: openai.AsyncOpenAI):
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 @pytest.mark.parametrize("guided_decoding_backend", GUIDED_DECODING_BACKENDS)
 async def test_guided_choice_chat_logprobs(client: openai.AsyncOpenAI,
                                            guided_decoding_backend: str,
                                            sample_guided_choice):
+=======
+async def test_guided_choice_chat_logprobs(client: openai.AsyncOpenAI,
+                                           sample_guided_choice):
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     messages = [{
         "role": "system",
         "content": "you are a helpful assistant"
@@ -634,8 +732,12 @@ async def test_guided_choice_chat_logprobs(client: openai.AsyncOpenAI,
         max_completion_tokens=10,
         logprobs=True,
         top_logprobs=5,
+<<<<<<< HEAD
         extra_body=dict(guided_choice=sample_guided_choice,
                         guided_decoding_backend=guided_decoding_backend))
+=======
+        extra_body=dict(guided_choice=sample_guided_choice))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     assert chat_completion.choices[0].logprobs is not None
     assert chat_completion.choices[0].logprobs.content is not None
@@ -647,10 +749,14 @@ async def test_guided_choice_chat_logprobs(client: openai.AsyncOpenAI,
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 @pytest.mark.parametrize("guided_decoding_backend", GUIDED_DECODING_BACKENDS)
 async def test_named_tool_use(client: openai.AsyncOpenAI,
                               guided_decoding_backend: str,
                               sample_json_schema):
+=======
+async def test_named_tool_use(client: openai.AsyncOpenAI, sample_json_schema):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     messages = [{
         "role": "system",
         "content": "you are a helpful assistant"
@@ -682,7 +788,11 @@ async def test_named_tool_use(client: openai.AsyncOpenAI,
                 "name": "dummy_function_name"
             }
         },
+<<<<<<< HEAD
         extra_body=dict(guided_decoding_backend=guided_decoding_backend))
+=======
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     message = chat_completion.choices[0].message
     assert len(message.content) == 0
     json_string = message.tool_calls[0].function.arguments
@@ -717,7 +827,10 @@ async def test_named_tool_use(client: openai.AsyncOpenAI,
                 "name": "dummy_function_name"
             }
         },
+<<<<<<< HEAD
         extra_body=dict(guided_decoding_backend=guided_decoding_backend),
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stream=True)
 
     output = []
@@ -740,6 +853,7 @@ async def test_named_tool_use(client: openai.AsyncOpenAI,
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 async def test_required_tool_use_not_yet_supported(client: openai.AsyncOpenAI,
                                                    sample_json_schema):
     messages = [{
@@ -782,6 +896,130 @@ async def test_required_tool_use_not_yet_supported(client: openai.AsyncOpenAI,
                 }
             }],
             tool_choice="auto")
+=======
+@pytest.mark.parametrize("model_name", [MODEL_NAME])
+async def test_required_tool_use(client: openai.AsyncOpenAI,
+                                 is_v1_server: bool, model_name: str):
+    if is_v1_server:
+        pytest.skip(
+            "tool_choice='required' requires features unsupported on V1")
+
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "description":
+                            "The city to find the weather for, e.g. 'Vienna'",
+                            "default": "Vienna",
+                        },
+                        "country": {
+                            "type":
+                            "string",
+                            "description":
+                            "The country that the city is in, e.g. 'Austria'",
+                        },
+                        "unit": {
+                            "type": "string",
+                            "description":
+                            "The unit to fetch the temperature in",
+                            "enum": ["celsius", "fahrenheit"],
+                        },
+                    },
+                    "required": ["country", "unit"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_forecast",
+                "description": "Get the weather forecast for a given location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "description":
+                            "The city to get the forecast for, e.g. 'Vienna'",
+                            "default": "Vienna",
+                        },
+                        "country": {
+                            "type":
+                            "string",
+                            "description":
+                            "The country that the city is in, e.g. 'Austria'",
+                        },
+                        "days": {
+                            "type":
+                            "integer",
+                            "description":
+                            "Number of days to get the forecast for (1-7)",
+                        },
+                        "unit": {
+                            "type": "string",
+                            "description":
+                            "The unit to fetch the temperature in",
+                            "enum": ["celsius", "fahrenheit"],
+                        },
+                    },
+                    "required": ["country", "days", "unit"],
+                },
+            },
+        },
+    ]
+
+    messages = [
+        {
+            "role": "user",
+            "content": "Hi! How are you doing today?"
+        },
+        {
+            "role": "assistant",
+            "content": "I'm doing well! How can I help you?"
+        },
+        {
+            "role":
+            "user",
+            "content":
+            "Can you tell me what the current weather is in Berlin and the "\
+            "forecast for the next 5 days, in fahrenheit?",
+        },
+    ]
+
+    # Non-streaming test
+    chat_completion = await client.chat.completions.create(
+        messages=messages,
+        model=model_name,
+        tools=tools,
+        tool_choice="required",
+    )
+
+    assert chat_completion.choices[0].message.tool_calls is not None
+    assert len(chat_completion.choices[0].message.tool_calls) > 0
+
+    # Streaming test
+    stream = await client.chat.completions.create(
+        messages=messages,
+        model=model_name,
+        tools=tools,
+        tool_choice="required",
+        stream=True,
+    )
+
+    output = []
+    async for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta.tool_calls:
+            output.extend(chunk.choices[0].delta.tool_calls)
+
+    assert len(output) > 0
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.asyncio
@@ -1000,7 +1238,11 @@ async def test_long_seed(client: openai.AsyncOpenAI):
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 async def test_http_chat_wo_model_name(server: RemoteOpenAIServer):
+=======
+async def test_http_chat_no_model_name_with_curl(server: RemoteOpenAIServer):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     url = f"http://localhost:{server.port}/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
@@ -1021,10 +1263,42 @@ async def test_http_chat_wo_model_name(server: RemoteOpenAIServer):
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
     print(response_data)
+<<<<<<< HEAD
 
+=======
+    assert response_data.get("model") == MODEL_NAME
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     choice = response_data.get("choices")[0]
     message = choice.get("message")
     assert message is not None
     content = message.get("content")
     assert content is not None
     assert len(content) > 0
+<<<<<<< HEAD
+=======
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model_name", [MODEL_NAME, ""])
+async def test_http_chat_no_model_name_with_openai(server: RemoteOpenAIServer,
+                                                   model_name: str):
+
+    openai_api_key = "EMPTY"
+    openai_api_base = f"http://localhost:{server.port}/v1"
+
+    client = OpenAI(
+        api_key=openai_api_key,
+        base_url=openai_api_base,
+    )
+    messages = [
+        {
+            "role": "user",
+            "content": "Hello, vLLM!"
+        },
+    ]
+    response = client.chat.completions.create(
+        model="",  # empty string
+        messages=messages,
+    )
+    assert response.model == MODEL_NAME
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

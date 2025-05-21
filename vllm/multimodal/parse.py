@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from collections import UserDict
 from collections.abc import Callable, Iterator, Mapping, Sequence
+<<<<<<< HEAD
 from typing import (TYPE_CHECKING, Any, Generic, NamedTuple, Optional, TypeVar,
                     Union)
 
@@ -15,6 +16,18 @@ from typing_extensions import TypeAlias, TypeGuard, assert_never
 from vllm.utils import is_list_of
 
 from .audio import resample_audio
+=======
+from typing import (TYPE_CHECKING, Any, Generic, Literal, NamedTuple, Optional,
+                    TypeVar, Union)
+
+import numpy as np
+import torch
+from typing_extensions import TypeAlias, TypeGuard, assert_never
+
+from vllm.utils import LazyLoader, is_list_of
+
+from .audio import AudioResampler
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .inputs import (AudioItem, HfAudioItem, HfImageItem, HfVideoItem,
                      ImageItem, ModalityData, MultiModalDataDict,
                      MultiModalFieldConfig, MultiModalKwargs, VideoItem)
@@ -22,10 +35,22 @@ from .inputs import (AudioItem, HfAudioItem, HfImageItem, HfVideoItem,
 _T = TypeVar("_T")
 _I = TypeVar("_I")
 
+<<<<<<< HEAD
 
 class ModalityDataItems(ABC, Generic[_T, _I]):
     """
     Represents data items for a modality in :class:`MultiModalDataItems`.
+=======
+if TYPE_CHECKING:
+    import PIL.Image as PILImage
+else:
+    PILImage = LazyLoader("PILImage", globals(), "PIL.Image")
+
+
+class ModalityDataItems(ABC, Generic[_T, _I]):
+    """
+    Represents data items for a modality in {class}`MultiModalDataItems`.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     def __init__(self, data: _T, modality: str) -> None:
@@ -131,6 +156,11 @@ class DictEmbeddingItems(ModalityDataItems[Mapping[str, torch.Tensor],
             Mapping[str, MultiModalFieldConfig],
         ],
     ) -> None:
+<<<<<<< HEAD
+=======
+        from transformers.feature_extraction_utils import BatchFeature
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__(data, modality)
 
         missing_required_data_keys = required_fields - data.keys()
@@ -176,6 +206,13 @@ class AudioProcessorItems(ProcessorBatchItems[HfAudioItem]):
     def __init__(self, data: Sequence[HfAudioItem]) -> None:
         super().__init__(data, "audio")
 
+<<<<<<< HEAD
+=======
+    def get_audio_length(self, item_idx: int) -> int:
+        audio = self.get(item_idx)
+        return len(audio)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class AudioEmbeddingItems(EmbeddingItems):
 
@@ -196,7 +233,11 @@ class ImageProcessorItems(ProcessorBatchItems[HfImageItem]):
     def get_image_size(self, item_idx: int) -> ImageSize:
         image = self.get(item_idx)
 
+<<<<<<< HEAD
         if isinstance(image, Image):
+=======
+        if isinstance(image, PILImage.Image):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return ImageSize(*image.size)
         if isinstance(image, (np.ndarray, torch.Tensor)):
             _, h, w = image.shape
@@ -222,7 +263,11 @@ class VideoProcessorItems(ProcessorBatchItems[HfVideoItem]):
     def get_frame_size(self, item_idx: int) -> ImageSize:
         image = self.get(item_idx)[0]  # Assume that the video isn't empty
 
+<<<<<<< HEAD
         if isinstance(image, Image):
+=======
+        if isinstance(image, PILImage.Image):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return ImageSize(*image.size)
         if isinstance(image, (np.ndarray, torch.Tensor)):
             _, h, w = image.shape
@@ -242,15 +287,24 @@ _D = TypeVar("_D", bound=ModalityDataItems[Any, Any])
 
 class MultiModalDataItems(UserDict[str, ModalityDataItems[Any, Any]]):
     """
+<<<<<<< HEAD
     As :data:`~vllm.multimodal.inputs.MultiModalDataDict`, but normalized
+=======
+    As {data}`~vllm.multimodal.inputs.MultiModalDataDict`, but normalized
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     such that each entry corresponds to a list.
     """
 
     def get_count(self, modality: str, *, strict: bool = True) -> int:
         """
         Get the number of data items belonging to a modality.
+<<<<<<< HEAD
         
         If `strict=False`, return `0` instead of raising :exc:`KeyError`
+=======
+
+        If `strict=False`, return `0` instead of raising {exc}`KeyError`
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         even if the modality is not found.
         """
         if modality not in self:
@@ -291,23 +345,47 @@ class MultiModalDataItems(UserDict[str, ModalityDataItems[Any, Any]]):
 
 
 ModalityDataParser: TypeAlias = Callable[[ModalityData[Any]],
+<<<<<<< HEAD
                                          ModalityDataItems[Any, Any]]
+=======
+                                         Optional[ModalityDataItems[Any, Any]]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MultiModalDataParser:
     """
+<<<<<<< HEAD
     Parses :data:`~vllm.multimodal.inputs.MultiModalDataDict` into
     :class:`MultiModalDataItems`.
+=======
+    Parses {data}`~vllm.multimodal.inputs.MultiModalDataDict` into
+    {class}`MultiModalDataItems`.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     Args:
         target_sr (float, optional): Enables automatic resampling of audio
             items to the model's expected sampling rate.
     """
 
+<<<<<<< HEAD
     def __init__(self, *, target_sr: Optional[float] = None) -> None:
         super().__init__()
 
         self.target_sr = target_sr
+=======
+    def __init__(
+        self,
+        *,
+        target_sr: Optional[float] = None,
+        audio_resample_method: Literal["librosa", "scipy"] = "librosa",
+    ) -> None:
+        super().__init__()
+
+        self.audio_resampler = AudioResampler(
+            target_sr=target_sr,
+            method=audio_resample_method,
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def _is_embeddings(
             self, data: object
@@ -315,7 +393,19 @@ class MultiModalDataParser:
         if isinstance(data, torch.Tensor):
             return data.ndim == 3
         if is_list_of(data, torch.Tensor):
+<<<<<<< HEAD
             return len(data) == 0 or data[0].ndim == 2
+=======
+            return data[0].ndim == 2
+
+        return False
+
+    def _is_empty(self, data: object) -> TypeGuard[None]:
+        if isinstance(data, list):
+            return len(data) == 0
+        if isinstance(data, (np.ndarray, torch.Tensor)):
+            return data.size == 0
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return False
 
@@ -337,7 +427,16 @@ class MultiModalDataParser:
     def _parse_audio_data(
         self,
         data: ModalityData[AudioItem],
+<<<<<<< HEAD
     ) -> ModalityDataItems[Any, Any]:
+=======
+    ) -> Optional[ModalityDataItems[Any, Any]]:
+        # also check single audio item with sampling rate
+        if self._is_empty(data) or (isinstance(data, tuple)
+                                    and self._is_empty(data[0])):
+            return None
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if self._is_embeddings(data):
             return AudioEmbeddingItems(data)
 
@@ -357,6 +456,7 @@ class MultiModalDataParser:
             if orig_sr is None:
                 new_audio = audio
             else:
+<<<<<<< HEAD
                 target_sr = self.target_sr
                 if target_sr is None:
                     raise RuntimeError(
@@ -366,6 +466,10 @@ class MultiModalDataParser:
                 new_audio = resample_audio(audio,
                                            orig_sr=orig_sr,
                                            target_sr=target_sr)
+=======
+                new_audio = self.audio_resampler.resample(audio,
+                                                          orig_sr=orig_sr)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             new_audios.append(new_audio)
 
@@ -374,11 +478,22 @@ class MultiModalDataParser:
     def _parse_image_data(
         self,
         data: ModalityData[ImageItem],
+<<<<<<< HEAD
     ) -> ModalityDataItems[Any, Any]:
         if self._is_embeddings(data):
             return ImageEmbeddingItems(data)
 
         if (isinstance(data, Image)
+=======
+    ) -> Optional[ModalityDataItems[Any, Any]]:
+        if self._is_empty(data):
+            return None
+
+        if self._is_embeddings(data):
+            return ImageEmbeddingItems(data)
+
+        if (isinstance(data, PILImage.Image)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 or isinstance(data,
                               (np.ndarray, torch.Tensor)) and data.ndim == 3):
             data_items = [data]
@@ -392,11 +507,22 @@ class MultiModalDataParser:
     def _parse_video_data(
         self,
         data: ModalityData[VideoItem],
+<<<<<<< HEAD
     ) -> ModalityDataItems[Any, Any]:
         if self._is_embeddings(data):
             return VideoEmbeddingItems(data)
 
         if (is_list_of(data, Image)
+=======
+    ) -> Optional[ModalityDataItems[Any, Any]]:
+        if self._is_empty(data):
+            return None
+
+        if self._is_embeddings(data):
+            return VideoEmbeddingItems(data)
+
+        if (is_list_of(data, PILImage.Image)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 or isinstance(data,
                               (np.ndarray, torch.Tensor)) and data.ndim == 4):
             data_items = [data]
@@ -423,6 +549,12 @@ class MultiModalDataParser:
             if k not in subparsers:
                 raise ValueError(f"Unsupported modality: {k}")
 
+<<<<<<< HEAD
             mm_items[k] = subparsers[k](v)
+=======
+            # ignore empty embedding data
+            if (parsed_data := subparsers[k](v)) is not None:
+                mm_items[k] = parsed_data
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return mm_items

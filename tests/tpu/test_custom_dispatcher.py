@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 import os
+=======
+import pytest
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.config import CompilationLevel
 
@@ -9,6 +13,7 @@ from ..utils import compare_two_settings
 # --enforce-eager on TPU causes graph compilation
 # this times out default Health Check in the MQLLMEngine,
 # so we set the timeout here to 30s
+<<<<<<< HEAD
 os.environ["VLLM_RPC_TIMEOUT"] = "30000"
 
 
@@ -22,3 +27,24 @@ def test_custom_dispatcher():
         arg2=["--enforce-eager", f"-O{CompilationLevel.DYNAMO_AS_IS}"],
         env1={},
         env2={})
+=======
+
+
+def test_custom_dispatcher(monkeypatch: pytest.MonkeyPatch):
+    with monkeypatch.context() as m:
+        m.setenv("VLLM_RPC_TIMEOUT", "30000")
+        compare_two_settings("Qwen/Qwen2.5-1.5B-Instruct",
+                             arg1=[
+                                 "--max-model-len=256",
+                                 "--max-num-seqs=32",
+                                 "--enforce-eager",
+                                 f"-O{CompilationLevel.DYNAMO_ONCE}",
+                             ],
+                             arg2=[
+                                 "--max-model-len=256", "--max-num-seqs=32",
+                                 "--enforce-eager",
+                                 f"-O{CompilationLevel.DYNAMO_AS_IS}"
+                             ],
+                             env1={},
+                             env2={})
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

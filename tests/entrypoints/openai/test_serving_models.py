@@ -8,8 +8,13 @@ import pytest
 from vllm.config import ModelConfig
 from vllm.engine.protocol import EngineClient
 from vllm.entrypoints.openai.protocol import (ErrorResponse,
+<<<<<<< HEAD
                                               LoadLoraAdapterRequest,
                                               UnloadLoraAdapterRequest)
+=======
+                                              LoadLoRAAdapterRequest,
+                                              UnloadLoRAAdapterRequest)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.entrypoints.openai.serving_models import (BaseModelPath,
                                                     OpenAIServingModels)
 from vllm.lora.request import LoRARequest
@@ -51,7 +56,11 @@ async def test_serving_model_name():
 @pytest.mark.asyncio
 async def test_load_lora_adapter_success():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = LoadLoraAdapterRequest(lora_name="adapter",
+=======
+    request = LoadLoRAAdapterRequest(lora_name="adapter",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                      lora_path="/path/to/adapter2")
     response = await serving_models.load_lora_adapter(request)
     assert response == LORA_LOADING_SUCCESS_MESSAGE.format(lora_name='adapter')
@@ -62,7 +71,11 @@ async def test_load_lora_adapter_success():
 @pytest.mark.asyncio
 async def test_load_lora_adapter_missing_fields():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = LoadLoraAdapterRequest(lora_name="", lora_path="")
+=======
+    request = LoadLoRAAdapterRequest(lora_name="", lora_path="")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     response = await serving_models.load_lora_adapter(request)
     assert isinstance(response, ErrorResponse)
     assert response.type == "InvalidUserInput"
@@ -72,14 +85,22 @@ async def test_load_lora_adapter_missing_fields():
 @pytest.mark.asyncio
 async def test_load_lora_adapter_duplicate():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = LoadLoraAdapterRequest(lora_name="adapter1",
+=======
+    request = LoadLoRAAdapterRequest(lora_name="adapter1",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                      lora_path="/path/to/adapter1")
     response = await serving_models.load_lora_adapter(request)
     assert response == LORA_LOADING_SUCCESS_MESSAGE.format(
         lora_name='adapter1')
     assert len(serving_models.lora_requests) == 1
 
+<<<<<<< HEAD
     request = LoadLoraAdapterRequest(lora_name="adapter1",
+=======
+    request = LoadLoRAAdapterRequest(lora_name="adapter1",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                      lora_path="/path/to/adapter1")
     response = await serving_models.load_lora_adapter(request)
     assert isinstance(response, ErrorResponse)
@@ -91,12 +112,20 @@ async def test_load_lora_adapter_duplicate():
 @pytest.mark.asyncio
 async def test_unload_lora_adapter_success():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = LoadLoraAdapterRequest(lora_name="adapter1",
+=======
+    request = LoadLoRAAdapterRequest(lora_name="adapter1",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                      lora_path="/path/to/adapter1")
     response = await serving_models.load_lora_adapter(request)
     assert len(serving_models.lora_requests) == 1
 
+<<<<<<< HEAD
     request = UnloadLoraAdapterRequest(lora_name="adapter1")
+=======
+    request = UnloadLoRAAdapterRequest(lora_name="adapter1")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     response = await serving_models.unload_lora_adapter(request)
     assert response == LORA_UNLOADING_SUCCESS_MESSAGE.format(
         lora_name='adapter1')
@@ -106,7 +135,11 @@ async def test_unload_lora_adapter_success():
 @pytest.mark.asyncio
 async def test_unload_lora_adapter_missing_fields():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = UnloadLoraAdapterRequest(lora_name="", lora_int_id=None)
+=======
+    request = UnloadLoRAAdapterRequest(lora_name="", lora_int_id=None)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     response = await serving_models.unload_lora_adapter(request)
     assert isinstance(response, ErrorResponse)
     assert response.type == "InvalidUserInput"
@@ -116,7 +149,11 @@ async def test_unload_lora_adapter_missing_fields():
 @pytest.mark.asyncio
 async def test_unload_lora_adapter_not_found():
     serving_models = await _async_serving_models_init()
+<<<<<<< HEAD
     request = UnloadLoraAdapterRequest(lora_name="nonexistent_adapter")
+=======
+    request = UnloadLoRAAdapterRequest(lora_name="nonexistent_adapter")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     response = await serving_models.unload_lora_adapter(request)
     assert isinstance(response, ErrorResponse)
     assert response.type == "NotFoundError"

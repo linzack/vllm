@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 import torch
 
@@ -12,8 +15,21 @@ from vllm.platforms import current_platform
 MODEL_PATH = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
 
+<<<<<<< HEAD
 def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int,
               prompts: List[str]) -> List[str]:
+=======
+@pytest.fixture(autouse=True)
+def v1(run_with_both_engines_lora):
+    # Simple autouse wrapper to run both engines for each test
+    # This can be promoted up to conftest.py to run for every
+    # test in a package
+    pass
+
+
+def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int,
+              prompts: list[str]) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     sampling_params = vllm.SamplingParams(temperature=0, max_tokens=256)
     outputs = llm.generate(
@@ -22,7 +38,11 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int,
         lora_request=LoRARequest(str(lora_id), lora_id, lora_path)
         if lora_id else None)
     # Print the outputs.
+<<<<<<< HEAD
     generated_texts: List[str] = []
+=======
+    generated_texts: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text.strip()
@@ -63,6 +83,7 @@ def test_mixtral_lora(mixtral_lora_files, tp_size):
                      prompts=prompts) == expected_lora_output
     assert do_sample(llm, mixtral_lora_files, lora_id=2,
                      prompts=prompts) == expected_lora_output
+<<<<<<< HEAD
 
 
 @pytest.mark.parametrize("tp_size", [4])
@@ -105,3 +126,5 @@ def test_mixtral_lora_all_target_modules(mixtral_lora_files_all_target_modules,
                      mixtral_lora_files_all_target_modules,
                      lora_id=2,
                      prompts=prompts) == expected_lora_output
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

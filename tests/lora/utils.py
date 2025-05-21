@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Dict, List, Optional, Tuple, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -12,7 +16,11 @@ class DummyLoRAManager:
 
     def __init__(self, device: torch.device = "cuda:0"):
         super().__init__()
+<<<<<<< HEAD
         self._loras: Dict[str, LoRALayerWeights] = {}
+=======
+        self._loras: dict[str, LoRALayerWeights] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self._device = device
 
     def set_module_lora(self, module_name: str, lora: LoRALayerWeights):
@@ -77,11 +85,19 @@ class DummyLoRAManager:
         self,
         module_name: str,
         input_dim: int,
+<<<<<<< HEAD
         output_dims: List[int],
         noop_lora_index: Optional[List[int]] = None,
         rank: int = 8,
     ):
         base_loras: List[LoRALayerWeights] = []
+=======
+        output_dims: list[int],
+        noop_lora_index: Optional[list[int]] = None,
+        rank: int = 8,
+    ):
+        base_loras: list[LoRALayerWeights] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         noop_lora_index_set = set(noop_lora_index or [])
 
         for i, out_dim in enumerate(output_dims):
@@ -110,7 +126,11 @@ def assert_close(a, b):
 @dataclass
 class PunicaTensors:
     inputs_tensor: torch.Tensor
+<<<<<<< HEAD
     lora_weights: Union[torch.Tensor, List[torch.Tensor]]
+=======
+    lora_weights: Union[torch.Tensor, list[torch.Tensor]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     our_out_tensor: torch.Tensor
     ref_out_tensor: torch.Tensor
     b_seq_start_loc: torch.Tensor
@@ -118,7 +138,11 @@ class PunicaTensors:
     seq_len_tensor: torch.Tensor
     token_lora_mapping: torch.Tensor
 
+<<<<<<< HEAD
     def meta(self) -> Tuple[int, int]:
+=======
+    def meta(self) -> tuple[int, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Infer max_seq_length and token_nums from the tensors
         and return them.

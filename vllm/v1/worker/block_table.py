@@ -1,11 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import numpy as np
 import torch
 
 from vllm.logger import init_logger
+<<<<<<< HEAD
+=======
+from vllm.utils import cdiv
+from vllm.v1.kv_cache_interface import KVCacheConfig
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -15,14 +23,24 @@ class BlockTable:
     def __init__(
         self,
         max_num_reqs: int,
+<<<<<<< HEAD
         max_model_len: int,
         max_num_blocks_per_req: int,
+=======
+        max_num_blocks_per_req: int,
+        max_num_batched_tokens: int,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pin_memory: bool,
         device: torch.device,
     ):
         self.max_num_reqs = max_num_reqs
+<<<<<<< HEAD
         self.max_model_len = max_model_len
         self.max_num_blocks_per_req = max_num_blocks_per_req
+=======
+        self.max_num_blocks_per_req = max_num_blocks_per_req
+        self.max_num_batched_tokens = max_num_batched_tokens
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.pin_memory = pin_memory
         self.device = device
 
@@ -40,20 +58,46 @@ class BlockTable:
         self.block_table_np = self.block_table_cpu.numpy()
         self.num_blocks_per_row = np.zeros(max_num_reqs, dtype=np.int32)
 
+<<<<<<< HEAD
     def append_row(
         self,
         row_idx: int,
         start: int,
         block_ids: List[int],
+=======
+        self.slot_mapping_cpu = torch.zeros(self.max_num_batched_tokens,
+                                            dtype=torch.int64,
+                                            device="cpu",
+                                            pin_memory=self.pin_memory)
+        self.slot_mapping_np = self.slot_mapping_cpu.numpy()
+        self.slot_mapping = torch.zeros(self.max_num_batched_tokens,
+                                        dtype=torch.int64,
+                                        device=self.device)
+
+    def append_row(
+        self,
+        block_ids: list[int],
+        row_idx: int,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> None:
         if not block_ids:
             return
         num_blocks = len(block_ids)
+<<<<<<< HEAD
         self.block_table_np[row_idx, start:start + num_blocks] = block_ids
         self.num_blocks_per_row[row_idx] = start + num_blocks
 
     def add_row(self, row_idx: int, block_ids: List[int]) -> None:
         self.append_row(row_idx, 0, block_ids)
+=======
+        start = self.num_blocks_per_row[row_idx]
+        self.num_blocks_per_row[row_idx] += num_blocks
+        self.block_table_np[row_idx, start:start + num_blocks] = block_ids
+
+    def add_row(self, block_ids: list[int], row_idx: int) -> None:
+        self.num_blocks_per_row[row_idx] = 0
+        self.append_row(block_ids, row_idx)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def move_row(self, src: int, tgt: int) -> None:
         num_blocks = self.num_blocks_per_row[src]
@@ -88,3 +132,51 @@ class BlockTable:
     def get_numpy_array(self) -> np.ndarray:
         """Returns the numpy array of the block table."""
         return self.block_table_np
+<<<<<<< HEAD
+=======
+
+
+class MultiGroupBlockTable:
+    """The BlockTables for each KV cache group."""
+
+    def __init__(self, max_num_reqs: int, max_model_len: int,
+                 max_num_batched_tokens: int, pin_memory: bool,
+                 device: torch.device, kv_cache_config: KVCacheConfig) -> None:
+        max_num_blocks_per_req = [
+            cdiv(max_model_len, g.kv_cache_spec.block_size)
+            for g in kv_cache_config.kv_cache_groups
+        ]
+        self.block_tables = [
+            BlockTable(max_num_reqs, max_num_blocks_per_req[i],
+                       max_num_batched_tokens, pin_memory, device)
+            for i in range(len(kv_cache_config.kv_cache_groups))
+        ]
+
+    def append_row(self, block_ids: list[list[int]], row_idx: int) -> None:
+        for i, block_table in enumerate(self.block_tables):
+            block_table.append_row(block_ids[i], row_idx)
+
+    def add_row(self, block_ids: list[list[int]], row_idx: int) -> None:
+        for i, block_table in enumerate(self.block_tables):
+            block_table.add_row(block_ids[i], row_idx)
+
+    def move_row(self, src: int, tgt: int) -> None:
+        for block_table in self.block_tables:
+            block_table.move_row(src, tgt)
+
+    def swap_row(self, src: int, tgt: int) -> None:
+        for block_table in self.block_tables:
+            block_table.swap_row(src, tgt)
+
+    def commit(self, num_reqs: int) -> None:
+        for block_table in self.block_tables:
+            block_table.commit(num_reqs)
+
+    def clear(self) -> None:
+        for block_table in self.block_tables:
+            block_table.clear()
+
+    def __getitem__(self, idx: int) -> "BlockTable":
+        """Returns the BlockTable for the i-th KV cache group."""
+        return self.block_tables[idx]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

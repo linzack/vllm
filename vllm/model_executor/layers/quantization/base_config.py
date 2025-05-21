@@ -2,11 +2,23 @@
 
 import inspect
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Type
+=======
+from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 
+<<<<<<< HEAD
+=======
+if TYPE_CHECKING:
+    from vllm.model_executor.layers.quantization import QuantizationMethods
+else:
+    QuantizationMethods = str
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class QuantizeMethodBase(ABC):
     """Base class for different quantized methods."""
@@ -43,7 +55,11 @@ class QuantizeMethodBase(ABC):
 
 
 def method_has_implemented_embedding(
+<<<<<<< HEAD
         method_class: Type[QuantizeMethodBase]) -> bool:
+=======
+        method_class: type[QuantizeMethodBase]) -> bool:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Not all quant methods have embedding implemented, so we need to check that
     it exists for our given method. We check this by making sure the function
@@ -63,15 +79,26 @@ class QuantizationConfig(ABC):
     def __init__(self):
         super().__init__()
         # mapping is updated by models as they initialize
+<<<<<<< HEAD
         self.packed_modules_mapping: Dict[str, List[str]] = dict()
 
     @abstractmethod
     def get_name(self) -> str:
+=======
+        self.packed_modules_mapping: dict[str, list[str]] = dict()
+
+    @abstractmethod
+    def get_name(self) -> QuantizationMethods:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Name of the quantization method."""
         raise NotImplementedError
 
     @abstractmethod
+<<<<<<< HEAD
     def get_supported_act_dtypes(self) -> List[torch.dtype]:
+=======
+    def get_supported_act_dtypes(self) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """List of supported activation dtypes."""
         raise NotImplementedError
 
@@ -88,19 +115,32 @@ class QuantizationConfig(ABC):
 
     @staticmethod
     @abstractmethod
+<<<<<<< HEAD
     def get_config_filenames() -> List[str]:
+=======
+    def get_config_filenames() -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """List of filenames to search for in the model directory."""
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
+<<<<<<< HEAD
     def from_config(cls, config: Dict[str, Any]) -> "QuantizationConfig":
+=======
+    def from_config(cls, config: dict[str, Any]) -> "QuantizationConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Create a config class from the model's quantization config."""
         raise NotImplementedError
 
     @classmethod
+<<<<<<< HEAD
     def override_quantization_method(cls, hf_quant_cfg,
                                      user_quant) -> Optional[str]:
+=======
+    def override_quantization_method(
+            cls, hf_quant_cfg, user_quant) -> Optional[QuantizationMethods]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
            Detects if this quantization method can support a given checkpoint
            format by overriding the user specified quantization method -- 
@@ -110,7 +150,11 @@ class QuantizationConfig(ABC):
         return None
 
     @staticmethod
+<<<<<<< HEAD
     def get_from_keys(config: Dict[str, Any], keys: List[str]) -> Any:
+=======
+    def get_from_keys(config: dict[str, Any], keys: list[str]) -> Any:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Get a value from the model's quantization config."""
         for key in keys:
             if key in config:
@@ -119,7 +163,11 @@ class QuantizationConfig(ABC):
                          "quantization config.")
 
     @staticmethod
+<<<<<<< HEAD
     def get_from_keys_or(config: Dict[str, Any], keys: List[str],
+=======
+    def get_from_keys_or(config: dict[str, Any], keys: list[str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                          default: Any) -> Any:
         """Get a optional value from the model's quantization config."""
         try:

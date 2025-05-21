@@ -3,11 +3,15 @@
 import base64
 from io import BytesIO
 from pathlib import Path
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, Optional
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from PIL import Image
 
+<<<<<<< HEAD
 from vllm.inputs.registry import InputContext
 from vllm.logger import init_logger
 from vllm.transformers_utils.processor import cached_get_image_processor
@@ -86,6 +90,9 @@ class ImagePlugin(MultiModalPlugin):
 
     def _default_max_multimodal_tokens(self, ctx: InputContext) -> int:
         return 3000
+=======
+from .base import MediaIO
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def rescale_image_size(image: Image.Image,
@@ -134,3 +141,25 @@ class ImageMediaIO(MediaIO[Image.Image]):
             data = buffer.getvalue()
 
         return base64.b64encode(data).decode('utf-8')
+<<<<<<< HEAD
+=======
+
+
+class ImageEmbeddingMediaIO(MediaIO[torch.Tensor]):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def load_bytes(self, data: bytes) -> torch.Tensor:
+        buffer = BytesIO(data)
+        return torch.load(buffer, weights_only=True)
+
+    def load_base64(self, media_type: str, data: str) -> torch.Tensor:
+        return self.load_bytes(base64.b64decode(data))
+
+    def load_file(self, filepath: Path) -> torch.Tensor:
+        return torch.load(filepath, weights_only=True)
+
+    def encode_base64(self, media: torch.Tensor) -> str:
+        return base64.b64encode(media.numpy()).decode('utf-8')
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

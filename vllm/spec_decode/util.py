@@ -93,6 +93,7 @@ def create_logprobs_output(
 
 
 def create_sequence_group_output(
+<<<<<<< HEAD
     token_id: int,
     token_id_logprob_rank: int,
     token_id_logprob: float,
@@ -101,6 +102,16 @@ def create_sequence_group_output(
     topk_logprobs: List[Optional[float]],
     prompt_logprobs: Optional[PromptLogprobs] = None,
 ) -> CompletionSequenceGroupOutput:
+=======
+        token_id: int,
+        token_id_logprob_rank: int,
+        token_id_logprob: float,
+        seq_id: SeqId,
+        topk_token_ids: List[Optional[int]],
+        topk_logprobs: List[Optional[float]],
+        prompt_logprobs: Optional[PromptLogprobs] = None,
+        step_index: Optional[int] = 0) -> CompletionSequenceGroupOutput:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Create a SequenceGroupOutput given the sampling results.
 
     Args:
@@ -110,6 +121,10 @@ def create_sequence_group_output(
         seq_id (int): The sequence id.
         topk_token_ids (List[Optional[int]]): The list of top-k token ids.
         topk_logprobs (List[Optional[float]]): The list of top-k logprobs.
+<<<<<<< HEAD
+=======
+        step_index: (Optional[int]): The index of the speculative token.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     logprobs = create_logprobs_output(
@@ -120,6 +135,7 @@ def create_sequence_group_output(
         topk_logprobs,
     )
 
+<<<<<<< HEAD
     return CompletionSequenceGroupOutput(
         samples=[
             SequenceOutput(parent_seq_id=seq_id,
@@ -128,6 +144,15 @@ def create_sequence_group_output(
         ],
         prompt_logprobs=prompt_logprobs,
     )
+=======
+    return CompletionSequenceGroupOutput(samples=[
+        SequenceOutput(parent_seq_id=seq_id,
+                       output_token=token_id,
+                       logprobs=logprobs)
+    ],
+                                         prompt_logprobs=prompt_logprobs,
+                                         step_index=step_index)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def split_batch_by_proposal_len(

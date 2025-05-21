@@ -2,7 +2,11 @@
 
 import json
 from json import JSONDecodeError, JSONDecoder
+<<<<<<< HEAD
 from typing import Any, List, Tuple
+=======
+from typing import Any
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import partial_json_parser
 from partial_json_parser.core.options import Allow
@@ -82,7 +86,11 @@ def extract_intermediate_diff(curr: str, old: str) -> str:
     return diff
 
 
+<<<<<<< HEAD
 def find_all_indices(string: str, substring: str) -> List[int]:
+=======
+def find_all_indices(string: str, substring: str) -> list[int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Find all (starting) indices of a substring in a given string. Useful for
     tool call extraction
@@ -98,8 +106,13 @@ def find_all_indices(string: str, substring: str) -> List[int]:
 
 
 # partial_json_parser doesn't support extra data and
+<<<<<<< HEAD
 # JSONDecorder.raw_decode doesn't support partial JSON
 def partial_json_loads(input_str: str, flags: Allow) -> Tuple[Any, int]:
+=======
+# JSONDecoder.raw_decode doesn't support partial JSON
+def partial_json_loads(input_str: str, flags: Allow) -> tuple[Any, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         return (partial_json_parser.loads(input_str, flags), len(input_str))
     except JSONDecodeError as e:

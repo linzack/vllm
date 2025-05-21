@@ -42,7 +42,11 @@ Check the ❌ or 🟠 with links to see tracking issue for unsupported feature/h
   * [APC](#automatic-prefix-caching)
   * [LoRA](#lora-adapter)
   * <abbr title="Prompt Adapter">prmpt adptr</abbr>
+<<<<<<< HEAD
   * [SD](#spec_decode)
+=======
+  * [SD](#spec-decode)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   * CUDA graph
   * <abbr title="Pooling Models">pooling</abbr>
   * <abbr title="Encoder-Decoder Models">enc-dec</abbr>
@@ -122,7 +126,11 @@ Check the ❌ or 🟠 with links to see tracking issue for unsupported feature/h
   *
   *
   *
+<<<<<<< HEAD
 - * [SD](#spec_decode)
+=======
+- * [SD](#spec-decode)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   * ✅
   * ✅
   * ❌
@@ -377,7 +385,11 @@ Check the ❌ or 🟠 with links to see tracking issue for unsupported feature/h
   * ✅
   * [❌](gh-issue:8475)
   * ✅
+<<<<<<< HEAD
 - * [SD](#spec_decode)
+=======
+- * [SD](#spec-decode)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   * ✅
   * ✅
   * ✅

@@ -1,11 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+<<<<<<< HEAD
 from typing import Dict, Sequence, Union
+=======
+from collections.abc import Sequence
+from typing import Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import partial_json_parser
 from partial_json_parser.core.options import Allow
 
+<<<<<<< HEAD
+=======
+from vllm.entrypoints.chat_utils import random_tool_call_id
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.entrypoints.openai.protocol import (ChatCompletionRequest,
                                               DeltaFunctionCall, DeltaMessage,
                                               DeltaToolCall,
@@ -19,7 +28,10 @@ from vllm.entrypoints.openai.tool_parsers.utils import (consume_space,
                                                         partial_json_loads)
 from vllm.logger import init_logger
 from vllm.transformers_utils.tokenizer import AnyTokenizer
+<<<<<<< HEAD
 from vllm.utils import random_uuid
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -136,7 +148,11 @@ class GraniteToolParser(ToolParser):
                 return None
 
             # select as the current tool call the one we're on the state at
+<<<<<<< HEAD
             current_tool_call: Dict = tool_call_arr[self.current_tool_id]
+=======
+            current_tool_call: dict = tool_call_arr[self.current_tool_id]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             delta = None
             # case: we are starting a new tool in the array
@@ -181,7 +197,11 @@ class GraniteToolParser(ToolParser):
                     delta = DeltaMessage(tool_calls=[
                         DeltaToolCall(index=self.current_tool_id,
                                       type="function",
+<<<<<<< HEAD
                                       id=f"chatcmpl-tool-{random_uuid()}",
+=======
+                                      id=random_tool_call_id(),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                       function=DeltaFunctionCall(
                                           name=function_name).model_dump(
                                               exclude_none=True))

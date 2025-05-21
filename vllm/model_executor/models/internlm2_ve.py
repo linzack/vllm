@@ -1,12 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List, Optional, Tuple, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import PretrainedConfig
 
+<<<<<<< HEAD
 from vllm.attention import AttentionMetadata
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import get_pp_group
 from vllm.model_executor.layers.layernorm import RMSNorm
@@ -65,11 +72,17 @@ class InternLM2VEDecoderLayer(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
         residual: Optional[torch.Tensor],
         visual_token_mask: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+        residual: Optional[torch.Tensor],
+        visual_token_mask: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Self Attention
         if residual is None:
             residual = hidden_states
@@ -80,8 +93,11 @@ class InternLM2VEDecoderLayer(nn.Module):
         hidden_states = self.attention(
             positions=positions,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         # Fully Connected
@@ -113,8 +129,11 @@ class InternLM2VEModel(InternLM2Model):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors] = None,
         inputs_embeds: Optional[torch.Tensor] = None,
         visual_token_mask: Optional[torch.Tensor] = None,
@@ -129,6 +148,7 @@ class InternLM2VEModel(InternLM2Model):
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
             residual = intermediate_tensors["residual"]
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             layer = self.layers[i]
             hidden_states, residual = layer(
@@ -136,6 +156,12 @@ class InternLM2VEModel(InternLM2Model):
                 hidden_states,
                 kv_caches[i - self.start_layer],
                 attn_metadata,
+=======
+        for layer in self.layers[self.start_layer:self.end_layer]:
+            hidden_states, residual = layer(
+                positions,
+                hidden_states,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 residual,
                 visual_token_mask=visual_token_mask,
             )

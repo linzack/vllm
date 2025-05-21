@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 
 from vllm.lora.models import LoRAModel
@@ -23,7 +26,11 @@ def test_load_checkpoints_from_huggingface(lora_fixture_name, request):
     packed_modules_mapping = LlamaForCausalLM.packed_modules_mapping
     embedding_modules = LlamaForCausalLM.embedding_modules
     embed_padding_modules = LlamaForCausalLM.embedding_padding_modules
+<<<<<<< HEAD
     expected_lora_modules: List[str] = []
+=======
+    expected_lora_modules: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for module in LLAMA_LORA_MODULES:
         if module in packed_modules_mapping:
             expected_lora_modules.extend(packed_modules_mapping[module])
@@ -32,7 +39,11 @@ def test_load_checkpoints_from_huggingface(lora_fixture_name, request):
 
     lora_path = get_adapter_absolute_path(lora_name)
 
+<<<<<<< HEAD
     # lora loading should work for either absolute path and hugggingface id.
+=======
+    # lora loading should work for either absolute path and huggingface id.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     peft_helper = PEFTHelper.from_local_dir(lora_path, 4096)
     lora_model = LoRAModel.from_local_checkpoint(
         lora_path,

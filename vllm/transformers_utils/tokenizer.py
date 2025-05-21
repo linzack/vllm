@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import contextlib
+<<<<<<< HEAD
+=======
+import copy
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import os
 import warnings
 from functools import lru_cache
@@ -34,6 +38,7 @@ def decode_tokens(
     tokenizer: AnyTokenizer,
     token_ids: list[int],
     *,
+<<<<<<< HEAD
     skip_special_tokens: bool = False,
 ) -> str:
     """
@@ -41,16 +46,38 @@ def decode_tokens(
     :code:`tokenizer.decode(token_ids, skip_special_tokens=...)`.
     """
     return tokenizer.decode(token_ids, skip_special_tokens=skip_special_tokens)
+=======
+    skip_special_tokens: Optional[bool] = None,
+) -> str:
+    """
+    Backend-agnostic equivalent of HF's
+    `tokenizer.decode(token_ids, ...)`.
+
+    `skip_special_tokens=None` means to use the backend's default
+    settings.
+    """
+    if skip_special_tokens is not None:
+        return tokenizer.decode(token_ids,
+                                skip_special_tokens=skip_special_tokens)
+
+    return tokenizer.decode(token_ids)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def encode_tokens(
     tokenizer: AnyTokenizer,
     text: str,
     *,
+<<<<<<< HEAD
+=======
+    truncation: Optional[bool] = None,
+    max_length: Optional[int] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     add_special_tokens: Optional[bool] = None,
 ) -> list[int]:
     """
     Backend-agnostic equivalent of HF's
+<<<<<<< HEAD
     :code:`tokenizer.encode(text, add_special_tokens=...)`.
     """
     if add_special_tokens is not None:
@@ -71,6 +98,39 @@ def get_cached_tokenizer(tokenizer: AnyTokenizer) -> AnyTokenizer:
     tokenizer_all_special_tokens_extended = (
         tokenizer.all_special_tokens_extended)
     tokenizer_all_special_tokens = set(tokenizer.all_special_tokens)
+=======
+    `tokenizer.encode(text, ...)`.
+
+    `add_special_tokens=None` means to use the backend's default
+    settings.
+    """
+
+    kw_args: dict[str, Any] = {}
+    if max_length is not None:
+        kw_args["max_length"] = max_length
+
+    if truncation is not None:
+        kw_args["truncation"] = truncation
+
+    if add_special_tokens is not None:
+        kw_args["add_special_tokens"] = add_special_tokens
+
+    return tokenizer.encode(text, **kw_args)
+
+
+def get_cached_tokenizer(tokenizer: AnyTokenizer) -> AnyTokenizer:
+    """
+    By default, transformers will recompute multiple tokenizer properties
+    each time they are called, leading to a significant slowdown.
+    This proxy caches these properties for faster access.
+    """
+    cached_tokenizer = copy.copy(tokenizer)
+
+    tokenizer_all_special_ids = tokenizer.all_special_ids
+    tokenizer_all_special_tokens = tokenizer.all_special_tokens
+    tokenizer_all_special_tokens_extended = (
+        tokenizer.all_special_tokens_extended)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     tokenizer_vocab = tokenizer.get_vocab()
     tokenizer_len = len(tokenizer)
 
@@ -86,6 +146,7 @@ def get_cached_tokenizer(tokenizer: AnyTokenizer) -> AnyTokenizer:
     class CachedTokenizer(tokenizer.__class__):  # type: ignore
 
         @property
+<<<<<<< HEAD
         def all_special_ids(self):
             return tokenizer_all_special_ids
 
@@ -111,6 +172,36 @@ def get_cached_tokenizer(tokenizer: AnyTokenizer) -> AnyTokenizer:
 
     tokenizer.__class__ = CachedTokenizer
     return tokenizer
+=======
+        def all_special_ids(self) -> list[int]:
+            return tokenizer_all_special_ids
+
+        @property
+        def all_special_tokens(self) -> list[str]:
+            return tokenizer_all_special_tokens
+
+        @property
+        def all_special_tokens_extended(self) -> list[str]:
+            return tokenizer_all_special_tokens_extended
+
+        @property
+        def max_token_id(self) -> int:
+            return max_token_id
+
+        def get_vocab(self) -> dict[str, int]:
+            return tokenizer_vocab
+
+        def __len__(self) -> int:
+            return tokenizer_len
+
+        def __reduce__(self):
+            return get_cached_tokenizer, (tokenizer, )
+
+    CachedTokenizer.__name__ = f"Cached{tokenizer.__class__.__name__}"
+
+    cached_tokenizer.__class__ = CachedTokenizer
+    return cached_tokenizer
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def patch_padding_side(tokenizer: PreTrainedTokenizer) -> None:
@@ -150,6 +241,7 @@ def get_tokenizer(
         # pylint: disable=C.
         from modelscope.hub.snapshot_download import snapshot_download
 
+<<<<<<< HEAD
         # Only set the tokenizer here, model will be downloaded on the workers.
         if not os.path.exists(tokenizer_name):
             tokenizer_path = snapshot_download(
@@ -160,6 +252,24 @@ def get_tokenizer(
                 # Ignore weights - we only need the tokenizer.
                 ignore_file_pattern=[".*.pt", ".*.safetensors", ".*.bin"])
             tokenizer_name = tokenizer_path
+=======
+        # avoid circuit import
+        from vllm.model_executor.model_loader.weight_utils import get_lock
+
+        # Only set the tokenizer here, model will be downloaded on the workers.
+        if not os.path.exists(tokenizer_name):
+            # Use file lock to prevent multiple processes from
+            # downloading the same file at the same time.
+            with get_lock(tokenizer_name, download_dir):
+                tokenizer_path = snapshot_download(
+                    model_id=tokenizer_name,
+                    cache_dir=download_dir,
+                    revision=revision,
+                    local_files_only=huggingface_hub.constants.HF_HUB_OFFLINE,
+                    # Ignore weights - we only need the tokenizer.
+                    ignore_file_pattern=[".*.pt", ".*.safetensors", ".*.bin"])
+                tokenizer_name = tokenizer_path
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     if tokenizer_mode == "slow":
         if kwargs.get("use_fast", False):

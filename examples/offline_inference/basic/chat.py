@@ -4,6 +4,26 @@ from vllm import LLM, EngineArgs
 from vllm.utils import FlexibleArgumentParser
 
 
+<<<<<<< HEAD
+=======
+def create_parser():
+    parser = FlexibleArgumentParser()
+    # Add engine args
+    EngineArgs.add_cli_args(parser)
+    parser.set_defaults(model="meta-llama/Llama-3.2-1B-Instruct")
+    # Add sampling params
+    sampling_group = parser.add_argument_group("Sampling parameters")
+    sampling_group.add_argument("--max-tokens", type=int)
+    sampling_group.add_argument("--temperature", type=float)
+    sampling_group.add_argument("--top-p", type=float)
+    sampling_group.add_argument("--top-k", type=int)
+    # Add example params
+    parser.add_argument("--chat-template-path", type=str)
+
+    return parser
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def main(args: dict):
     # Pop arguments not used by LLM
     max_tokens = args.pop("max_tokens")
@@ -27,12 +47,22 @@ def main(args: dict):
         sampling_params.top_k = top_k
 
     def print_outputs(outputs):
+<<<<<<< HEAD
         for output in outputs:
             prompt = output.prompt
             generated_text = output.outputs[0].text
             print(f"Prompt: {prompt!r}")
             print(f"Generated text: {generated_text!r}")
         print("-" * 80)
+=======
+        print("\nGenerated Outputs:\n" + "-" * 80)
+        for output in outputs:
+            prompt = output.prompt
+            generated_text = output.outputs[0].text
+            print(f"Prompt: {prompt!r}\n")
+            print(f"Generated text: {generated_text!r}")
+            print("-" * 80)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     print("=" * 80)
 
@@ -81,6 +111,7 @@ def main(args: dict):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     parser = FlexibleArgumentParser()
     # Add engine args
     engine_group = parser.add_argument_group("Engine arguments")
@@ -94,5 +125,8 @@ if __name__ == "__main__":
     sampling_group.add_argument("--top-k", type=int)
     # Add example params
     parser.add_argument("--chat-template-path", type=str)
+=======
+    parser = create_parser()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     args: dict = vars(parser.parse_args())
     main(args)

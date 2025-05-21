@@ -2,7 +2,11 @@
 
 import os
 import re
+<<<<<<< HEAD
 from typing import List, Optional, Set, Tuple, Type, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import huggingface_hub
 from huggingface_hub.utils import (EntryNotFoundError, HfHubHTTPError,
@@ -15,17 +19,29 @@ from vllm.logger import init_logger
 from vllm.lora.fully_sharded_layers import (
     ColumnParallelLinearWithShardedLoRA,
     MergedColumnParallelLinearWithShardedLoRA,
+<<<<<<< HEAD
     MergedQKVParallelLinearWithShardedLora, QKVParallelLinearWithShardedLora,
+=======
+    MergedQKVParallelLinearWithShardedLoRA, QKVParallelLinearWithShardedLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     RowParallelLinearWithShardedLoRA)
 # being imported for _all_lora_classes below
 # yapf conflicts with isort for this block
 # yapf: disable
 from vllm.lora.layers import (BaseLayerWithLoRA, ColumnParallelLinearWithLoRA,
+<<<<<<< HEAD
                               LinearScalingRotaryEmbeddingWithLora,
                               LogitsProcessorWithLoRA,
                               MergedColumnParallelLinearWithLoRA,
                               MergedQKVParallelLinearWithLora,
                               QKVParallelLinearWithLora,
+=======
+                              LinearScalingRotaryEmbeddingWithLoRA,
+                              LogitsProcessorWithLoRA,
+                              MergedColumnParallelLinearWithLoRA,
+                              MergedQKVParallelLinearWithLoRA,
+                              QKVParallelLinearWithLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                               ReplicatedLinearWithLoRA,
                               RowParallelLinearWithLoRA,
                               VocabParallelEmbeddingWithLoRA)
@@ -37,28 +53,49 @@ from vllm.model_executor.models.utils import WeightsMapper
 
 logger = init_logger(__name__)
 
+<<<<<<< HEAD
 _all_lora_classes: Set[Type[BaseLayerWithLoRA]] = {
     VocabParallelEmbeddingWithLoRA,
     ColumnParallelLinearWithLoRA,
     MergedColumnParallelLinearWithLoRA,
     QKVParallelLinearWithLora,
     MergedQKVParallelLinearWithLora,
+=======
+_all_lora_classes: set[type[BaseLayerWithLoRA]] = {
+    VocabParallelEmbeddingWithLoRA,
+    ColumnParallelLinearWithLoRA,
+    MergedColumnParallelLinearWithLoRA,
+    QKVParallelLinearWithLoRA,
+    MergedQKVParallelLinearWithLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     RowParallelLinearWithLoRA,
     ReplicatedLinearWithLoRA,
     LogitsProcessorWithLoRA,
     ColumnParallelLinearWithShardedLoRA,
+<<<<<<< HEAD
     QKVParallelLinearWithShardedLora,
     MergedColumnParallelLinearWithShardedLoRA,
     MergedQKVParallelLinearWithShardedLora,
     RowParallelLinearWithShardedLoRA,
     LinearScalingRotaryEmbeddingWithLora,
+=======
+    QKVParallelLinearWithShardedLoRA,
+    MergedColumnParallelLinearWithShardedLoRA,
+    MergedQKVParallelLinearWithShardedLoRA,
+    RowParallelLinearWithShardedLoRA,
+    LinearScalingRotaryEmbeddingWithLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 
 
 def from_layer(layer: nn.Module,
                max_loras: int,
                lora_config: LoRAConfig,
+<<<<<<< HEAD
                packed_modules_list: List,
+=======
+               packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                model_config: Optional[PretrainedConfig] = None) -> nn.Module:
     for lora_cls in _all_lora_classes:
         # specifying kwargs so they can be easily accessed in decorator
@@ -66,6 +103,7 @@ def from_layer(layer: nn.Module,
                                       lora_config=lora_config,
                                       packed_modules_list=packed_modules_list,
                                       model_config=model_config):
+<<<<<<< HEAD
             ret = lora_cls(layer)
             ret.create_lora_weights(max_loras, lora_config, model_config)
             return ret
@@ -77,6 +115,12 @@ def from_layer(layer: nn.Module,
         ret = lora_cls(layer)
         ret.create_lora_weights(max_loras, lora_config, model_config)
         return ret
+=======
+            instance_layer = lora_cls(layer)
+            instance_layer.create_lora_weights(max_loras, lora_config,
+                                               model_config)
+            return instance_layer
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return layer
 
 
@@ -106,7 +150,11 @@ def replace_submodule(model: nn.Module, module_name: str,
 def parse_fine_tuned_lora_name(
         name: str,
         weights_mapper: Optional[WeightsMapper] = None
+<<<<<<< HEAD
 ) -> Tuple[str, bool, bool]:
+=======
+) -> tuple[str, bool, bool]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Parse the name of lora weights.
 
     args:
@@ -115,24 +163,46 @@ def parse_fine_tuned_lora_name(
         weights_mapper: maps the name of weight, e.g.
             `model.` -> `language_model.model.`,
     return:
+<<<<<<< HEAD
         Tuple(module_name, is_lora_a):
+=======
+        tuple(module_name, is_lora_a):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             module_name: the name of the module, e.g. model.dense1,
             is_lora_a whether the tensor is lora_a or lora_b.
             is_bias whether the tensor is lora bias.
     """
 
+<<<<<<< HEAD
     # LoRA weight qualified name always starts with `base_model.model.`,
     # so we remove the prefix `base_model.model.` to make the following
     # mapping correctly.
     if "base_model.model." in name:
+=======
+    # LoRA weight qualified name usually starts with `base_model.model.`,
+    # so we remove the prefix `base_model.model.` to make the following
+    # mapping correctly.
+    if name.startswith("base_model.model."):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         name = name.replace("base_model.model.", "")
         name = weights_mapper._map_name(name) if weights_mapper else name
         # recover the prefix `base_model.model.`
         name = "base_model.model." + name
+<<<<<<< HEAD
+=======
+    else:
+        name = weights_mapper._map_name(name) if weights_mapper else name
+
+    # In some situations, we may not start with `base_model.model.`.
+    # If we don't (e.g., ibm-granite/granite-speech-3.3-8b),
+    # we should keep the prefix intact.
+    start_index = 2 if name.startswith("base_model.model.") else 0
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     parts = name.split(".")
     if parts[-1] == "weight" and (parts[-2] == "lora_A"
                                   or parts[-2] == "lora_B"):
+<<<<<<< HEAD
         new_name = ".".join(parts[2:-2])
         return new_name, parts[-2] == "lora_A", False
 
@@ -142,13 +212,29 @@ def parse_fine_tuned_lora_name(
 
     if parts[-1] == "bias":
         new_name = ".".join(parts[2:-2])
+=======
+        new_name = ".".join(parts[start_index:-2])
+        return new_name, parts[-2] == "lora_A", False
+
+    if parts[-1] == "lora_embedding_A" or parts[-1] == "lora_embedding_B":
+        new_name = ".".join(parts[start_index:-1])
+        return new_name, parts[-1] == "lora_embedding_A", False
+
+    if parts[-1] == "bias":
+        new_name = ".".join(parts[start_index:-2])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return new_name, False, True
 
     raise ValueError(f"{name} is unsupported LoRA weight")
 
 
+<<<<<<< HEAD
 def is_regex_target_modules(load_modules: Union[str, List[str]],
                             expected_lora_modules: List[str]) -> bool:
+=======
+def is_regex_target_modules(load_modules: Union[str, list[str]],
+                            expected_lora_modules: list[str]) -> bool:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     PEFT supports passing `target_modules` in the form of regular expressions, 
     such as `model.*(q_proj|k_proj|v_proj)$`. This function is mainly used to 
@@ -179,11 +265,19 @@ def is_regex_target_modules(load_modules: Union[str, List[str]],
     return False
 
 
+<<<<<<< HEAD
 def get_supported_lora_modules(model: nn.Module) -> List[str]:
     """
     In vLLM, all linear layers support LoRA.
     """
     supported_lora_modules: Set[str] = set()
+=======
+def get_supported_lora_modules(model: nn.Module) -> list[str]:
+    """
+    In vLLM, all linear layers support LoRA.
+    """
+    supported_lora_modules: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # step1: traverse the model to get all the linear subfixes.
     for name, module in model.named_modules():
         if isinstance(module, (LinearBase, )):

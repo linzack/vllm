@@ -3,6 +3,7 @@
 LM eval harness on model to compare vs HF baseline computed offline.
 Configs are found in configs/$MODEL.yaml
 
+<<<<<<< HEAD
 * export LM_EVAL_TEST_DATA_FILE=configs/Meta-Llama-3-70B-Instruct.yaml
 * export LM_EVAL_TP_SIZE=4 
 * pytest -s test_lm_eval_correctness.py
@@ -31,12 +32,36 @@ def launch_lm_eval(eval_config):
                  f"add_bos_token=true," \
                  f"trust_remote_code={trust_remote_code}"
 
+=======
+pytest -s -v test_lm_eval_correctness.py \
+    --config-list-file=configs/models-small.txt \
+    --tp-size=1
+"""
+
+import lm_eval
+import numpy as np
+import yaml
+
+RTOL = 0.08
+
+
+def launch_lm_eval(eval_config, tp_size):
+    trust_remote_code = eval_config.get("trust_remote_code", False)
+    model_args = (
+        f"pretrained={eval_config['model_name']},"
+        f"tensor_parallel_size={tp_size},"
+        f"enforce_eager=true,"
+        f"add_bos_token=true,"
+        f"trust_remote_code={trust_remote_code}"
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     results = lm_eval.simple_evaluate(
         model="vllm",
         model_args=model_args,
         tasks=[task["name"] for task in eval_config["tasks"]],
         num_fewshot=eval_config["num_fewshot"],
         limit=eval_config["limit"],
+<<<<<<< HEAD
         batch_size="auto")
 
     return results
@@ -50,15 +75,36 @@ def test_lm_eval_correctness():
     results = launch_lm_eval(eval_config)
 
     # Confirm scores match ground truth.
+=======
+        batch_size="auto",
+    )
+    return results
+
+
+def test_lm_eval_correctness_param(config_filename, tp_size):
+    eval_config = yaml.safe_load(config_filename.read_text(encoding="utf-8"))
+
+    results = launch_lm_eval(eval_config, tp_size)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     success = True
     for task in eval_config["tasks"]:
         for metric in task["metrics"]:
             ground_truth = metric["value"]
             measured_value = results["results"][task["name"]][metric["name"]]
+<<<<<<< HEAD
             print(f'{task["name"]} | {metric["name"]}: '
                   f'ground_truth={ground_truth} | measured={measured_value}')
             success = success and numpy.isclose(
                 ground_truth, measured_value, rtol=RTOL)
 
     # Assert at the end, print all scores even on failure for debugging.
+=======
+            print(
+                f"{task['name']} | {metric['name']}: "
+                f"ground_truth={ground_truth} | measured={measured_value}"
+            )
+            success = success and np.isclose(ground_truth, measured_value, rtol=RTOL)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert success

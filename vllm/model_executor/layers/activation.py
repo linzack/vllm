@@ -89,6 +89,16 @@ class SiluAndMul(CustomOp):
         self.op(out, x)
         return out
 
+<<<<<<< HEAD
+=======
+    def forward_neuron(self, x: torch.Tensor) -> torch.Tensor:
+        d = x.shape[-1] // 2
+        x_reshaped = x.view(-1, x.shape[-1])
+        s = x_reshaped[:, :d] * F.sigmoid(x_reshaped[:, :d])
+        result = s * x_reshaped[:, d:]
+        return result.view(*x.shape[:-1], d)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 @CustomOp.register("mul_and_silu")
 class MulAndSilu(CustomOp):
@@ -347,6 +357,10 @@ def get_act_fn(act_fn_name: str) -> nn.Module:
 _ACTIVATION_AND_MUL_REGISTRY = LazyDict({
     "gelu": lambda: GeluAndMul(),
     "silu": lambda: SiluAndMul(),
+<<<<<<< HEAD
+=======
+    "geglu": lambda: GeluAndMul(),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 })
 
 

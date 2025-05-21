@@ -8,6 +8,11 @@ the argument 2 should match the `tensor_parallel_size` below.
 see `tests/distributed/test_torchrun_example.py` for the unit test.
 """
 
+<<<<<<< HEAD
+=======
+import torch.distributed as dist
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm import LLM, SamplingParams
 
 # Create prompts, the same across all ranks
@@ -23,21 +28,46 @@ sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
 # Use `distributed_executor_backend="external_launcher"` so that
 # this llm engine/instance only creates one worker.
+<<<<<<< HEAD
 llm = LLM(
     model="facebook/opt-125m",
     tensor_parallel_size=2,
     distributed_executor_backend="external_launcher",
+=======
+# it is important to set an explicit seed to make sure that
+# all ranks have the same random seed, so that sampling can be
+# deterministic across ranks.
+llm = LLM(
+    model="meta-llama/Llama-3.1-8B",
+    tensor_parallel_size=2,
+    pipeline_parallel_size=2,
+    distributed_executor_backend="external_launcher",
+    max_model_len=32768,
+    seed=1,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 )
 
 outputs = llm.generate(prompts, sampling_params)
 
 # all ranks will have the same outputs
+<<<<<<< HEAD
 for output in outputs:
     prompt = output.prompt
     generated_text = output.outputs[0].text
     print(f"Prompt: {prompt!r}, "
           f"Generated text: {generated_text!r}")
 """
+=======
+if dist.get_rank() == 0:
+    print("-" * 50)
+    for output in outputs:
+        prompt = output.prompt
+        generated_text = output.outputs[0].text
+        print(f"Prompt: {prompt!r}\n"
+              f"Generated text: {generated_text!r}\n")
+        print("-" * 50)
+    """
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 Further tips:
 
 1. to communicate control messages across all ranks, use the cpu group,

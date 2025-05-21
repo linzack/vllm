@@ -2,7 +2,10 @@
 
 import os
 import time
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from tqdm import tqdm
@@ -45,7 +48,11 @@ def test_run(my_rank, pipe):
 def stress_test(my_rank, pipe):
     print(f"rank {my_rank} stress_test starts....")
 
+<<<<<<< HEAD
     tensors: List[torch.Tensor] = []
+=======
+    tensors: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     torch.distributed.barrier()
     torch.manual_seed(0)

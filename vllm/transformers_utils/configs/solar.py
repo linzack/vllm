@@ -108,7 +108,11 @@ class SolarConfig(PretrainedConfig):
             Whether to tie weight embeddings
         rope_theta (`float`, *optional*, defaults to 10000.0):
             The base period of the RoPE embeddings.
+<<<<<<< HEAD
         rope_scaling (`Dict`, *optional*):
+=======
+        rope_scaling (`dict`, *optional*):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             Dictionary containing the scaling configuration for
             the RoPE embeddings.
             Currently supports two scaling

@@ -4,6 +4,7 @@ import pytest
 from transformers import Idefics3Config
 
 from vllm.multimodal import MULTIMODAL_REGISTRY
+<<<<<<< HEAD
 from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
 
 from ....conftest import _ImageAssets
@@ -13,6 +14,14 @@ models = ["HuggingFaceM4/Idefics3-8B-Llama3"]
 
 
 @pytest.mark.parametrize("model", models)
+=======
+
+from ....conftest import ImageTestAssets
+from ...utils import build_model_context
+
+
+@pytest.mark.parametrize("model_id", ["HuggingFaceM4/Idefics3-8B-Llama3"])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # yapf: disable
 @pytest.mark.parametrize(
     ("mm_processor_kwargs", "expected_toks_per_img"),
@@ -24,18 +33,28 @@ models = ["HuggingFaceM4/Idefics3-8B-Llama3"]
 @pytest.mark.parametrize("num_imgs", [1, 2])
 @pytest.mark.parametrize("kwargs_on_init", [True, False])
 def test_processor_override(
+<<<<<<< HEAD
     image_assets: _ImageAssets,
     model: str,
+=======
+    image_assets: ImageTestAssets,
+    model_id: str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     mm_processor_kwargs: dict[str, object],
     expected_toks_per_img: int,
     num_imgs: int,
     kwargs_on_init: bool,
 ):
+<<<<<<< HEAD
     """Ensure input_processor_for_idefics3 handles num_crops properly."""
+=======
+    """Ensure Idefics3MultiModalProcessor handles num_crops properly."""
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Same as the previous test - don't initialize mm_processor_kwargs
     # in this test and assume that the kwargs will be correctly expanded by
     # the partial when calling the custom input processor.
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model,
         tokenizer_name=model,
         trust_remote_code=True,
@@ -47,6 +66,13 @@ def test_processor_override(
         ctx.model_config,
         tokenizer=tokenizer,
     )
+=======
+        model_id,
+        mm_processor_kwargs=mm_processor_kwargs if kwargs_on_init else None,
+        limit_mm_per_prompt={"image": num_imgs},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     hf_processor_mm_kwargs = {} if kwargs_on_init else mm_processor_kwargs
 
     # Build the image str / prompt based on the number of images we pass

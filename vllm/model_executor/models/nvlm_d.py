@@ -6,7 +6,12 @@
 # Copyright (c) 2024 NVIDIA
 # Licensed under Apache 2.0 License [see LICENSE for details]
 # --------------------------------------------------------
+<<<<<<< HEAD
 from typing import Mapping, Optional
+=======
+from collections.abc import Mapping, Sequence
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -14,12 +19,20 @@ from transformers import PretrainedConfig
 
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.multimodal import MULTIMODAL_REGISTRY
+<<<<<<< HEAD
 from vllm.multimodal.inputs import MultiModalKwargs
 from vllm.multimodal.parse import (ImageEmbeddingItems, ImageProcessorItems,
                                    MultiModalDataItems)
 from vllm.multimodal.processing import (PromptReplacement,
                                         PromptReplacementDetails)
 from vllm.multimodal.profiling import ProcessorInputs
+=======
+from vllm.multimodal.inputs import MultiModalDataDict, MultiModalKwargs
+from vllm.multimodal.parse import (ImageEmbeddingItems, ImageProcessorItems,
+                                   MultiModalDataItems)
+from vllm.multimodal.processing import (PromptReplacement, PromptUpdate,
+                                        PromptUpdateDetails)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .intern_vit import InternVisionModel
 from .internvl import (BaseInternVLProcessingInfo, BaseInternVLProcessor,
@@ -35,16 +48,28 @@ class NVLMProcessor(BaseInternVLProcessor):
     def image_token_id(self) -> int:
         return self.tokenizer.get_vocab()[IMG_PAD]
 
+<<<<<<< HEAD
     def get_image_repl_features(
         self,
         feature_size: int,
         num_patches: Optional[int],
     ) -> str:
+=======
+    def get_image_repl(
+        self,
+        feature_size: int,
+        num_patches: Optional[int],
+    ) -> PromptUpdateDetails[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if num_patches is None:
             raise NotImplementedError("Embedding inputs are not supported")
 
         tile_pos_identifiers = [f"<tile_{i}>" for i in range(1, num_patches)]
+<<<<<<< HEAD
         if self.use_thumbnail and num_patches != 1:
+=======
+        if self.use_thumbnail:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             tile_pos_identifiers += ["<tile_global_thumbnail>"]
 
         context_size = feature_size // num_patches
@@ -54,6 +79,7 @@ class NVLMProcessor(BaseInternVLProcessor):
         # We include the start and end as well because "<Image><tile" is
         # tokenized as ["<Image", "><", "tile"], resulting in assertion error
         # when trying to find "<tile" as a subsequence of "<Image><tile"
+<<<<<<< HEAD
         return "<Image>" + features + "</Image>"
 
     def get_image_repl_full(
@@ -62,6 +88,11 @@ class NVLMProcessor(BaseInternVLProcessor):
         num_patches: Optional[int],
     ) -> str:
         return self.get_image_repl_features(feature_size, num_patches)
+=======
+        repl = "<Image>" + features + "</Image>"
+
+        return PromptUpdateDetails.select_text(repl, IMG_PAD)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class NVLMProcessingInfo(BaseInternVLProcessingInfo):
@@ -88,6 +119,7 @@ class NVLMProcessingInfo(BaseInternVLProcessingInfo):
             **kwargs,
         )
 
+<<<<<<< HEAD
     def get_max_image_tokens(self) -> int:
         hf_processor = self.get_hf_processor()
         tokenizer = hf_processor.tokenizer
@@ -121,17 +153,39 @@ class NVLMDummyInputsBuilder(InternVLDummyInputsBuilder[NVLMProcessingInfo]):
         seq_len: int,
         mm_counts: Mapping[str, int],
     ) -> ProcessorInputs:
+=======
+
+class NVLMDummyInputsBuilder(InternVLDummyInputsBuilder[NVLMProcessingInfo]):
+
+    def get_dummy_text(self, mm_counts: Mapping[str, int]) -> str:
+        num_images = mm_counts.get("image", 0)
+
+        # The newline is necessary to separate ">" of the current item
+        # and "<" of the next item
+        return "<image>\n" * num_images
+
+    def get_dummy_mm_data(
+        self,
+        seq_len: int,
+        mm_counts: Mapping[str, int],
+    ) -> MultiModalDataDict:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         target_width, target_height = \
             self.info.get_image_size_with_most_features()
         num_images = mm_counts.get("image", 0)
 
+<<<<<<< HEAD
         mm_data = {
+=======
+        return {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "image":
             self._get_dummy_images(width=target_width,
                                    height=target_height,
                                    num_images=num_images)
         }
 
+<<<<<<< HEAD
         return ProcessorInputs(
             # The newline is necessary to separate ">" of the current item
             # and "<" of the next item
@@ -143,11 +197,21 @@ class NVLMDummyInputsBuilder(InternVLDummyInputsBuilder[NVLMProcessingInfo]):
 class NVLMMultiModalProcessor(InternVLMultiModalProcessor[NVLMProcessingInfo]):
 
     def _get_prompt_replacements(
+=======
+
+class NVLMMultiModalProcessor(InternVLMultiModalProcessor[NVLMProcessingInfo]):
+
+    def _get_prompt_updates(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self,
         mm_items: MultiModalDataItems,
         hf_processor_mm_kwargs: Mapping[str, object],
         out_mm_kwargs: MultiModalKwargs,
+<<<<<<< HEAD
     ) -> list[PromptReplacement]:
+=======
+    ) -> Sequence[PromptUpdate]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         hf_processor = self.info.get_hf_processor(**hf_processor_mm_kwargs)
 
         if "image_num_patches" in out_mm_kwargs:
@@ -179,12 +243,18 @@ class NVLMMultiModalProcessor(InternVLMultiModalProcessor[NVLMProcessingInfo]):
             if num_patches is not None:
                 assert isinstance(num_patches, int)
 
+<<<<<<< HEAD
             return PromptReplacementDetails(
                 full=hf_processor.get_image_repl_full(feature_size,
                                                       num_patches) + "\n",
                 features=hf_processor.get_image_repl_features(
                     feature_size, num_patches) + "\n",
             )
+=======
+            repl = hf_processor.get_image_repl(feature_size, num_patches)
+
+            return PromptUpdateDetails.select_text(repl.full + "\n", IMG_PAD)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # See note in dummy data regarding why we have the extra newline
         return [

@@ -13,6 +13,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 import datetime
+<<<<<<< HEAD
 import inspect
 import logging
 import os
@@ -24,6 +25,19 @@ from sphinx.ext import autodoc
 
 logger = logging.getLogger(__name__)
 sys.path.append(os.path.abspath("../.."))
+=======
+import logging
+import os
+import re
+import sys
+from pathlib import Path
+
+import requests
+
+logger = logging.getLogger(__name__)
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.append(os.path.abspath(REPO_ROOT))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # -- Project information -----------------------------------------------------
 
@@ -41,8 +55,12 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
+<<<<<<< HEAD
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+=======
+    "autodoc2",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "myst_parser",
     "sphinxarg.ext",
     "sphinx_design",
@@ -50,7 +68,23 @@ extensions = [
 ]
 myst_enable_extensions = [
     "colon_fence",
+<<<<<<< HEAD
 ]
+=======
+    "fieldlist",
+]
+autodoc2_packages = [
+    {
+        "path": "../../vllm",
+        "exclude_dirs": ["__pycache__", "third_party"],
+    },
+]
+autodoc2_output_dir = "api"
+autodoc2_render_plugin = "myst"
+autodoc2_hidden_objects = ["dunder", "private", "inherited"]
+autodoc2_sort_names = True
+autodoc2_index_template = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -58,7 +92,11 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
+<<<<<<< HEAD
 exclude_patterns: List[str] = ["**/*.template.md", "**/*.inc.md"]
+=======
+exclude_patterns: list[str] = ["**/*.template.md", "**/*.inc.md"]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # Exclude the prompt "$" when copying code
 copybutton_prompt_text = r"\$ "
@@ -78,6 +116,14 @@ html_theme_options = {
     'repository_url': 'https://github.com/vllm-project/vllm',
     'use_repository_button': True,
     'use_edit_page_button': True,
+<<<<<<< HEAD
+=======
+    # Prevents the full API being added to the left sidebar of every page.
+    # Reduces build time by 2.5x and reduces build size from ~225MB to ~95MB.
+    'collapse_navbar': True,
+    # Makes API visible in the right sidebar on API reference pages.
+    'show_toc_level': 3,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -86,6 +132,10 @@ html_static_path = ["_static"]
 html_js_files = ["custom.js"]
 html_css_files = ["custom.css"]
 
+<<<<<<< HEAD
+=======
+myst_heading_anchors = 2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 myst_url_schemes = {
     'http': None,
     'https': None,
@@ -103,6 +153,14 @@ myst_url_schemes = {
         "title": "Pull Request #{{path}}",
         "classes": ["github"],
     },
+<<<<<<< HEAD
+=======
+    "gh-project": {
+        "url": "https://github.com/orgs/vllm-project/projects/{{path}}",
+        "title": "Project #{{path}}",
+        "classes": ["github"],
+    },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "gh-dir": {
         "url": "https://github.com/vllm-project/vllm/tree/main/{{path}}",
         "title": "{{path}}",
@@ -159,6 +217,7 @@ def linkcode_resolve(domain, info):
         return None
     if not info['module']:
         return None
+<<<<<<< HEAD
     filename = info['module'].replace('.', '/')
     module = info['module']
 
@@ -192,10 +251,45 @@ def linkcode_resolve(domain, info):
         if base and branch:
             return f"https://github.com/{base}/blob/{branch}/{filename}#L{lineno}"
 
+=======
+
+    # Get path from module name
+    file = Path(f"{info['module'].replace('.', '/')}.py")
+    path = REPO_ROOT / file
+    if not path.exists():
+        path = REPO_ROOT / file.with_suffix("") / "__init__.py"
+    if not path.exists():
+        return None
+
+    # Get the line number of the object
+    with open(path) as f:
+        lines = f.readlines()
+    name = info['fullname'].split(".")[-1]
+    pattern = fr"^( {{4}})*((def|class) )?{name}\b.*"
+    for lineno, line in enumerate(lines, 1):
+        if not line or line.startswith("#"):
+            continue
+        if re.match(pattern, line):
+            break
+
+    # If the line number is not found, return None
+    if lineno == len(lines):
+        return None
+
+    # If the line number is found, create the URL
+    filename = path.relative_to(REPO_ROOT)
+    if "checkouts" in path.parts:
+        # a PR build on readthedocs
+        pr_number = REPO_ROOT.name
+        base, branch = get_repo_base_and_branch(pr_number)
+        if base and branch:
+            return f"https://github.com/{base}/blob/{branch}/{filename}#L{lineno}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Otherwise, link to the source file on the main branch
     return f"https://github.com/vllm-project/vllm/blob/main/{filename}#L{lineno}"
 
 
+<<<<<<< HEAD
 # Mock out external dependencies here, otherwise the autodoc pages may be blank.
 autodoc_mock_imports = [
     "blake3",
@@ -221,6 +315,30 @@ autodoc_mock_imports = [
     "gguf",
     "lark",
     "decord",
+=======
+# Mock out external dependencies here, otherwise sphinx-argparse won't work.
+autodoc_mock_imports = [
+    "huggingface_hub",
+    "pydantic",
+    "zmq",
+    "cloudpickle",
+    "aiohttp",
+    "starlette",
+    "blake3",
+    "cpuinfo",
+    "transformers",
+    "psutil",
+    "vllm._C",
+    "PIL",
+    "numpy",
+    "tqdm",
+    # The mocks below are required by
+    # docs/source/serving/openai_compatible_server.md's
+    # vllm.entrypoints.openai.cli_args
+    "openai",
+    "fastapi",
+    "partial_json_parser",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ]
 
 for mock_target in autodoc_mock_imports:
@@ -231,6 +349,7 @@ for mock_target in autodoc_mock_imports:
             "been loaded into sys.modules when the sphinx build starts.",
             mock_target)
 
+<<<<<<< HEAD
 
 class MockedClassDocumenter(autodoc.ClassDocumenter):
     """Remove note about base class when a class is derived from object."""
@@ -243,6 +362,8 @@ class MockedClassDocumenter(autodoc.ClassDocumenter):
 
 autodoc.ClassDocumenter = MockedClassDocumenter
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "typing_extensions":
@@ -254,7 +375,10 @@ intersphinx_mapping = {
     "psutil": ("https://psutil.readthedocs.io/en/stable", None),
 }
 
+<<<<<<< HEAD
 autodoc_preserve_defaults = True
 autodoc_warningiserror = True
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 navigation_with_keys = False

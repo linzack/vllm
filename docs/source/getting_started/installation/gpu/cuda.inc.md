@@ -1,6 +1,10 @@
 # Installation
 
+<<<<<<< HEAD
 vLLM contains pre-compiled C++ and CUDA (12.1) binaries.
+=======
+vLLM contains pre-compiled C++ and CUDA (12.6) binaries.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ## Requirements
 
@@ -23,12 +27,20 @@ Therefore, it is recommended to install vLLM with a **fresh new** environment. I
 You can install vLLM using either `pip` or `uv pip`:
 
 ```console
+<<<<<<< HEAD
 # Install vLLM with CUDA 12.1.
+=======
+# Install vLLM with CUDA 12.6.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 pip install vllm # If you are using pip.
 uv pip install vllm # If you are using uv.
 ```
 
+<<<<<<< HEAD
 As of now, vLLM's binaries are compiled with CUDA 12.1 and public PyTorch release versions by default. We also provide vLLM binaries compiled with CUDA 11.8 and public PyTorch release versions:
+=======
+As of now, vLLM's binaries are compiled with CUDA 12.6 and public PyTorch release versions by default. We also provide vLLM binaries compiled with CUDA 12.8, 11.8, and public PyTorch release versions:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ```console
 # Install vLLM with CUDA 11.8.
@@ -46,7 +58,11 @@ LLM inference is a fast-evolving field, and the latest code may contain bug fixe
 ##### Install the latest code using `pip`
 
 ```console
+<<<<<<< HEAD
 pip install vllm --pre --extra-index-url https://wheels.vllm.ai/nightly
+=======
+pip install -U vllm --pre --extra-index-url https://wheels.vllm.ai/nightly
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 `--pre` is required for `pip` to consider pre-released versions.
@@ -65,9 +81,17 @@ Note that the wheels are built with Python 3.8 ABI (see [PEP 425](https://peps.p
 Another way to install the latest code is to use `uv`:
 
 ```console
+<<<<<<< HEAD
 uv pip install vllm --extra-index-url https://wheels.vllm.ai/nightly
 ```
 
+=======
+uv pip install -U vllm --extra-index-url https://wheels.vllm.ai/nightly
+```
+
+##### Install specific revisions using `uv`
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 If you want to access the wheels for previous commits (e.g. to bisect the behavior change, performance regression), you can specify the commit hash in the URL:
 
 ```console
@@ -131,6 +155,11 @@ Building from source requires a lot of compilation. If you are building from sou
 For example, you can install [ccache](https://github.com/ccache/ccache) using `conda install ccache` or `apt install ccache` .
 As long as `which ccache` command can find the `ccache` binary, it will be used automatically by the build system. After the first build, subsequent builds will be much faster.
 
+<<<<<<< HEAD
+=======
+When using `ccache` with `pip install -e .`, you should run `CCACHE_NOHASHDIR="true" pip install --no-build-isolation -e .`. This is because `pip` creates a new folder with a random name for each build, preventing `ccache` from recognizing that the same files are being built.
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 [sccache](https://github.com/mozilla/sccache) works similarly to `ccache`, but has the capability to utilize caching in remote storage environments.
 The following environment variables can be set to configure the vLLM `sccache` remote: `SCCACHE_BUCKET=vllm-build-sccache SCCACHE_REGION=us-west-2 SCCACHE_S3_NO_CREDENTIALS=1`. We also recommend setting `SCCACHE_IDLE_TIMEOUT=0`.
 :::
@@ -148,8 +177,13 @@ To build vLLM using an existing PyTorch installation:
 git clone https://github.com/vllm-project/vllm.git
 cd vllm
 python use_existing_torch.py
+<<<<<<< HEAD
 pip install -r requirements-build.txt
 pip install -e . --no-build-isolation
+=======
+pip install -r requirements/build.txt
+pip install --no-build-isolation -e .
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 ##### Use the local cutlass for compilation

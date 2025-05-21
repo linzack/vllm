@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Callable, List, Tuple, Union
 
 import torch
@@ -9,6 +10,18 @@ from vllm.transformers_utils.tokenizer import AnyTokenizer, MistralTokenizer
 LogitsProcessor = Union[Callable[[List[int], torch.Tensor], torch.Tensor],
                         Callable[[List[int], List[int], torch.Tensor],
                                  torch.Tensor]]
+=======
+from typing import Callable, Union
+
+import torch
+
+from vllm.transformers_utils.tokenizer import AnyTokenizer
+
+LogitsProcessor = Union[
+    Callable[[list[int], torch.Tensor], torch.Tensor],
+    Callable[[list[int], list[int], torch.Tensor], torch.Tensor],
+]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 """LogitsProcessor is a function that takes a list
 of previously generated tokens, the logits tensor
 for the next token and, optionally, prompt tokens as a
@@ -17,9 +30,15 @@ to sample from."""
 
 
 def get_bad_words_logits_processors(
+<<<<<<< HEAD
         bad_words: List[str],
         tokenizer: AnyTokenizer) -> List[LogitsProcessor]:
     bad_words_ids: List[List[int]] = list()
+=======
+        bad_words: list[str],
+        tokenizer: AnyTokenizer) -> list[LogitsProcessor]:
+    bad_words_ids: list[list[int]] = list()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for bad_word in bad_words:
         # To prohibit words both at the beginning
@@ -29,12 +48,17 @@ def get_bad_words_logits_processors(
             prefix = " " if add_prefix_space else ""
             prompt = prefix + bad_word.lstrip()
 
+<<<<<<< HEAD
             if isinstance(tokenizer, MistralTokenizer):
                 # Mistral tokenizers should not add special tokens
                 prompt_token_ids = tokenizer.encode(text=prompt)
             else:
                 prompt_token_ids = tokenizer.encode(text=prompt,
                                                     add_special_tokens=False)
+=======
+            prompt_token_ids = tokenizer.encode(text=prompt,
+                                                add_special_tokens=False)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             # If no space at the beginning
             # or if prefix space produces a new word token
@@ -51,13 +75,21 @@ class NoBadWordsLogitsProcessor:
     _SMALLEST_LOGIT = float("-inf")
     _NEUTRAL_LOGIT = 0.0
 
+<<<<<<< HEAD
     def __init__(self, bad_words_ids: List[List[int]]):
+=======
+    def __init__(self, bad_words_ids: list[list[int]]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.bad_words_ids = bad_words_ids
         self.word_bias: torch.FloatTensor = None
 
     def __call__(
         self,
+<<<<<<< HEAD
         past_tokens_ids: Union[List[int], Tuple[int]],
+=======
+        past_tokens_ids: Union[list[int], tuple[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         logits: torch.FloatTensor,
     ) -> torch.Tensor:
         if self.word_bias is None:

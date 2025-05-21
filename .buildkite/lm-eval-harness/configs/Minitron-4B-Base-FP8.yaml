@@ -1,11 +1,21 @@
+<<<<<<< HEAD
+=======
+# For vllm script, with -t option (tensor parallel size).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # bash .buildkite/lm-eval-harness/run-lm-eval-gsm-vllm-baseline.sh -m mgoin/Minitron-4B-Base-FP8 -b auto -l 1000 -f 5 -t 1
 model_name: "mgoin/Minitron-4B-Base-FP8"
 tasks:
 - name: "gsm8k"
   metrics:
   - name: "exact_match,strict-match"
+<<<<<<< HEAD
     value: 0.233
   - name: "exact_match,flexible-extract"
     value: 0.236
+=======
+    value: 0.231
+  - name: "exact_match,flexible-extract"
+    value: 0.22
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 limit: 1000
 num_fewshot: 5

@@ -282,10 +282,18 @@ class PackedColumnParameter(_ColumnvLLMParameter):
                  packed_factor: Union[int, Fraction],
                  packed_dim: int,
                  marlin_tile_size: Optional[int] = None,
+<<<<<<< HEAD
+=======
+                 bitblas_tile_size: Optional[int] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                  **kwargs):
         self._packed_factor = packed_factor
         self._packed_dim = packed_dim
         self._marlin_tile_size = marlin_tile_size
+<<<<<<< HEAD
+=======
+        self._bitblas_tile_size = bitblas_tile_size
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__(**kwargs)
 
     @property
@@ -300,12 +308,24 @@ class PackedColumnParameter(_ColumnvLLMParameter):
     def marlin_tile_size(self):
         return self._marlin_tile_size
 
+<<<<<<< HEAD
+=======
+    @property
+    def bitblas_tile_size(self):
+        return self._bitblas_tile_size
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def adjust_shard_indexes_for_packing(self, shard_size, shard_offset):
         return _adjust_shard_indexes_for_packing(
             shard_size=shard_size,
             shard_offset=shard_offset,
             packed_factor=self.packed_factor,
+<<<<<<< HEAD
             marlin_tile_size=self.marlin_tile_size)
+=======
+            marlin_tile_size=self.marlin_tile_size,
+            bitblas_tile_size=self.bitblas_tile_size)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class PackedvLLMParameter(ModelWeightParameter):
@@ -323,10 +343,18 @@ class PackedvLLMParameter(ModelWeightParameter):
                  packed_factor: Union[int, Fraction],
                  packed_dim: int,
                  marlin_tile_size: Optional[int] = None,
+<<<<<<< HEAD
+=======
+                 bitblas_tile_size: Optional[int] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                  **kwargs):
         self._packed_factor = packed_factor
         self._packed_dim = packed_dim
         self._marlin_tile_size = marlin_tile_size
+<<<<<<< HEAD
+=======
+        self._bitblas_tile_size = bitblas_tile_size
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__(**kwargs)
 
     @property
@@ -341,12 +369,24 @@ class PackedvLLMParameter(ModelWeightParameter):
     def marlin_tile_size(self):
         return self._marlin_tile_size
 
+<<<<<<< HEAD
+=======
+    @property
+    def bitblas_tile_size(self):
+        return self._bitblas_tile_size
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def adjust_shard_indexes_for_packing(self, shard_size, shard_offset):
         return _adjust_shard_indexes_for_packing(
             shard_size=shard_size,
             shard_offset=shard_offset,
             packed_factor=self.packed_factor,
+<<<<<<< HEAD
             marlin_tile_size=self.marlin_tile_size)
+=======
+            marlin_tile_size=self.marlin_tile_size,
+            bitblas_tile_size=self.bitblas_tile_size)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class BlockQuantScaleParameter(_ColumnvLLMParameter, RowvLLMParameter):
@@ -421,8 +461,18 @@ def _adjust_shard_indexes_for_marlin(shard_size, shard_offset,
     return shard_size * marlin_tile_size, shard_offset * marlin_tile_size
 
 
+<<<<<<< HEAD
 def _adjust_shard_indexes_for_packing(shard_size, shard_offset, packed_factor,
                                       marlin_tile_size):
+=======
+def _adjust_shard_indexes_for_bitblas(shard_size, shard_offset,
+                                      bitblas_tile_size):
+    return shard_size // bitblas_tile_size, shard_offset // bitblas_tile_size
+
+
+def _adjust_shard_indexes_for_packing(shard_size, shard_offset, packed_factor,
+                                      marlin_tile_size, bitblas_tile_size):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     shard_size = shard_size // packed_factor
     shard_offset = shard_offset // packed_factor
     if marlin_tile_size is not None:
@@ -430,4 +480,14 @@ def _adjust_shard_indexes_for_packing(shard_size, shard_offset, packed_factor,
             shard_size=shard_size,
             shard_offset=shard_offset,
             marlin_tile_size=marlin_tile_size)
+<<<<<<< HEAD
     return shard_size, shard_offset
+=======
+    elif bitblas_tile_size is not None:
+        return _adjust_shard_indexes_for_bitblas(
+            shard_size=shard_size,
+            shard_offset=shard_offset,
+            bitblas_tile_size=bitblas_tile_size)
+
+    return shard_size, shard_offset
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

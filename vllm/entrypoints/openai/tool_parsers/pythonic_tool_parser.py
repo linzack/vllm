@@ -3,7 +3,12 @@
 import ast
 import json
 import re
+<<<<<<< HEAD
 from typing import Any, Sequence, Tuple, Union
+=======
+from collections.abc import Sequence
+from typing import Any, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from transformers import PreTrainedTokenizerBase
 
@@ -27,7 +32,11 @@ class _UnexpectedAstError(Exception):
 class PythonicToolParser(ToolParser):
     """
     Tool call parser for models that produce tool calls in a pythonic style,
+<<<<<<< HEAD
     such as Llama 3.2 models.
+=======
+    such as Llama 3.2 and Llama 4 models.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     Used when --enable-auto-tool-choice --tool-call-parser pythonic are all set
     """
@@ -204,7 +213,11 @@ def _handle_single_tool(call: ast.Call) -> ToolCall:
                                           arguments=json.dumps(arguments)))
 
 
+<<<<<<< HEAD
 def _make_valid_python(text: str) -> Union[Tuple[str, str], None]:
+=======
+def _make_valid_python(text: str) -> Union[tuple[str, str], None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     bracket_stack = []
     for index, char in enumerate(text):
         if char in {"[", "(", "{"}:
@@ -279,6 +292,10 @@ def _compute_tool_delta(previously_sent_args: str, new_call: ToolCall,
         new_call_args = new_call_args[:-len(withheld_suffix)]
     if not previously_sent_args:
         return DeltaToolCall(id=new_call.id,
+<<<<<<< HEAD
+=======
+                             type="function",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              index=index,
                              function=DeltaFunctionCall(
                                  name=new_call.function.name,
@@ -287,5 +304,9 @@ def _compute_tool_delta(previously_sent_args: str, new_call: ToolCall,
 
     arg_diff = new_call_args[len(previously_sent_args):]
     return DeltaToolCall(
+<<<<<<< HEAD
         id="", index=index, function=DeltaFunctionCall(
+=======
+        id=None, index=index, function=DeltaFunctionCall(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             arguments=arg_diff)) if arg_diff else None

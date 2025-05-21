@@ -1,8 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List, Optional, Type
 
 import vllm.envs as envs
+=======
+from typing import Optional
+
+import vllm.envs as envs
+from vllm.model_executor.layers.quantization.kernels.mixed_precision.allspark import (  # noqa: E501
+    AllSparkLinearKernel)
+from vllm.model_executor.layers.quantization.kernels.mixed_precision.bitblas import (  # noqa: E501
+    BitBLASLinearKernel)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.kernels.mixed_precision.exllama import (  # noqa: E501
     ExllamaLinearKernel)
 from vllm.model_executor.layers.quantization.kernels.mixed_precision.machete import (  # noqa: E501
@@ -14,16 +24,28 @@ from vllm.model_executor.layers.quantization.kernels.mixed_precision.MPLinearKer
 from vllm.platforms import current_platform
 
 # in priority/performance order (when available)
+<<<<<<< HEAD
 _POSSIBLE_KERNELS: List[Type[MPLinearKernel]] = [
     MacheteLinearKernel,
     MarlinLinearKernel,
+=======
+_POSSIBLE_KERNELS: list[type[MPLinearKernel]] = [
+    MacheteLinearKernel,
+    AllSparkLinearKernel,
+    MarlinLinearKernel,
+    BitBLASLinearKernel,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ExllamaLinearKernel,
 ]
 
 
 def choose_mp_linear_kernel(
         config: MPLinearLayerConfig,
+<<<<<<< HEAD
         compute_capability: Optional[int] = None) -> Type[MPLinearKernel]:
+=======
+        compute_capability: Optional[int] = None) -> type[MPLinearKernel]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Choose an MPLinearKernel that can implement the given config for the given
      compute capability. Attempts to choose the best kernel in terms of 
@@ -40,7 +62,11 @@ def choose_mp_linear_kernel(
         ValueError: If no kernel can implement the given config.
 
     Returns:
+<<<<<<< HEAD
         Type[MPLinearKernel]: Chosen kernel.
+=======
+        type[MPLinearKernel]: Chosen kernel.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     if compute_capability is None:
         if current_platform is None:
@@ -73,4 +99,8 @@ def choose_mp_linear_kernel(
     raise ValueError(
         "Failed to find a kernel that can implement the "\
         "WNA16 linear layer. Reasons: \n"
+<<<<<<< HEAD
         + '\n'.join(failure_reasons))
+=======
+        + '\n'.join(failure_reasons))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

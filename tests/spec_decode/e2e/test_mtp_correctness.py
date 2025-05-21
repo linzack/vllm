@@ -57,7 +57,13 @@ PRECISION = "bfloat16"
 @pytest.mark.parametrize("baseline_llm_kwargs", [{}])
 @pytest.mark.parametrize("test_llm_kwargs", [
     {
+<<<<<<< HEAD
         "num_speculative_tokens": MAX_SPEC_TOKENS,
+=======
+        "speculative_config": {
+            "num_speculative_tokens": MAX_SPEC_TOKENS,
+        },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     },
 ])
 @pytest.mark.parametrize("output_len", [
@@ -99,12 +105,25 @@ def test_mtp_e2e_greedy_correctness(vllm_runner, common_llm_kwargs,
 @pytest.mark.parametrize("baseline_llm_kwargs", [{}])
 @pytest.mark.parametrize("test_llm_kwargs", [
     {
+<<<<<<< HEAD
         "num_speculative_tokens": MAX_SPEC_TOKENS,
         "disable_logprobs_during_spec_decoding": False,
     },
     {
         "num_speculative_tokens": MAX_SPEC_TOKENS,
         "disable_logprobs_during_spec_decoding": True,
+=======
+        "speculative_config": {
+            "num_speculative_tokens": MAX_SPEC_TOKENS,
+            "disable_logprobs": False,
+        },
+    },
+    {
+        "speculative_config": {
+            "num_speculative_tokens": MAX_SPEC_TOKENS,
+            "disable_logprobs": True,
+        },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     },
 ])
 @pytest.mark.parametrize("output_len", [
@@ -119,6 +138,7 @@ def test_mtp_e2e_greedy_logprobs(vllm_runner, common_llm_kwargs,
                                  batch_size: int, output_len: int, seed: int,
                                  logprobs: int):
 
+<<<<<<< HEAD
     run_equality_correctness_test(vllm_runner,
                                   common_llm_kwargs,
                                   per_test_common_llm_kwargs,
@@ -131,6 +151,21 @@ def test_mtp_e2e_greedy_logprobs(vllm_runner, common_llm_kwargs,
                                   prompt_logprobs=logprobs,
                                   disable_logprobs=test_llm_kwargs[
                                       'disable_logprobs_during_spec_decoding'])
+=======
+    run_equality_correctness_test(
+        vllm_runner,
+        common_llm_kwargs,
+        per_test_common_llm_kwargs,
+        baseline_llm_kwargs,
+        test_llm_kwargs,
+        batch_size,
+        output_len,
+        seed,
+        logprobs=logprobs,
+        prompt_logprobs=logprobs,
+        disable_logprobs=test_llm_kwargs["speculative_config"]
+        ["disable_logprobs"])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.parametrize(
@@ -152,7 +187,13 @@ def test_mtp_e2e_greedy_logprobs(vllm_runner, common_llm_kwargs,
 @pytest.mark.parametrize("baseline_llm_kwargs", [{}])
 @pytest.mark.parametrize("test_llm_kwargs", [
     {
+<<<<<<< HEAD
         "num_speculative_tokens": MAX_SPEC_TOKENS,
+=======
+        "speculative_config": {
+            "num_speculative_tokens": MAX_SPEC_TOKENS,
+        },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     },
 ])
 @pytest.mark.parametrize("output_len", [
@@ -198,7 +239,13 @@ def test_mtp_e2e_greedy_correctness_cuda_graph(vllm_runner, common_llm_kwargs,
 @pytest.mark.parametrize("baseline_llm_kwargs", [{}])
 @pytest.mark.parametrize("test_llm_kwargs", [
     {
+<<<<<<< HEAD
         "num_speculative_tokens": MAX_SPEC_TOKENS,
+=======
+        "speculative_config": {
+            "num_speculative_tokens": MAX_SPEC_TOKENS,
+        },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     },
 ])
 @pytest.mark.parametrize(
@@ -243,7 +290,13 @@ def test_mtp_e2e_greedy_correctness_with_preemption(
     "test_llm_kwargs",
     [
         {
+<<<<<<< HEAD
             "num_speculative_tokens": k,
+=======
+            "speculative_config": {
+                "num_speculative_tokens": k,
+            },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         }
         # Try a range of num. speculative tokens
         for k in range(1, 1 + MAX_SPEC_TOKENS)
@@ -286,11 +339,20 @@ def test_mtp_different_k(vllm_runner, common_llm_kwargs,
     }])
 @pytest.mark.parametrize("per_test_common_llm_kwargs", [{}])
 @pytest.mark.parametrize("baseline_llm_kwargs", [{}])
+<<<<<<< HEAD
 @pytest.mark.parametrize("test_llm_kwargs",
                          [{
                              "num_speculative_tokens": MAX_SPEC_TOKENS,
                              "speculative_disable_by_batch_size": 4
                          }])
+=======
+@pytest.mark.parametrize("test_llm_kwargs", [{
+    "speculative_config": {
+        "num_speculative_tokens": MAX_SPEC_TOKENS,
+        "disable_by_batch_size": 4
+    },
+}])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest.mark.parametrize("batch_size", [1, 5])
 @pytest.mark.parametrize(
     "output_len",

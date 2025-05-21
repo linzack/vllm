@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "$schema":
     "https://json-schema.org/draft/2020-12/schema",
     "title":
@@ -111,3 +112,23 @@
     "required":
     ["userId", "personalInfo", "address", "accountStatus", "registrationDate"]
 }
+=======
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "email": { "type": "string" },
+      "street": { "type": "string" },
+      "city": { "type": "string" },
+      "state": { "type": "string" },
+      "zip": { "type": "string" },
+      "phone": { "type": "string" },
+      "website": { "type": "string" },
+      "company": { "type": "string" },
+      "age": { "type": "integer" }
+    },
+    "required": [
+      "name",
+      "email"
+    ]
+}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -4,9 +4,15 @@
 
 A Helm chart to deploy vLLM for Kubernetes
 
+<<<<<<< HEAD
 Helm is a package manager for Kubernetes. It will help you to deploy vLLM on k8s and automate the deployment of vLLMm Kubernetes applications. With Helm, you can deploy the same framework architecture with different configurations to multiple namespaces by overriding variables values.
 
 This guide will walk you through the process of deploying vLLM with Helm, including the necessary prerequisites, steps for helm install and documentation on architecture and values file.
+=======
+Helm is a package manager for Kubernetes. It will help you to deploy vLLM on k8s and automate the deployment of vLLM Kubernetes applications. With Helm, you can deploy the same framework architecture with different configurations to multiple namespaces by overriding variable values.
+
+This guide will walk you through the process of deploying vLLM with Helm, including the necessary prerequisites, steps for helm installation and documentation on architecture and values file.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ## Prerequisites
 

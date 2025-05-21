@@ -78,6 +78,13 @@ class AttentionBackend(ABC):
         raise NotImplementedError
 
     @staticmethod
+<<<<<<< HEAD
+=======
+    def get_kv_cache_stride_order() -> Tuple[int, ...]:
+        raise NotImplementedError
+
+    @staticmethod
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     @abstractmethod
     def swap_blocks(
         src_kv_cache: torch.Tensor,
@@ -232,10 +239,18 @@ class AttentionMetadataBuilder(ABC, Generic[T]):
 
 class AttentionLayer(Protocol):
 
+<<<<<<< HEAD
+=======
+    _q_scale: torch.Tensor
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     _k_scale: torch.Tensor
     _v_scale: torch.Tensor
     _k_scale_float: float
     _v_scale_float: float
+<<<<<<< HEAD
+=======
+    _prob_scale: torch.Tensor
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def forward(
         self,
@@ -294,3 +309,10 @@ class MLAAttentionImpl(AttentionImpl[T], Generic[T]):
         output: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         raise NotImplementedError
+<<<<<<< HEAD
+=======
+
+
+def is_quantized_kv_cache(kv_cache_dtype: str) -> bool:
+    return kv_cache_dtype != "auto"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

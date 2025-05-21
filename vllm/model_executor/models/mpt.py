@@ -2,12 +2,21 @@
 
 # Adapted from https://huggingface.co/mosaicml/mpt-7b/tree/main
 import math
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Set, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import (get_pp_group, get_tensor_model_parallel_rank,
@@ -18,7 +27,10 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
                                                RowParallelLinear)
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
@@ -27,7 +39,11 @@ from vllm.sequence import IntermediateTensors
 from vllm.transformers_utils.configs.mpt import MPTConfig
 
 from .interfaces import SupportsPP
+<<<<<<< HEAD
 from .utils import (is_pp_missing_parameter,
+=======
+from .utils import (AutoWeightsLoader, is_pp_missing_parameter,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     make_empty_intermediate_tensors_factory, make_layers,
                     maybe_prefix)
 
@@ -125,8 +141,11 @@ class MPTAttention(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         del position_ids  # unused.
         qkv, _ = self.Wqkv(hidden_states)
@@ -136,7 +155,11 @@ class MPTAttention(nn.Module):
         if self.qk_ln:
             q = self.q_ln(q)
             k = self.k_ln(k)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output, _ = self.out_proj(attn_output)
         return output
 
@@ -196,15 +219,21 @@ class MPTBlock(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         x = self.norm_1(hidden_states)
         x = self.attn(
             position_ids=position_ids,
             hidden_states=x,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
         hidden_states = hidden_states + x
         x = self.norm_2(hidden_states)
@@ -253,8 +282,11 @@ class MPTModel(nn.Module):
         self,
         input_ids: torch.Tensor,
         position_ids: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors],
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -267,6 +299,7 @@ class MPTModel(nn.Module):
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
 
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             block = self.blocks[i]
             hidden_states = block(
@@ -275,11 +308,35 @@ class MPTModel(nn.Module):
                 kv_caches[i - self.start_layer],
                 attn_metadata,
             )
+=======
+        for block in self.blocks[self.start_layer:self.end_layer]:
+            hidden_states = block(position_ids, hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if not get_pp_group().is_last_rank:
             return IntermediateTensors({"hidden_states": hidden_states})
         hidden_states = self.norm_f(hidden_states)
         return hidden_states
 
+<<<<<<< HEAD
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        params_dict = dict(self.named_parameters(remove_duplicate=False))
+        loaded_params: set[str] = set()
+        for name, loaded_weight in weights:
+            # Skip loading extra bias for GPTQ models.
+            if name.endswith(".bias") and name not in params_dict:
+                continue
+            if is_pp_missing_parameter(name, self):
+                continue
+            param = params_dict[name]
+            weight_loader = getattr(param, "weight_loader",
+                                    default_weight_loader)
+            weight_loader(param, loaded_weight)
+            loaded_params.add(name)
+        return loaded_params
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class MPTForCausalLM(nn.Module, SupportsPP):
 
@@ -295,7 +352,10 @@ class MPTForCausalLM(nn.Module, SupportsPP):
                                     prefix=maybe_prefix(prefix, "transformer"))
         self.lm_head = self.transformer.wte
         self.logits_processor = LogitsProcessor(config.vocab_size)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.make_empty_intermediate_tensors = (
             self.transformer.make_empty_intermediate_tensors)
 
@@ -306,6 +366,7 @@ class MPTForCausalLM(nn.Module, SupportsPP):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
         intermediate_tensors: Optional[IntermediateTensors] = None,
@@ -314,6 +375,13 @@ class MPTForCausalLM(nn.Module, SupportsPP):
         hidden_states = self.transformer(input_ids, positions, kv_caches,
                                          attn_metadata, intermediate_tensors,
                                          inputs_embeds)
+=======
+        intermediate_tensors: Optional[IntermediateTensors] = None,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> Union[torch.Tensor, IntermediateTensors]:
+        hidden_states = self.transformer(input_ids, positions,
+                                         intermediate_tensors, inputs_embeds)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return hidden_states
 
     def compute_logits(
@@ -325,6 +393,7 @@ class MPTForCausalLM(nn.Module, SupportsPP):
                                        sampling_metadata)
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: torch.Tensor,
@@ -349,3 +418,9 @@ class MPTForCausalLM(nn.Module, SupportsPP):
             weight_loader(param, loaded_weight)
             loaded_params.add(name)
         return loaded_params
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        loader = AutoWeightsLoader(self)
+        return loader.load_weights(weights)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

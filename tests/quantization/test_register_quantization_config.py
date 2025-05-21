@@ -5,7 +5,11 @@ See https://github.com/vllm-project/vllm/issues/11926 for more details.
 
 Run `pytest tests/quantization/test_register_quantization_config.py`.
 """
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import torch
@@ -14,7 +18,11 @@ import torch.nn.functional as F
 from vllm.model_executor.layers.linear import LinearBase  # noqa: E501
 from vllm.model_executor.layers.linear import UnquantizedLinearMethod
 from vllm.model_executor.layers.quantization import (
+<<<<<<< HEAD
     get_quantization_config, register_quantization_config)
+=======
+    QuantizationMethods, get_quantization_config, register_quantization_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (  # noqa: E501
     QuantizationConfig)
 
@@ -54,11 +62,19 @@ class CustomQuantConfig(QuantizationConfig):
         """Initialize the quantization config."""
         self.num_bits = num_bits
 
+<<<<<<< HEAD
     def get_name(self) -> str:
         """Name of the quantization method."""
         return "custom_quant"
 
     def get_supported_act_dtypes(self) -> List["torch.dtype"]:
+=======
+    def get_name(self) -> QuantizationMethods:
+        """Name of the quantization method."""
+        return "custom_quant"
+
+    def get_supported_act_dtypes(self) -> list["torch.dtype"]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """List of supported activation dtypes."""
         return [torch.float16, torch.bfloat16]
 
@@ -68,12 +84,20 @@ class CustomQuantConfig(QuantizationConfig):
         return -1
 
     @staticmethod
+<<<<<<< HEAD
     def get_config_filenames() -> List[str]:
+=======
+    def get_config_filenames() -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """List of filenames to search for in the model directory."""
         return []
 
     @classmethod
+<<<<<<< HEAD
     def from_config(cls, config: Dict[str, Any]) -> "CustomQuantConfig":
+=======
+    def from_config(cls, config: dict[str, Any]) -> "CustomQuantConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Create a config class from the model's quantization config."""
         return CustomQuantConfig(num_bits=config.get("num_bits", 8))
 
@@ -101,8 +125,15 @@ def test_register_quantization_config():
                          argvalues=[
                              "meta-llama/Llama-3.2-1B-Instruct",
                          ])
+<<<<<<< HEAD
 def test_custom_quant(vllm_runner, model):
     """Test infer with the custom quantization method."""
+=======
+def test_custom_quant(vllm_runner, model, monkeypatch):
+    """Test infer with the custom quantization method."""
+    # vllm_runner.apply_model() relies on V0 internals.
+    monkeypatch.setenv("VLLM_USE_V1", "0")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with vllm_runner(model_name=model,
                      quantization="custom_quant",
                      enforce_eager=True) as llm:

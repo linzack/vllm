@@ -16,13 +16,24 @@ def post_http_request(prompt: dict, api_url: str) -> requests.Response:
     return response
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
+=======
+def parse_args():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--model", type=str, default="BAAI/bge-reranker-v2-m3")
+<<<<<<< HEAD
 
     args = parser.parse_args()
+=======
+    return parser.parse_args()
+
+
+def main(args):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     api_url = f"http://{args.host}:{args.port}/score"
     model_name = args.model
 
@@ -30,9 +41,15 @@ if __name__ == "__main__":
     text_2 = "The capital of Brazil is Brasilia."
     prompt = {"model": model_name, "text_1": text_1, "text_2": text_2}
     score_response = post_http_request(prompt=prompt, api_url=api_url)
+<<<<<<< HEAD
     print("Prompt when text_1 and text_2 are both strings:")
     pprint.pprint(prompt)
     print("Score Response:")
+=======
+    print("\nPrompt when text_1 and text_2 are both strings:")
+    pprint.pprint(prompt)
+    print("\nScore Response:")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     pprint.pprint(score_response.json())
 
     text_1 = "What is the capital of France?"
@@ -41,9 +58,15 @@ if __name__ == "__main__":
     ]
     prompt = {"model": model_name, "text_1": text_1, "text_2": text_2}
     score_response = post_http_request(prompt=prompt, api_url=api_url)
+<<<<<<< HEAD
     print("Prompt when text_1 is string and text_2 is a list:")
     pprint.pprint(prompt)
     print("Score Response:")
+=======
+    print("\nPrompt when text_1 is string and text_2 is a list:")
+    pprint.pprint(prompt)
+    print("\nScore Response:")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     pprint.pprint(score_response.json())
 
     text_1 = [
@@ -54,7 +77,19 @@ if __name__ == "__main__":
     ]
     prompt = {"model": model_name, "text_1": text_1, "text_2": text_2}
     score_response = post_http_request(prompt=prompt, api_url=api_url)
+<<<<<<< HEAD
     print("Prompt when text_1 and text_2 are both lists:")
     pprint.pprint(prompt)
     print("Score Response:")
     pprint.pprint(score_response.json())
+=======
+    print("\nPrompt when text_1 and text_2 are both lists:")
+    pprint.pprint(prompt)
+    print("\nScore Response:")
+    pprint.pprint(score_response.json())
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

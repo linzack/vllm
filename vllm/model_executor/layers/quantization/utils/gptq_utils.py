@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 import re
 from copy import deepcopy
+<<<<<<< HEAD
 from typing import Dict, Optional, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -52,7 +56,11 @@ def get_dynamic_override(
     layer_name: str,
     key: Optional[str] = None,
     default_value: Union[int, bool,
+<<<<<<< HEAD
                          None] = None) -> Union[Dict, int, bool, None]:
+=======
+                         None] = None) -> Union[dict, int, bool, None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for pattern, pattern_dict in config.dynamic.items():
         # Negative match: matched modules are excluded from quantized init
         if pattern.startswith("-:"):

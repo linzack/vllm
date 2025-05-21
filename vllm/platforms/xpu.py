@@ -37,10 +37,18 @@ class XPUPlatform(Platform):
         return "vllm.attention.backends.ipex_attn.IpexAttnBackend"
 
     @staticmethod
+<<<<<<< HEAD
     def get_device_capability(device_id: int = 0) -> DeviceCapability:
         major, minor, *_ = torch.xpu.get_device_capability(
             device_id)['version'].split('.')
         return DeviceCapability(major=int(major), minor=int(minor))
+=======
+    def get_device_capability(
+            device_id: int = 0) -> Optional[DeviceCapability]:
+        # capacity format differs from cuda's and will cause unexpected
+        # failure, so use None directly
+        return None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def get_device_name(device_id: int = 0) -> str:
@@ -73,7 +81,11 @@ class XPUPlatform(Platform):
                 logger.warning(
                     "bfloat16 is only supported on Intel Data Center GPU, "
                     "Intel Arc GPU is not supported yet. Your device is %s,"
+<<<<<<< HEAD
                     "which is not supported. will fallback to float16",
+=======
+                    " which is not supported. will fallback to float16",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     cls.get_device_name())
                 model_config.dtype = torch.float16
         if not model_config.enforce_eager:

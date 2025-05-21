@@ -8,6 +8,11 @@
 
 #include <ATen/cuda/CUDAContext.h>
 
+<<<<<<< HEAD
+=======
+#include "cuda_utils.h"
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #include "cutlass/cutlass.h"
 
 #include "cutlass/gemm/device/gemm_universal_adapter.h"
@@ -65,12 +70,16 @@ struct cutlass_sparse_3x_gemm {
       typename std::conditional<std::is_same_v<ElementAB, int8_t>, int32_t,
                                 float>::type;
 
+<<<<<<< HEAD
   using EpilogueDescriptor =
       cutlass::epilogue::collective::detail::EpilogueDescriptor<
           TileShape, cutlass::epilogue::collective::EpilogueTileAuto, ElementD,
           ElementD, EpilogueSchedule>;
 
   using Epilogue = Epilogue_<ElementAcc, ElementD, EpilogueDescriptor>;
+=======
+  using Epilogue = Epilogue_<ElementAcc, ElementD, TileShape>;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
   using ElementC = void;
   using LayoutC = cutlass::layout::RowMajor;
@@ -100,9 +109,15 @@ struct cutlass_sparse_3x_gemm {
   // clang-format off
   using CollectiveMainloop =
       typename cutlass::gemm::collective::CollectiveBuilder<
+<<<<<<< HEAD
           cutlass::arch::Sm90, cutlass::arch::OpClassSparseTensorOp, 
           ElementAB, cutlass::layout::RowMajor, AlignmentAB, 
           ElementAB, cutlass::layout::ColumnMajor, AlignmentAB, 
+=======
+          cutlass::arch::Sm90, cutlass::arch::OpClassSparseTensorOp,
+          ElementAB, cutlass::layout::RowMajor, AlignmentAB,
+          ElementAB, cutlass::layout::ColumnMajor, AlignmentAB,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
           ElementAcc, TileShape, ClusterShape,
           Stages,
           KernelSchedule>::CollectiveOp;

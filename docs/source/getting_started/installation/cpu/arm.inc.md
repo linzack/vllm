@@ -20,7 +20,11 @@ There are no pre-built wheels or images for this device, so you must build vLLM 
 
 ### Build wheel from source
 
+<<<<<<< HEAD
 :::{include} build.inc.md
+=======
+:::{include} cpu/build.inc.md
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :::
 
 Testing has been conducted on AWS Graviton3 instances for compatibility.

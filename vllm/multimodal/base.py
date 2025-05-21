@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from collections import defaultdict
 from pathlib import Path
 from typing import (TYPE_CHECKING, Any, Callable, Generic, NamedTuple,
@@ -232,11 +233,28 @@ class MultiModalPlugin(ABC):
         self._validate_max_multimodal_tokens(max_mm_tokens)
 
         return max_mm_tokens
+=======
+from collections.abc import Sequence
+from pathlib import Path
+from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar
+
+if TYPE_CHECKING:
+    from vllm.sequence import SequenceGroupMetadata
+
+from .inputs import MultiModalKwargs, PlaceholderRange
+
+_T = TypeVar("_T")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MultiModalPlaceholderMap:
     """
     Relates multi-modal embeddings to their corresponding placeholders.
+<<<<<<< HEAD
+=======
+
+    Note: This is only used in V0.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     class IndexMap(NamedTuple):
@@ -274,8 +292,12 @@ class MultiModalPlaceholderMap:
     @classmethod
     def from_seq_group(
         cls, seq_group: "SequenceGroupMetadata", positions: range
+<<<<<<< HEAD
     ) -> Tuple[Optional[MultiModalDataDict], dict[str,
                                                   "MultiModalPlaceholderMap"]]:
+=======
+    ) -> tuple[MultiModalKwargs, dict[str, "MultiModalPlaceholderMap"]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Returns the multi-modal items that intersect with the portion of a
         prompt (``seq_group``) represented by ``positions``, as well as a
@@ -284,6 +306,7 @@ class MultiModalPlaceholderMap:
 
         Examples:
 
+<<<<<<< HEAD
         .. code-block::
 
             Prompt:    |AAAA BBBB What's in these images?|
@@ -313,11 +336,43 @@ class MultiModalPlaceholderMap:
                 images      = []
                 src_ranges  = []
                 dest_ranges = []
+=======
+        ```
+        Prompt:    |AAAA BBBB What's in these images?|
+        Positions: |.................................|
+
+            images      = [A, B]
+            src_ranges  = [(0, 4), (4, 8)]
+            dest_ranges = [(0, 4), (5, 9)]
+
+        Prompt:    |AAAA BBBB What's in these images?|
+        Positions: |  .....                          |
+
+            images      = [A, B]
+            src_ranges  = [(2, 4), (4, 6)]
+            dest_ranges = [(0, 2), (3, 5)]
+
+        Prompt:    |AAAA BBBB What's in these images?|
+        Positions: |     .........                   |
+
+            images      = [B]
+            src_ranges  = [(0, 4)]
+            dest_ranges = [(0, 4)]
+
+        Prompt:    |AAAA BBBB What's in these images?|
+        Positions: |          .......................|
+
+            images      = []
+            src_ranges  = []
+            dest_ranges = []
+        ```
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         seq_mm_data = seq_group.multi_modal_data
         seq_mm_placeholders = seq_group.multi_modal_placeholders
 
         if not seq_mm_data or not seq_mm_placeholders:
+<<<<<<< HEAD
             return seq_mm_data, {}
 
         # For merged processor, we directly use mm_kwargs as mm_data
@@ -360,6 +415,26 @@ class MultiModalPlaceholderMap:
                     mm_data[modality] = intersecting_items
 
         return mm_data, placeholder_maps
+=======
+            return MultiModalKwargs({}), {}
+
+        placeholder_maps = dict[str, MultiModalPlaceholderMap]()
+
+        for modality, placeholders in seq_mm_placeholders.items():
+            placeholder_map = MultiModalPlaceholderMap()
+
+            if positions:
+                placeholder_map.append_items_from_seq_group(
+                    positions,
+                    # Dummy, since we don't care about intersecting items
+                    [None] * len(placeholders),
+                    placeholders,
+                )
+
+            placeholder_maps[modality] = placeholder_map
+
+        return seq_mm_data, placeholder_maps
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def append_items_from_seq_group(
         self,
@@ -380,8 +455,13 @@ class MultiModalPlaceholderMap:
         for placeholder_dict, mm_item in zip(multi_modal_placeholders,
                                              multi_modal_items):
             placeholder = range(
+<<<<<<< HEAD
                 placeholder_dict["offset"],
                 placeholder_dict["offset"] + placeholder_dict["length"],
+=======
+                placeholder_dict.offset,
+                placeholder_dict.offset + placeholder_dict.length,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             )
             intersection = range(
                 max(positions.start, placeholder.start),
@@ -440,8 +520,12 @@ class MultiModalPlaceholderMap:
                 f"The number of source ({len(src_indices)}) and destination "
                 f"indices ({len(dest_indices)}) must be the same.")
 
+<<<<<<< HEAD
         return MultiModalPlaceholderMap.IndexMap(src=src_indices,
                                                  dest=dest_indices)
+=======
+        return self.IndexMap(src=src_indices, dest=dest_indices)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MediaIO(ABC, Generic[_T]):

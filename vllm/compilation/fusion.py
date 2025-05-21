@@ -1,24 +1,41 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Callable, Dict, List, NamedTuple, Optional, Tuple
 
 import torch
 import torch._inductor.pattern_matcher as pm
 # TODO(luka) use vllm.utils once #10836 landed
 from compressed_tensors.quantization import FP8_DTYPE
+=======
+from typing import Callable, NamedTuple, Optional
+
+import torch
+import torch._inductor.pattern_matcher as pm
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from torch import fx
 from torch._higher_order_ops.auto_functionalize import auto_functionalized
 from torch._inductor.pattern_matcher import PatternMatcherPass
 from torch._ops import OpOverload
 
+<<<<<<< HEAD
 from vllm.config import CompilationConfig
 from vllm.logger import init_logger
+=======
+from vllm.config import VllmConfig
+from vllm.logger import init_logger
+from vllm.platforms import current_platform
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .fx_utils import find_getitem_maybe
 from .multi_output_match import MultiOutputMatch
 from .vllm_inductor_pass import VllmInductorPass
 
 logger = init_logger(__name__)
+<<<<<<< HEAD
+=======
+FP8_DTYPE = current_platform.fp8_dtype()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def empty_bf16(*args, **kwargs):
@@ -57,7 +74,11 @@ kFp8StaticTensorSym = QuantKey(FP8_DTYPE, True, True, True)
 kFp8DynamicTensorSym = QuantKey(FP8_DTYPE, False, True, True)
 kFp8DynamicTokenSym = QuantKey(FP8_DTYPE, False, False, True)
 
+<<<<<<< HEAD
 QUANT_OPS: Dict[QuantKey, OpOverload] = {
+=======
+QUANT_OPS: dict[QuantKey, OpOverload] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     kFp8StaticTensorSym: torch.ops._C.static_scaled_fp8_quant.default,  # noqa
     kFp8DynamicTensorSym:
     torch.ops._C.dynamic_scaled_fp8_quant.default,  # noqa
@@ -80,7 +101,11 @@ class FusedRMSQuantKey(NamedTuple):
                 f"{'' if self.fused_add else 'out'} residual)")
 
 
+<<<<<<< HEAD
 FUSED_OPS: Dict[FusedRMSQuantKey, OpOverload] = {
+=======
+FUSED_OPS: dict[FusedRMSQuantKey, OpOverload] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     FusedRMSQuantKey(kFp8StaticTensorSym, False):
     torch.ops._C.rms_norm_static_fp8_quant.default,  # noqa
     FusedRMSQuantKey(kFp8StaticTensorSym, True):
@@ -101,7 +126,11 @@ class QuantMultiOutputMatch(MultiOutputMatch):
         self.QUANT_OP = quant_op  # in-place quant op
         self.FUSED_OP = fused_op  # in-place fused quant op
 
+<<<<<<< HEAD
     def insert_fused_node(self, fused_return_mapping: Dict[int, Tuple[fx.Node,
+=======
+    def insert_fused_node(self, fused_return_mapping: dict[int, tuple[fx.Node,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                                       int]],
                           **kwargs):
         """
@@ -531,7 +560,11 @@ class FusionPass(VllmInductorPass):
     _instance: 'Optional[FusionPass]' = None
 
     @classmethod
+<<<<<<< HEAD
     def instance(cls, config: CompilationConfig.PassConfig):
+=======
+    def instance(cls, config: VllmConfig):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Get the singleton instance of the FusionPass.
         If the instance exists, the config is updated but
@@ -540,15 +573,26 @@ class FusionPass(VllmInductorPass):
         if cls._instance is None:
             cls._instance = FusionPass(config)
         else:
+<<<<<<< HEAD
             cls._instance.config = config
         return cls._instance
 
     def __init__(self, config: CompilationConfig.PassConfig):
+=======
+            cls._instance.pass_config = config.compilation_config.pass_config
+        return cls._instance
+
+    def __init__(self, config: VllmConfig):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert self.__class__._instance is None, \
             "FusionPass singleton instance already exists"
         super().__init__(config)
 
+<<<<<<< HEAD
         self.matches: List[MultiOutputMatch] = []
+=======
+        self.matches: list[MultiOutputMatch] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.patterns: PatternMatcherPass = PatternMatcherPass(
             pass_name="fusion_pass")
 

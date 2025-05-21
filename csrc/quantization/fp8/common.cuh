@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quantization/vectorization.cuh"
+<<<<<<< HEAD
 
 #include <cmath>
 #include <c10/core/ScalarType.h>
@@ -19,6 +20,29 @@ using FP8_TYPE = c10::Float8_e4m3fnuz;
 constexpr auto FP8_E4M3_MAX = 224.0f;
 #endif
 constexpr static auto kFp8Type = c10::CppTypeToScalarType<FP8_TYPE>::value;
+=======
+#include "quantization/utils.cuh"
+
+#include <cmath>
+
+#ifdef USE_ROCM
+  #include "amd/quant_utils.cuh"
+#endif
+
+// Determines the preferred FP8 type for the current platform.
+// Note that for CUDA this just returns true,
+// but on ROCm it will check device props.
+static bool is_fp8_ocp() {
+#ifndef USE_ROCM
+  return true;
+#else
+  auto dprops = at::cuda::getCurrentDeviceProperties();
+  std::string device_arch = dprops->gcnArchName;
+  size_t substring = device_arch.find("gfx94");
+  return substring == std::string::npos;
+#endif
+}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 namespace vllm {
 
@@ -32,8 +56,13 @@ __device__ __forceinline__ float atomicMaxFloat(float* addr, float value) {
   return old;
 }
 
+<<<<<<< HEAD
 template <bool is_scale_inverted>
 __device__ __forceinline__ FP8_TYPE scaled_fp8_conversion(float const val,
+=======
+template <bool is_scale_inverted, typename fp8_type>
+__device__ __forceinline__ fp8_type scaled_fp8_conversion(float const val,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                           float const scale) {
   float x = 0.0f;
   if constexpr (is_scale_inverted) {
@@ -42,6 +71,7 @@ __device__ __forceinline__ FP8_TYPE scaled_fp8_conversion(float const val,
     x = val / scale;
   }
 
+<<<<<<< HEAD
   float r = fmax(-FP8_E4M3_MAX, fmin(x, FP8_E4M3_MAX));
 #ifndef USE_ROCM
   return static_cast<c10::Float8_e4m3fn>(r);
@@ -49,6 +79,15 @@ __device__ __forceinline__ FP8_TYPE scaled_fp8_conversion(float const val,
   // Use hardware cvt instruction for fp8 on rocm
   return c10::Float8_e4m3fnuz(hip_fp8(r).data,
                               c10::Float8_e4m3fnuz::from_bits());
+=======
+  float r =
+      fmax(-quant_type_max_v<fp8_type>, fmin(x, quant_type_max_v<fp8_type>));
+#ifndef USE_ROCM
+  return static_cast<fp8_type>(r);
+#else
+  // Use hardware cvt instruction for fp8 on rocm
+  return fp8::cvt_c10<fp8_type>(r);
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #endif
 }
 
@@ -58,7 +97,11 @@ __device__ __forceinline__ FP8_TYPE scaled_fp8_conversion(float const val,
 // So to get the right answer, *scale needs to be initialized to
 // a value <= 0.0 and we need to wait for all thread blocks to
 // finish before consuming *scale.
+<<<<<<< HEAD
 template <typename scalar_t>
+=======
+template <typename scalar_t, typename fp8_type>
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 __global__ void segmented_max_reduction(float* __restrict__ scale,
                                         const scalar_t* __restrict__ input,
                                         int64_t num_elems) {
@@ -89,7 +132,11 @@ __global__ void segmented_max_reduction(float* __restrict__ scale,
   // Finally, since cache[0] contains the maximum for this thread block,
   // atomically write the max to the target location
   if (threadIdx.x == 0) {
+<<<<<<< HEAD
     atomicMaxFloat(scale, cache[0] / FP8_E4M3_MAX);
+=======
+    atomicMaxFloat(scale, cache[0] / quant_type_max_v<fp8_type>);
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   }
 }
 
@@ -121,13 +168,22 @@ __device__ float thread_max_vec(scalar_t const* __restrict__ input,
   return absmax_val;
 }
 
+<<<<<<< HEAD
 template <typename scalar_t, bool is_scale_inverted>
 __device__ void scaled_fp8_conversion_vec(FP8_TYPE* __restrict__ out,
+=======
+template <typename scalar_t, bool is_scale_inverted, typename fp8_type>
+__device__ void scaled_fp8_conversion_vec(fp8_type* __restrict__ out,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                           scalar_t const* __restrict__ input,
                                           float const scale,
                                           int64_t const num_elems,
                                           int const tid, int const step) {
+<<<<<<< HEAD
   using float8x4_t = q8x4_t<FP8_TYPE>;
+=======
+  using float8x4_t = q8x4_t<fp8_type>;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   // Vectorized input/output to better utilize memory bandwidth.
   auto const* vectorized_in = reinterpret_cast<vec4_t<scalar_t> const*>(input);
   auto* vectorized_out = reinterpret_cast<float8x4_t*>(out);
@@ -139,6 +195,7 @@ __device__ void scaled_fp8_conversion_vec(FP8_TYPE* __restrict__ out,
     vec4_t<scalar_t> in_vec = vectorized_in[i];
     float8x4_t out_vec;
 
+<<<<<<< HEAD
     out_vec.x = scaled_fp8_conversion<is_scale_inverted>(
         static_cast<float>(in_vec.x), scale);
     out_vec.y = scaled_fp8_conversion<is_scale_inverted>(
@@ -146,15 +203,32 @@ __device__ void scaled_fp8_conversion_vec(FP8_TYPE* __restrict__ out,
     out_vec.z = scaled_fp8_conversion<is_scale_inverted>(
         static_cast<float>(in_vec.z), scale);
     out_vec.w = scaled_fp8_conversion<is_scale_inverted>(
+=======
+    out_vec.x = scaled_fp8_conversion<is_scale_inverted, fp8_type>(
+        static_cast<float>(in_vec.x), scale);
+    out_vec.y = scaled_fp8_conversion<is_scale_inverted, fp8_type>(
+        static_cast<float>(in_vec.y), scale);
+    out_vec.z = scaled_fp8_conversion<is_scale_inverted, fp8_type>(
+        static_cast<float>(in_vec.z), scale);
+    out_vec.w = scaled_fp8_conversion<is_scale_inverted, fp8_type>(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         static_cast<float>(in_vec.w), scale);
     vectorized_out[i] = out_vec;
   }
 
   // Handle the remaining elements if num_elems is not divisible by 4
   for (int64_t i = num_vec_elems * 4 + tid; i < num_elems; i += step) {
+<<<<<<< HEAD
     out[i] = scaled_fp8_conversion<is_scale_inverted>(
+=======
+    out[i] = scaled_fp8_conversion<is_scale_inverted, fp8_type>(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         static_cast<float>(input[i]), scale);
   }
 }
 
+<<<<<<< HEAD
 }  // namespace vllm
+=======
+}  // namespace vllm
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

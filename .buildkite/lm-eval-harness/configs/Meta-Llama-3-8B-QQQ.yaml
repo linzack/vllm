@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# For vllm script, with -t option (tensor parallel size).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # bash .buildkite/lm-eval-harness/run-lm-eval-gsm-vllm-baseline.sh -m HandH1998/QQQ-Llama-3-8b-g128 -b 32 -l 1000 -f 5 -t 1
 model_name: "HandH1998/QQQ-Llama-3-8b-g128"
 tasks:

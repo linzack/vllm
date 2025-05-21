@@ -28,4 +28,17 @@ def _prev_minor_version_was(version_str):
         return True
 
     # Note - this won't do the right thing when we release 1.0!
+<<<<<<< HEAD
     return version_str == f"{__version_tuple__[0]}.{__version_tuple__[1] - 1}"
+=======
+    assert __version_tuple__[0] == 0
+    assert isinstance(__version_tuple__[1], int)
+    return version_str == f"{__version_tuple__[0]}.{__version_tuple__[1] - 1}"
+
+
+def _prev_minor_version():
+    """For the purpose of testing, return a previous minor version number."""
+    # In dev tree, this will return "0.-1", but that will work fine"
+    assert isinstance(__version_tuple__[1], int)
+    return f"{__version_tuple__[0]}.{__version_tuple__[1] - 1}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

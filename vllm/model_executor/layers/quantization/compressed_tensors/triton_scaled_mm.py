@@ -1,10 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Optional, Type
 
 import torch
 import triton
 import triton.language as tl
+=======
+from typing import Optional
+
+import torch
+
+from vllm.triton_utils import tl, triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def is_weak_contiguous(x: torch.Tensor):
@@ -126,7 +134,11 @@ def triton_scaled_mm(input: torch.Tensor,
                      weight: torch.Tensor,
                      scale_a: torch.Tensor,
                      scale_b: torch.Tensor,
+<<<<<<< HEAD
                      out_dtype: Type[torch.dtype],
+=======
+                     out_dtype: type[torch.dtype],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                      bias: Optional[torch.Tensor] = None,
                      block_size_m: int = 32,
                      block_size_n: int = 32,

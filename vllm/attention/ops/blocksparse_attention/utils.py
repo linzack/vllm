@@ -8,7 +8,12 @@ from functools import lru_cache
 
 import numpy as np
 import torch
+<<<<<<< HEAD
 import triton
+=======
+
+from vllm.triton_utils import triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class csr_matrix:

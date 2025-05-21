@@ -10,7 +10,11 @@ import torch
 from huggingface_hub import snapshot_download
 
 from vllm import LLM, SamplingParams
+<<<<<<< HEAD
 from vllm.model_executor.model_loader.loader import ShardedStateLoader
+=======
+from vllm.model_executor.model_loader import ShardedStateLoader
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 prompts = [
     "Hello, my name is",
@@ -47,12 +51,19 @@ def test_filter_subtensors():
 
 @pytest.fixture(scope="module")
 def llama_3p2_1b_files():
+<<<<<<< HEAD
     with TemporaryDirectory() as cache_dir:
         input_dir = snapshot_download("meta-llama/Llama-3.2-1B-Instruct",
                                       cache_dir=cache_dir,
                                       ignore_patterns=["*.bin*", "original/*"])
 
         yield input_dir
+=======
+    input_dir = snapshot_download("meta-llama/Llama-3.2-1B-Instruct",
+                                  ignore_patterns=["*.bin*", "original/*"])
+
+    yield input_dir
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def _run_writer(input_dir, output_dir, weights_patterns, **kwargs):
@@ -64,9 +75,15 @@ def _run_writer(input_dir, output_dir, weights_patterns, **kwargs):
 
     # Copy metadata files to output directory
     for file in os.listdir(input_dir):
+<<<<<<< HEAD
         if not any(
                 file.endswith(ext) and not os.path.isdir(file)
                 for ext in weights_patterns):
+=======
+        if os.path.isdir(os.path.join(input_dir, file)):
+            continue
+        if not any(file.endswith(ext) for ext in weights_patterns):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             shutil.copy(f"{input_dir}/{file}", output_dir)
 
 
@@ -81,7 +98,12 @@ def _run_generate(input_dir, queue: mp.Queue, **kwargs):
 @pytest.mark.parametrize("enable_lora", [False, True])
 @pytest.mark.parametrize("tp_size", [1, 2])
 def test_sharded_state_loader(enable_lora, tp_size, num_gpus_available,
+<<<<<<< HEAD
                               llama_3p2_1b_files):
+=======
+                              llama_3p2_1b_files,
+                              monkeypatch: pytest.MonkeyPatch):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if num_gpus_available < tp_size:
         pytest.skip(f"Not enough GPUs for tensor parallelism {tp_size}")
 
@@ -89,6 +111,11 @@ def test_sharded_state_loader(enable_lora, tp_size, num_gpus_available,
     gpu_memory_utilization = 0.8
     input_dir = llama_3p2_1b_files
     ctx = mp.get_context("spawn")
+<<<<<<< HEAD
+=======
+    # The interface in v1 engine has changed, run in v1 engine will hang.
+    monkeypatch.setenv("VLLM_USE_V1", "0")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Run in separate processes for memory & CUDA isolation
     with TemporaryDirectory() as output_dir:

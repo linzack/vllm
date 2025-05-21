@@ -3,7 +3,11 @@
 import random
 from copy import deepcopy
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Dict, List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from unittest.mock import patch
 
 import pytest
@@ -14,22 +18,37 @@ from vllm.config import LoRAConfig
 from vllm.lora.fully_sharded_layers import (
     ColumnParallelLinearWithShardedLoRA,
     MergedColumnParallelLinearWithShardedLoRA,
+<<<<<<< HEAD
     MergedQKVParallelLinearWithShardedLora, QKVParallelLinearWithShardedLora,
+=======
+    MergedQKVParallelLinearWithShardedLoRA, QKVParallelLinearWithShardedLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     RowParallelLinearWithShardedLoRA)
 # yapf conflicts with isort for this block
 # yapf: disable
 from vllm.lora.layers import (BaseLayerWithLoRA, ColumnParallelLinearWithLoRA,
+<<<<<<< HEAD
                               LinearScalingRotaryEmbeddingWithLora,
                               LogitsProcessorWithLoRA, LoRAMapping,
                               MergedColumnParallelLinearWithLoRA,
                               MergedQKVParallelLinearWithLora,
                               QKVParallelLinearWithLora,
+=======
+                              LogitsProcessorWithLoRA, LoRAMapping,
+                              MergedColumnParallelLinearWithLoRA,
+                              MergedQKVParallelLinearWithLoRA,
+                              QKVParallelLinearWithLoRA,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                               ReplicatedLinearWithLoRA,
                               RowParallelLinearWithLoRA,
                               VocabParallelEmbeddingWithLoRA)
 # yapf: enable
+<<<<<<< HEAD
 from vllm.lora.models import (LongContextLoRAContext, LoRALayerWeights,
                               PackedLoRALayerWeights)
+=======
+from vllm.lora.models import LoRALayerWeights, PackedLoRALayerWeights
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.lora.punica_wrapper import get_punica_wrapper
 from vllm.model_executor.layers.linear import (ColumnParallelLinear,
                                                MergedColumnParallelLinear,
@@ -37,7 +56,10 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
                                                ReplicatedLinear,
                                                RowParallelLinear)
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
+<<<<<<< HEAD
 from vllm.model_executor.layers.rotary_embedding import get_rope
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding, get_masked_input_and_mask)
 from vllm.model_executor.utils import set_random_seed
@@ -59,6 +81,7 @@ DEVICES = ([
     f"cuda:{i}" for i in range(1 if torch.cuda.device_count() == 1 else 2)
 ] if current_platform.is_cuda_alike() else ["cpu"])
 
+<<<<<<< HEAD
 #For GPU, we will launch different triton kernels between the prefill and decode
 # stages, so we need to verify this. prefill stage(True) or decode stage(False)
 STAGES = [True, False]
@@ -67,6 +90,48 @@ STAGES = [True, False]
 def get_random_id_to_index(num_loras: int,
                            num_slots: int,
                            log: bool = True) -> List[Optional[int]]:
+=======
+# prefill stage(True) or decode stage(False)
+STAGES = [True, False]
+
+NUM_RANDOM_SEEDS = 6
+
+VOCAB_PARALLEL_EMBEDDING_TEST_NUM_RANDOM_SEEDS = 128
+
+
+@pytest.fixture(autouse=True)
+def clean_cache_reset_device(reset_default_device):
+    # Release any memory we might be holding on to. CI runs OOMs otherwise.
+    from vllm.lora.ops.triton_ops.utils import (_LORA_A_PTR_DICT,
+                                                _LORA_B_PTR_DICT)
+    _LORA_B_PTR_DICT.clear()
+    _LORA_A_PTR_DICT.clear()
+
+    yield
+
+
+@pytest.fixture(autouse=True)
+def skip_cuda_with_stage_false(request):
+    """
+    On cuda-like platforms, we use the same kernels for prefill and decode 
+    stage, and 'stage' is generally ignored, so we only need to test once.
+    """
+    if current_platform.is_cuda_alike():
+        try:
+            if hasattr(request.node, "callspec") and hasattr(
+                    request.node.callspec, "params"):
+                params = request.node.callspec.params
+                if "stage" in params and params["stage"] is False:
+                    pytest.skip("Skip test when stage=False")
+        except Exception:
+            pass
+    yield
+
+
+def get_random_id_to_index(num_loras: int,
+                           num_slots: int,
+                           log: bool = True) -> list[Optional[int]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Creates a random lora_id_to_index mapping.
 
     Args:
@@ -81,7 +146,11 @@ def get_random_id_to_index(num_loras: int,
             f"num_loras is higher than num_slots: {num_loras} > {num_slots}. "
             "num_loras must be less than or equal to num_slots.")
 
+<<<<<<< HEAD
     slots: List[Optional[int]] = [None] * num_slots
+=======
+    slots: list[Optional[int]] = [None] * num_slots
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     random_slot_selections = (torch.randperm(num_slots)[:num_loras]).tolist()
     for lora_id, slot_idx in enumerate(random_slot_selections, start=1):
         slots[slot_idx] = lora_id
@@ -93,12 +162,20 @@ def get_random_id_to_index(num_loras: int,
 
 
 def populate_loras(
+<<<<<<< HEAD
     id_to_index: List[Optional[int]],
+=======
+    id_to_index: list[Optional[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     layer: BaseLayerWithLoRA,
     layer_weights: torch.Tensor,
     generate_embeddings_tensor: int = 0,
     repeats: int = 1,
+<<<<<<< HEAD
 ) -> Tuple[Dict[int, LoRALayerWeights], Dict[int, List[LoRALayerWeights]]]:
+=======
+) -> tuple[dict[int, LoRALayerWeights], dict[int, list[LoRALayerWeights]]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """This method populates the lora layers with lora weights.
 
     Args:
@@ -117,6 +194,7 @@ def populate_loras(
 
     # Dictionary that maps the lora ID to the
     # corresponding lora weights.
+<<<<<<< HEAD
     lora_dict: Dict[int, LoRALayerWeights] = dict()
 
     # Dictionary that maps the lora ID to the
@@ -126,6 +204,17 @@ def populate_loras(
     for slot_idx, lora_id in enumerate(id_to_index):
         if lora_id is not None:
             subloras: List[LoRALayerWeights] = []
+=======
+    lora_dict: dict[int, LoRALayerWeights] = dict()
+
+    # Dictionary that maps the lora ID to the
+    # corresponding subloras.
+    sublora_dict: dict[int, list[LoRALayerWeights]] = dict()
+
+    for slot_idx, lora_id in enumerate(id_to_index):
+        if lora_id is not None:
+            subloras: list[LoRALayerWeights] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             sublora_len = layer_weights.shape[0] // repeats
             for i in range(repeats):
                 sublora = DummyLoRAManager(
@@ -156,6 +245,7 @@ def populate_loras(
 
 
 def create_random_inputs(
+<<<<<<< HEAD
     active_lora_ids: List[int],
     num_inputs: int,
     input_size: Tuple[int, ...],
@@ -163,6 +253,15 @@ def create_random_inputs(
     input_type: torch.dtype = torch.int,
     device: torch.device = "cuda"
 ) -> Tuple[List[torch.Tensor], List[int], List[int]]:
+=======
+    active_lora_ids: list[int],
+    num_inputs: int,
+    input_size: tuple[int, ...],
+    input_range: tuple[float, float],
+    input_type: torch.dtype = torch.int,
+    device: torch.device = "cuda"
+) -> tuple[list[torch.Tensor], list[int], list[int]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Creates random inputs.
 
     Args:
@@ -176,9 +275,15 @@ def create_random_inputs(
 
     low, high = input_range
 
+<<<<<<< HEAD
     inputs: List[torch.Tensor] = []
     index_mapping: List[int] = []
     prompt_mapping: List[int] = []
+=======
+    inputs: list[torch.Tensor] = []
+    index_mapping: list[int] = []
+    prompt_mapping: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for _ in range(num_inputs):
         if input_type == torch.int:
@@ -226,7 +331,11 @@ def test_embeddings(dist_init, num_loras, device, vocab_size, stage) -> None:
 
     torch.set_default_device(device)
     max_loras = 8
+<<<<<<< HEAD
     punica_wrapper = get_punica_wrapper(8192, 256, device)
+=======
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert check_punica_wrapper(punica_wrapper)
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
@@ -241,7 +350,11 @@ def test_embeddings(dist_init, num_loras, device, vocab_size, stage) -> None:
 
         return embedding, lora_embedding
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
@@ -268,7 +381,11 @@ def test_embeddings(dist_init, num_loras, device, vocab_size, stage) -> None:
 
         lora_result = lora_embedding(torch.cat(inputs))
 
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, lora_id in zip(inputs, prompt_mapping):
             lora = lora_dict[lora_id]
             result = embedding(input_)
@@ -329,7 +446,11 @@ def test_embeddings_with_new_embeddings(dist_init, num_loras, device,
 
     torch.set_default_device(device)
     max_loras = 8
+<<<<<<< HEAD
     punica_wrapper = get_punica_wrapper(8192, 256, device)
+=======
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert check_punica_wrapper(punica_wrapper)
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
@@ -353,7 +474,11 @@ def test_embeddings_with_new_embeddings(dist_init, num_loras, device,
 
         return expanded_embedding, lora_embedding
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
@@ -408,7 +533,11 @@ def test_embeddings_with_new_embeddings(dist_init, num_loras, device,
 
         lora_result = lora_embedding(torch.cat(original_inputs))
 
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, original_input_, lora_id in zip(inputs, original_inputs,
                                                     prompt_mapping):
             lora = lora_dict[lora_id]
@@ -468,7 +597,11 @@ def test_lm_head_logits_processor(dist_init, num_loras, device, vocab_size,
 
     torch.set_default_device(device)
     max_loras = 8
+<<<<<<< HEAD
     punica_wrapper = get_punica_wrapper(8192, 256, device)
+=======
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert check_punica_wrapper(punica_wrapper)
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
@@ -490,7 +623,11 @@ def test_lm_head_logits_processor(dist_init, num_loras, device, vocab_size,
 
         return linear, logits_processor, lora_logits_processor
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
@@ -538,7 +675,11 @@ def test_lm_head_logits_processor(dist_init, num_loras, device, vocab_size,
 
         logits_processor.org_vocab_size = (vocab_size +
                                            lora_config.lora_extra_vocab_size)
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, lora_id in zip(inputs, prompt_mapping):
             lora = lora_dict[lora_id]
             result = logits_processor._get_logits(hidden_states=input_,
@@ -600,10 +741,17 @@ def test_linear_replicated(dist_init, num_loras, device, stage,
     if current_platform.is_cuda_alike():
         torch.cuda.set_device(device)
 
+<<<<<<< HEAD
     torch.set_default_device(device)
     punica_wrapper = get_punica_wrapper(8192, 256, device)
     assert check_punica_wrapper(punica_wrapper)
     max_loras = 8
+=======
+    max_loras = 8
+    torch.set_default_device(device)
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+    assert check_punica_wrapper(punica_wrapper)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
                              lora_dtype=torch.float16,
@@ -627,11 +775,19 @@ def test_linear_replicated(dist_init, num_loras, device, stage,
             assert lora_linear.lora_bias_stacked is None
         return linear, lora_linear
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
         linear, lora_linear = create_random_linear_replicated_layer()
+<<<<<<< HEAD
+=======
+        assert torch.equal(linear.weight, lora_linear.weight)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_linear.set_mapping(punica_wrapper)
         lora_dict, _ = populate_loras(
             id_to_index,
@@ -659,7 +815,11 @@ def test_linear_replicated(dist_init, num_loras, device, stage,
 
         lora_result = lora_linear(torch.cat(inputs))[0]
 
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, lora_id in zip(inputs, prompt_mapping):
             lora = lora_dict[lora_id]
             result = linear(input_)[0]
@@ -715,10 +875,17 @@ def test_linear_parallel(dist_init, num_loras, orientation, fully_shard,
     if current_platform.is_cuda_alike():
         torch.cuda.set_device(device)
 
+<<<<<<< HEAD
     torch.set_default_device(device)
     punica_wrapper = get_punica_wrapper(8192, 256, device)
     assert check_punica_wrapper(punica_wrapper)
     max_loras = 8
+=======
+    max_loras = 8
+    torch.set_default_device(device)
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+    assert check_punica_wrapper(punica_wrapper)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
                              fully_sharded_loras=fully_shard,
@@ -752,11 +919,19 @@ def test_linear_parallel(dist_init, num_loras, orientation, fully_shard,
             assert lora_linear.lora_bias_stacked is None
         return linear, lora_linear
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
         linear, lora_linear = create_random_linear_parallel_layer()
+<<<<<<< HEAD
+=======
+        assert torch.equal(linear.weight, lora_linear.weight)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_linear.set_mapping(punica_wrapper)
         lora_dict, _ = populate_loras(
             id_to_index,
@@ -784,7 +959,11 @@ def test_linear_parallel(dist_init, num_loras, orientation, fully_shard,
 
         lora_result = lora_linear(torch.cat(inputs))[0]
 
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, lora_id in zip(inputs, prompt_mapping):
             lora = lora_dict[lora_id]
             result = linear(input_)[0]
@@ -840,10 +1019,17 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
     if current_platform.is_cuda_alike():
         torch.cuda.set_device(device)
 
+<<<<<<< HEAD
     torch.set_default_device(device)
     punica_wrapper = get_punica_wrapper(8192, 256, device)
     assert check_punica_wrapper(punica_wrapper)
     max_loras = 8
+=======
+    max_loras = 8
+    torch.set_default_device(device)
+    punica_wrapper = get_punica_wrapper(8192, 256, device, max_loras=max_loras)
+    assert check_punica_wrapper(punica_wrapper)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     lora_config = LoRAConfig(max_loras=max_loras,
                              max_lora_rank=8,
                              fully_sharded_loras=fully_shard,
@@ -866,9 +1052,15 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
                                        bias=False,
                                        params_dtype=torch.float16)
             linear.weight.data = torch.rand_like(linear.weight.data)
+<<<<<<< HEAD
             lora_linear = (MergedQKVParallelLinearWithLora(linear)
                            if not fully_shard else
                            MergedQKVParallelLinearWithShardedLora(linear))
+=======
+            lora_linear = (MergedQKVParallelLinearWithLoRA(linear)
+                           if not fully_shard else
+                           MergedQKVParallelLinearWithShardedLoRA(linear))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             linear = QKVParallelLinear(4096,
                                        64,
@@ -876,9 +1068,15 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
                                        bias=False,
                                        params_dtype=torch.float16)
             linear.weight.data = torch.rand_like(linear.weight.data)
+<<<<<<< HEAD
             lora_linear = QKVParallelLinearWithLora(
                 linear
             ) if not fully_shard else QKVParallelLinearWithShardedLora(linear)
+=======
+            lora_linear = QKVParallelLinearWithLoRA(
+                linear
+            ) if not fully_shard else QKVParallelLinearWithShardedLoRA(linear)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         @dataclass
         class FakeConfig:
@@ -898,12 +1096,20 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
             assert lora_linear.lora_bias_stacked is None
         return linear, lora_linear
 
+<<<<<<< HEAD
     for i in range(10):
+=======
+    for i in range(NUM_RANDOM_SEEDS):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         set_random_seed(i)
 
         id_to_index = get_random_id_to_index(num_loras, max_loras)
 
         linear, lora_linear = create_column_parallel_packed_layer()
+<<<<<<< HEAD
+=======
+        assert torch.equal(linear.weight, lora_linear.weight)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_linear.set_mapping(punica_wrapper)
         lora_dict, sublora_dict = populate_loras(
             id_to_index,
@@ -933,7 +1139,11 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
 
         lora_result = lora_linear(torch.cat(inputs))[0]
 
+<<<<<<< HEAD
         expected_results: List[torch.Tensor] = []
+=======
+        expected_results: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for input_, lora_id in zip(inputs, prompt_mapping):
             result = linear(input_)[0]
             subloras = sublora_dict[lora_id]
@@ -982,6 +1192,7 @@ def test_column_parallel_packed(dist_init, num_loras, repeats, fully_shard,
                                    atol=atol)
 
 
+<<<<<<< HEAD
 @torch.inference_mode()
 @pytest.mark.parametrize("num_loras", [1, 8])
 @pytest.mark.parametrize("device", ["cuda"])
@@ -1081,6 +1292,11 @@ def test_rotary_embedding_long_context(dist_init, num_loras, device,
 
 @pytest.mark.parametrize("tp_size", [1, 2, 4, 8])
 @pytest.mark.parametrize("seed", list(range(256)))
+=======
+@pytest.mark.parametrize("tp_size", [1, 2, 4, 8])
+@pytest.mark.parametrize(
+    "seed", list(range(VOCAB_PARALLEL_EMBEDDING_TEST_NUM_RANDOM_SEEDS)))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_vocab_parallel_embedding_indices(tp_size, seed):
     random.seed(seed)
     vocab_size = random.randint(4000, 64000)
@@ -1093,9 +1309,15 @@ def test_vocab_parallel_embedding_indices(tp_size, seed):
     computed_added_vocab_size = 0
     vocab_size_padded = -1
 
+<<<<<<< HEAD
     all_org_tokens: List[int] = []
     all_added_tokens: List[int] = []
     token_ids: List[int] = []
+=======
+    all_org_tokens: list[int] = []
+    all_added_tokens: list[int] = []
+    token_ids: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for tp_rank in range(tp_size):
         with patch(

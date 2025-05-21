@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import torch
 
 from vllm.v1.utils import bind_kv_cache
@@ -22,7 +25,11 @@ def test_bind_kv_cache():
         'layers.2.self_attn': torch.zeros((1, )),
         'layers.3.self_attn': torch.zeros((1, )),
     }
+<<<<<<< HEAD
     runner_kv_caches: List[torch.Tensor] = []
+=======
+    runner_kv_caches: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     bind_kv_cache(kv_cache, ctx, runner_kv_caches)
     assert ctx['layers.0.self_attn'].kv_cache[0] is kv_cache[
         'layers.0.self_attn']
@@ -52,7 +59,11 @@ def test_bind_kv_cache_non_attention():
         'model.layers.28.attn': torch.zeros((1, )),
     }
 
+<<<<<<< HEAD
     runner_kv_caches: List[torch.Tensor] = []
+=======
+    runner_kv_caches: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     bind_kv_cache(kv_cache, ctx, runner_kv_caches)
 
     assert ctx['model.layers.20.attn'].kv_cache[0] is kv_cache[

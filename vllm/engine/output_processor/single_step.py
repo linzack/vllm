@@ -19,7 +19,11 @@ logger = init_logger(__name__)
 def single_step_process_prompt_logprob(
         sg_output_proc: SequenceGroupOutputProcessor, seq_group: SequenceGroup,
         output: CompletionSequenceGroupOutput) -> None:
+<<<<<<< HEAD
     """Process prompt logprobs associated with the :class:`SequenceGroupOutput`
+=======
+    """Process prompt logprobs associated with the {class}`SequenceGroupOutput`
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for a given step.
 
     Do nothing if the output has no prompt logprobs.
@@ -27,9 +31,15 @@ def single_step_process_prompt_logprob(
     Account for the fact that transformers do not compute first-token logprobs.
     
     Args:
+<<<<<<< HEAD
       sg_output_proc: :class:`SequenceGroupOutputProcessor` instance
       seq_group: the output is associated with this :class:`SequenceGroup`
       output: the :class:`SequenceGroupOutput` for a single scheduler step
+=======
+      sg_output_proc: {class}`SequenceGroupOutputProcessor` instance
+      seq_group: the output is associated with this {class}`SequenceGroup`
+      output: the {class}`SequenceGroupOutput` for a single scheduler step
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     prompt_logprobs = output.prompt_logprobs
 
@@ -103,8 +113,13 @@ class SingleStepOutputProcessor(SequenceGroupOutputProcessor):
         scheduled computation.
         
         Args:
+<<<<<<< HEAD
           seq_group: the output is associated with this :class:`SequenceGroup`
           outputs: the :class:`SequenceGroupOutput` for a single scheduler step
+=======
+          seq_group: the output is associated with this {class}`SequenceGroup`
+          outputs: the {class}`SequenceGroupOutput` for a single scheduler step
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         assert len(outputs) == 1, "Single step should only have 1 output."
         output = outputs[0]
@@ -119,7 +134,12 @@ class SingleStepOutputProcessor(SequenceGroupOutputProcessor):
         sample = outputs.samples[0]
         seq = seq_group.first_seq
         if not is_async:
+<<<<<<< HEAD
             seq.append_token_id(sample.output_token, sample.logprobs)
+=======
+            seq.append_token_id(sample.output_token, sample.logprobs,
+                                sample.output_embed)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if sampling_params.detokenize and self.detokenizer:
             new_char_count = self.detokenizer.decode_sequence_inplace(
                 seq, sampling_params)

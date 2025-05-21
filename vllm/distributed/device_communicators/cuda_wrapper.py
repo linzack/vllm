@@ -6,7 +6,11 @@ convenient for use when we just need to call a few functions.
 
 import ctypes
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # this line makes it possible to directly load `libcudart.so` using `ctypes`
 import torch  # noqa
@@ -32,7 +36,11 @@ class cudaIpcMemHandle_t(ctypes.Structure):
 class Function:
     name: str
     restype: Any
+<<<<<<< HEAD
     argtypes: List[Any]
+=======
+    argtypes: list[Any]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def find_loaded_library(lib_name) -> Optional[str]:
@@ -97,11 +105,19 @@ class CudaRTLibrary:
 
     # class attribute to store the mapping from the path to the library
     # to avoid loading the same library multiple times
+<<<<<<< HEAD
     path_to_library_cache: Dict[str, Any] = {}
 
     # class attribute to store the mapping from library path
     #  to the corresponding dictionary
     path_to_dict_mapping: Dict[str, Dict[str, Any]] = {}
+=======
+    path_to_library_cache: dict[str, Any] = {}
+
+    # class attribute to store the mapping from library path
+    #  to the corresponding dictionary
+    path_to_dict_mapping: dict[str, dict[str, Any]] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self, so_file: Optional[str] = None):
         if so_file is None:

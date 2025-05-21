@@ -1,11 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Set, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import (get_pp_group, get_tensor_model_parallel_rank,
                               get_tensor_model_parallel_world_size)
@@ -16,7 +25,10 @@ from vllm.model_executor.layers.linear import (QKVParallelLinear,
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.rotary_embedding import get_rope
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     DEFAULT_VOCAB_PADDING_SIZE, ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import (
@@ -26,7 +38,11 @@ from vllm.sequence import IntermediateTensors
 from vllm.transformers_utils.configs.dbrx import DbrxConfig
 
 from .interfaces import SupportsPP
+<<<<<<< HEAD
 from .utils import (is_pp_missing_parameter,
+=======
+from .utils import (AutoWeightsLoader, is_pp_missing_parameter,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     make_empty_intermediate_tensors_factory, make_layers,
                     maybe_prefix)
 
@@ -65,6 +81,10 @@ class DbrxExperts(FusedMoE):
         config: DbrxConfig,
         quant_config: Optional[QuantizationConfig] = None,
         params_dtype: Optional[torch.dtype] = None,
+<<<<<<< HEAD
+=======
+        prefix: str = "",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ):
         super().__init__(
             num_experts=config.ffn_config.moe_num_experts,
@@ -76,9 +96,15 @@ class DbrxExperts(FusedMoE):
             renormalize=True,
             quant_config=quant_config,
             tp_size=get_tensor_model_parallel_world_size(),
+<<<<<<< HEAD
         )
         self.config = config
         self.tp_size = get_tensor_model_parallel_world_size()
+=======
+            prefix=prefix,
+        )
+        self.config = config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.d_model = config.d_model
         self.intermediate_size = (self.config.ffn_config.ffn_hidden_size //
                                   self.tp_size)
@@ -139,6 +165,10 @@ class DbrxMoE(nn.Module):
         config: DbrxConfig,
         quant_config: Optional[QuantizationConfig] = None,
         params_dtype: Optional[torch.dtype] = None,
+<<<<<<< HEAD
+=======
+        prefix: str = "",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ):
         super().__init__()
         self.d_model = config.d_model
@@ -150,7 +180,12 @@ class DbrxMoE(nn.Module):
 
         self.experts = DbrxExperts(config=config,
                                    quant_config=quant_config,
+<<<<<<< HEAD
                                    params_dtype=self.params_dtype)
+=======
+                                   params_dtype=self.params_dtype,
+                                   prefix=f"{prefix}.experts")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         orig_shape = hidden_states.shape
@@ -230,15 +265,22 @@ class DbrxAttention(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         qkv, _ = self.Wqkv(hidden_states)
         if self.clip_qkv is not None:
             qkv.clamp_(min=-self.clip_qkv, max=self.clip_qkv)
         q, k, v = qkv.split([self.q_size, self.kv_size, self.kv_size], dim=-1)
         q, k = self.rotary_emb(position_ids, q, k)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         hidden_states, _ = self.out_proj(attn_output)
         return hidden_states
 
@@ -265,16 +307,22 @@ class DbrxFusedNormAttention(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         residual = hidden_states
         hidden_states = self.norm_1(hidden_states)
         x = self.attn(
             position_ids=position_ids,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
         hidden_states = residual + x
         residual = hidden_states
@@ -297,20 +345,30 @@ class DbrxBlock(nn.Module):
             cache_config,
             quant_config,
             prefix=f"{prefix}.norm_attn_norm")
+<<<<<<< HEAD
         self.ffn = DbrxMoE(config, quant_config)
+=======
+        self.ffn = DbrxMoE(config, quant_config, prefix=f"{prefix}.ffn")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def forward(
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         hidden_states, residual = self.norm_attn_norm(
             position_ids=position_ids,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
         hidden_states = self.ffn(hidden_states)
         hidden_states = hidden_states + residual
@@ -326,6 +384,10 @@ class DbrxModel(nn.Module):
         cache_config = vllm_config.cache_config
         quant_config = vllm_config.quant_config
 
+<<<<<<< HEAD
+=======
+        self.quant_config = quant_config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.wte = VocabParallelEmbedding(
             config.vocab_size,
             config.d_model,
@@ -353,8 +415,11 @@ class DbrxModel(nn.Module):
         self,
         input_ids: torch.Tensor,
         position_ids: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors],
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -366,6 +431,7 @@ class DbrxModel(nn.Module):
         else:
             assert intermediate_tensors
             hidden_states = intermediate_tensors["hidden_states"]
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             block = self.blocks[i]
             hidden_states = block(
@@ -374,11 +440,16 @@ class DbrxModel(nn.Module):
                 kv_caches[i - self.start_layer],
                 attn_metadata,
             )
+=======
+        for block in self.blocks[self.start_layer:self.end_layer]:
+            hidden_states = block(position_ids, hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if not get_pp_group().is_last_rank:
             return IntermediateTensors({"hidden_states": hidden_states})
         hidden_states = self.norm_f(hidden_states)
         return hidden_states
 
+<<<<<<< HEAD
 
 class DbrxForCausalLM(nn.Module, SupportsPP):
 
@@ -444,12 +515,20 @@ class DbrxForCausalLM(nn.Module, SupportsPP):
 
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         expert_params_mapping = [(
             "w13" if weight_name in ["w1", "v1"] else "w2",
             f"mlp.{weight_name}",
         ) for weight_name in ["w1", "v1", "w2"]]
         params_dict = dict(self.named_parameters(remove_duplicate=False))
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for name, loaded_weight in weights:
             if (self.quant_config is not None and
@@ -478,6 +557,7 @@ class DbrxForCausalLM(nn.Module, SupportsPP):
                 break
 
             else:
+<<<<<<< HEAD
                 # Remapping the name of FP8 kv-scale.
                 name = maybe_remap_kv_scale_name(name, params_dict)
                 if name is None:
@@ -485,6 +565,11 @@ class DbrxForCausalLM(nn.Module, SupportsPP):
 
                 if is_pp_missing_parameter(name, self):
                     continue
+=======
+                if is_pp_missing_parameter(name, self):
+                    continue
+                # Remapping the name of FP8 kv-scale.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 name = maybe_remap_kv_scale_name(name, params_dict)
                 if name is None:
                     continue
@@ -494,3 +579,62 @@ class DbrxForCausalLM(nn.Module, SupportsPP):
                 weight_loader(param, loaded_weight)
             loaded_params.add(name)
         return loaded_params
+<<<<<<< HEAD
+=======
+
+
+class DbrxForCausalLM(nn.Module, SupportsPP):
+
+    def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
+        super().__init__()
+        config = vllm_config.model_config.hf_config
+        quant_config = vllm_config.quant_config
+        self.config = config
+        if config.tie_word_embeddings:
+            raise ValueError(
+                "tie_word_embeddings is not supported for Dbrx models.")
+        self.quant_config = quant_config
+        self.unpadded_vocab_size = config.vocab_size
+        self.transformer = DbrxModel(vllm_config=vllm_config,
+                                     prefix=maybe_prefix(
+                                         prefix, "transformer"))
+        self.lm_head = ParallelLMHead(
+            config.vocab_size,
+            config.d_model,
+            org_num_embeddings=config.vocab_size,
+            padding_size=DEFAULT_VOCAB_PADDING_SIZE,
+            quant_config=quant_config,
+        )
+        self.logits_processor = LogitsProcessor(self.unpadded_vocab_size,
+                                                config.vocab_size)
+        self.make_empty_intermediate_tensors = (
+            self.transformer.make_empty_intermediate_tensors)
+
+    def get_input_embeddings(self, input_ids: torch.Tensor) -> torch.Tensor:
+        return self.transformer.get_input_embeddings(input_ids)
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        positions: torch.Tensor,
+        intermediate_tensors: Optional[IntermediateTensors] = None,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> Union[torch.Tensor, IntermediateTensors]:
+        hidden_states = self.transformer(input_ids, positions,
+                                         intermediate_tensors, inputs_embeds)
+        return hidden_states
+
+    def compute_logits(
+        self,
+        hidden_states: torch.Tensor,
+        sampling_metadata: SamplingMetadata,
+    ) -> Optional[torch.Tensor]:
+        logits = self.logits_processor(self.lm_head, hidden_states,
+                                       sampling_metadata)
+        return logits
+
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        loader = AutoWeightsLoader(self)
+        return loader.load_weights(weights)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

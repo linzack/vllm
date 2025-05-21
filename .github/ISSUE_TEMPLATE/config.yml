@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+<<<<<<< HEAD
+=======
+contact_links:
+  - name: Questions
+    url: https://discuss.vllm.ai
+    about: Ask questions and discuss with other vLLM community members
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

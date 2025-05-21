@@ -16,9 +16,24 @@ namespace vec_op {
   AT_DISPATCH_CASE(at::ScalarType::BFloat16, __VA_ARGS__) \
   AT_DISPATCH_CASE(at::ScalarType::Half, __VA_ARGS__)
 
+<<<<<<< HEAD
 #define VLLM_DISPATCH_FLOATING_TYPES(TYPE, NAME, ...) \
   AT_DISPATCH_SWITCH(TYPE, NAME, VLLM_DISPATCH_CASE_FLOATING_TYPES(__VA_ARGS__))
 
+=======
+#define VLLM_DISPATCH_CASE_FLOATING_TYPES_FP8(...)        \
+  AT_DISPATCH_CASE(at::ScalarType::Float, __VA_ARGS__)    \
+  AT_DISPATCH_CASE(at::ScalarType::BFloat16, __VA_ARGS__) \
+  AT_DISPATCH_CASE(at::ScalarType::Float8_e5m2, __VA_ARGS__)
+
+#define VLLM_DISPATCH_FLOATING_TYPES(TYPE, NAME, ...) \
+  AT_DISPATCH_SWITCH(TYPE, NAME, VLLM_DISPATCH_CASE_FLOATING_TYPES(__VA_ARGS__))
+
+#define VLLM_DISPATCH_FLOATING_TYPES_WITH_E5M2(TYPE, NAME, ...) \
+  AT_DISPATCH_SWITCH(TYPE, NAME,                                \
+                     VLLM_DISPATCH_CASE_FLOATING_TYPES_FP8(__VA_ARGS__))
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #ifndef CPU_OP_GUARD
   #define CPU_KERNEL_GUARD_IN(NAME)
   #define CPU_KERNEL_GUARD_OUT(NAME)
@@ -69,9 +84,20 @@ struct FP16Vec16 : public Vec<FP16Vec16> {
 
   __m256i reg;
 
+<<<<<<< HEAD
   explicit FP16Vec16(const void* ptr)
       : reg((__m256i)_mm256_loadu_si256((__m256i*)ptr)) {}
 
+=======
+  // normal load
+  explicit FP16Vec16(const void* ptr)
+      : reg((__m256i)_mm256_loadu_si256((__m256i*)ptr)) {}
+
+  // non-temproal load
+  explicit FP16Vec16(bool, void* ptr)
+      : reg(_mm256_stream_load_si256((__m256i*)ptr)) {}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   explicit FP16Vec16(const FP32Vec16&);
 
   void save(void* ptr) const { *reinterpret_cast<__m256i*>(ptr) = reg; }
@@ -101,9 +127,20 @@ struct BF16Vec16 : public Vec<BF16Vec16> {
 
   __m256i reg;
 
+<<<<<<< HEAD
   explicit BF16Vec16(const void* ptr)
       : reg((__m256i)_mm256_loadu_si256((__m256i*)ptr)) {}
 
+=======
+  // normal load
+  explicit BF16Vec16(const void* ptr)
+      : reg((__m256i)_mm256_loadu_si256((__m256i*)ptr)) {}
+
+  // non-temproal load
+  explicit BF16Vec16(bool, void* ptr)
+      : reg(_mm256_stream_load_si256((__m256i*)ptr)) {}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   explicit BF16Vec16(const FP32Vec16&);
 
   void save(void* ptr) const { *reinterpret_cast<__m256i*>(ptr) = reg; }
@@ -121,6 +158,11 @@ struct BF16Vec32 : public Vec<BF16Vec32> {
 
   __m512i reg;
 
+<<<<<<< HEAD
+=======
+  explicit BF16Vec32() : reg(_mm512_setzero_si512()) {}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   explicit BF16Vec32(const void* ptr) : reg((__m512i)_mm512_loadu_si512(ptr)) {}
 
   explicit BF16Vec32(__m512i data) : reg(data) {}
@@ -302,8 +344,18 @@ struct FP32Vec16 : public Vec<FP32Vec16> {
 
   explicit FP32Vec16() : reg(_mm512_set1_ps(0.0)) {}
 
+<<<<<<< HEAD
   explicit FP32Vec16(const float* ptr) : reg(_mm512_loadu_ps(ptr)) {}
 
+=======
+  // normal load
+  explicit FP32Vec16(const float* ptr) : reg(_mm512_loadu_ps(ptr)) {}
+
+  // non-temproal load
+  explicit FP32Vec16(bool, void* ptr)
+      : reg((__m512)_mm512_stream_load_si512(ptr)) {}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   explicit FP32Vec16(__m512 data) : reg(data) {}
 
   explicit FP32Vec16(const FP32Vec4& data)
@@ -536,6 +588,36 @@ struct INT8Vec16 : public Vec<INT8Vec16> {
     _mm_mask_storeu_epi8(ptr, mask, reg);
   }
 };
+<<<<<<< HEAD
+=======
+
+struct INT8Vec64 : public Vec<INT8Vec64> {
+  constexpr static int VEC_ELEM_NUM = 64;
+  union AliasReg {
+    __m512i reg;
+    int8_t values[VEC_ELEM_NUM];
+  };
+
+  __m512i reg;
+
+  // normal load
+  explicit INT8Vec64(void* ptr) : reg(_mm512_loadu_epi8(ptr)) {}
+
+  // non-temproal load
+  explicit INT8Vec64(bool, void* ptr) : reg(_mm512_stream_load_si512(ptr)) {}
+
+  void save(void* ptr) const { _mm512_storeu_epi8(ptr, reg); }
+
+  void save(int8_t* ptr, const int elem_num) const {
+    constexpr uint64_t M = 0xFFFFFFFFFFFFFFFF;
+    __mmask64 mask = _cvtu64_mask64(M >> (64 - elem_num));
+    _mm512_mask_storeu_epi8(ptr, mask, reg);
+  }
+
+  // non-temproal save
+  void nt_save(int8_t* ptr) { _mm512_stream_si512((__m512i*)ptr, reg); }
+};
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #endif
 
 template <typename T>
@@ -646,6 +728,25 @@ inline BF16Vec16::BF16Vec16(const FP32Vec16& v) {
 
 inline void prefetch(const void* addr) { _mm_prefetch(addr, _MM_HINT_T1); }
 
+<<<<<<< HEAD
+=======
+#ifdef __AVX512F__
+inline void non_temporal_save(FP16Vec16& vec, void* ptr) {
+  _mm256_stream_si256((__m256i*)ptr, vec.reg);
+}
+inline void non_temporal_save(BF16Vec32& vec, void* ptr) {
+  _mm512_stream_si512((__m512i*)ptr, vec.reg);
+}
+inline void non_temporal_save(BF16Vec16& vec, void* ptr) {
+  _mm256_stream_si256((__m256i*)ptr, vec.reg);
+}
+inline void non_temporal_save(FP32Vec16& vec, void* ptr) {
+  _mm512_stream_ps((float*)ptr, vec.reg);
+}
+#endif
+
+inline void mem_barrier() { _mm_mfence(); }
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 };  // namespace vec_op
 
 #endif

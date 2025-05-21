@@ -29,6 +29,10 @@ def sample_regex():
             r"(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)")
 
 
+<<<<<<< HEAD
+=======
+# Note: Ensure this only uses attributes compatible with xgrammar
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest.fixture
 def sample_json_schema():
     return {
@@ -44,9 +48,21 @@ def sample_json_schema():
                 "type": "array",
                 "items": {
                     "type": "string",
+<<<<<<< HEAD
                     "maxLength": 10
                 },
                 "minItems": 3
+=======
+                }
+            },
+            "grade": {
+                "type": "string",
+                "pattern": "^[A-D]$"  # Regex pattern
+            },
+            "email": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             },
             "work_history": {
                 "type": "array",
@@ -57,12 +73,19 @@ def sample_json_schema():
                             "type": "string"
                         },
                         "duration": {
+<<<<<<< HEAD
                             "type": "number"
+=======
+                            "type": "number",
+                            "minimum": 0.0,
+                            "maximum": 100.0,  # Numeric range
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         },
                         "position": {
                             "type": "string"
                         }
                     },
+<<<<<<< HEAD
                     "required": ["company", "position"]
                 }
             }
@@ -73,11 +96,30 @@ def sample_json_schema():
 
 @pytest.fixture
 def sample_complex_json_schema():
+=======
+                    "required": ["company", "duration", "position"],
+                    "additionalProperties": False
+                },
+                "minItems": 0,
+                "maxItems": 3
+            }
+        },
+        "required":
+        ["name", "age", "skills", "grade", "email", "work_history"],
+        "additionalProperties": False
+    }
+
+
+# A schema unsupported by xgrammar
+@pytest.fixture
+def unsupported_json_schema():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return {
         "type": "object",
         "properties": {
             "score": {
                 "type": "integer",
+<<<<<<< HEAD
                 "minimum": 0,
                 "maximum": 100  # Numeric range
             },
@@ -88,17 +130,30 @@ def sample_complex_json_schema():
             "email": {
                 "type": "string",
                 "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+=======
+                "multipleOf": 5  # Numeric multiple
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             },
             "tags": {
                 "type": "array",
                 "items": {
                     "type": "string",
+<<<<<<< HEAD
                     "pattern":
                     "^[a-z]{1,10}$"  # Combining length and pattern restrictions
                 }
             }
         },
         "required": ["score", "grade", "email", "tags"]
+=======
+                    "minLength": 10,
+                    "maxLength": 20
+                }
+            }
+        },
+        "required": ["score", "tags"],
+        "additionalProperties": False
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     }
 
 
@@ -137,7 +192,12 @@ def sample_definition_json_schema():
         },
         'required': ['steps', 'final_answer'],
         'title': 'MathReasoning',
+<<<<<<< HEAD
         'type': 'object'
+=======
+        'type': 'object',
+        "additionalProperties": False
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     }
 
 
@@ -150,7 +210,23 @@ def sample_guided_choice():
 
 
 @pytest.fixture
+<<<<<<< HEAD
 def sample_sql_statements():
+=======
+def sample_sql_ebnf():
+    return """
+root ::= select_statement
+select_statement ::= "SELECT" column "from" table "where" condition
+column ::= "col_1" | "col_2"
+table ::= "table_1" | "table_2"
+condition ::= column "=" number
+number ::= "1" | "2"
+"""
+
+
+@pytest.fixture
+def sample_sql_lark():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return ("""
 start: select_statement
 select_statement: "SELECT" column "from" table "where" condition

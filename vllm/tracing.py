@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+<<<<<<< HEAD
 from typing import Mapping, Optional
+=======
+from collections.abc import Mapping
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.logger import init_logger
 from vllm.utils import run_once

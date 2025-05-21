@@ -1,12 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from vllm.model_executor.layers.linear import LinearBase, LinearMethodBase
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig)
 from vllm.model_executor.utils import set_weight_attrs
@@ -41,11 +49,19 @@ class DeepSpeedFPConfig(QuantizationConfig):
                 f"group_size={self.group_size}")
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "DeepSpeedFP"
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "DeepSpeedFPConfig":
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "deepspeedfp"
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "DeepSpeedFPConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         weight_bits = cls.get_from_keys(config, ["bits"])
         group_size = cls.get_from_keys(config, ["group_size"])
         return cls(weight_bits=weight_bits, group_size=group_size)
@@ -54,7 +70,11 @@ class DeepSpeedFPConfig(QuantizationConfig):
         return DeepSpeedFPLinearMethod(self)
 
     @classmethod
+<<<<<<< HEAD
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.half, torch.bfloat16]
 
     @classmethod
@@ -63,7 +83,11 @@ class DeepSpeedFPConfig(QuantizationConfig):
         return 60
 
     @staticmethod
+<<<<<<< HEAD
     def get_config_filenames() -> List[str]:
+=======
+    def get_config_filenames() -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [
             "quant_config.json",
             "quantize_config.json",
@@ -90,7 +114,11 @@ class DeepSpeedFPLinearMethod(LinearMethodBase):
     def create_weights(self,
                        layer: torch.nn.Module,
                        input_size_per_partition: int,
+<<<<<<< HEAD
                        output_partition_sizes: List[int],
+=======
+                       output_partition_sizes: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        input_size: int,
                        output_size: int,
                        params_dtype: torch.dtype,

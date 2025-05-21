@@ -1,18 +1,26 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 import time
+<<<<<<< HEAD
 from pathlib import Path
 from typing import List
 
 import pytest
 from huggingface_hub import snapshot_download
 
+=======
+
+import pytest
+
+import vllm.envs as env
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.inputs import TextPrompt
 from vllm.lora.request import LoRARequest
 from vllm.sampling_params import SamplingParams
 from vllm.utils import merge_async_iterators
 
+<<<<<<< HEAD
 MODEL_PATH = "meta-llama/Llama-2-7b-hf"
 LORA_MODULE_DOWNLOAD_PATH = None  # Populated by download_and_prepare_lora_module() #noqa
 LORA_RANK = 8
@@ -42,6 +50,11 @@ def download_and_prepare_lora_module():
     for tokenizer_file in tokenizer_files:
         del_path = Path(LORA_MODULE_DOWNLOAD_PATH) / tokenizer_file
         del_path.unlink(missing_ok=True)
+=======
+MODEL_PATH = "THUDM/chatglm3-6b"
+LORA_RANK = 64
+DEFAULT_MAX_LORAS = 4 * 3
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.fixture(autouse=True)
@@ -52,18 +65,28 @@ def v1(run_with_both_engines_lora):
     pass
 
 
+<<<<<<< HEAD
 def get_lora_requests() -> List[LoRARequest]:
     lora_requests: List[LoRARequest] = [
         LoRARequest(lora_name=f"{i}",
                     lora_int_id=i,
                     lora_path=LORA_MODULE_DOWNLOAD_PATH)
+=======
+def get_lora_requests(lora_path) -> list[LoRARequest]:
+    lora_requests: list[LoRARequest] = [
+        LoRARequest(lora_name=f"{i}", lora_int_id=i, lora_path=lora_path)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for i in range(1, DEFAULT_MAX_LORAS + 1)
     ]
     return lora_requests
 
 
 async def requests_processing_time(llm,
+<<<<<<< HEAD
                                    lora_requests: List[LoRARequest]) -> float:
+=======
+                                   lora_requests: list[LoRARequest]) -> float:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     sampling_params = SamplingParams(n=1,
                                      temperature=0.0,
@@ -93,7 +116,11 @@ async def requests_processing_time(llm,
 
 
 @pytest.mark.asyncio
+<<<<<<< HEAD
 async def test_add_lora():
+=======
+async def test_add_lora(chatglm3_lora_files):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """ 
     The add_lora function is used to pre-load some LoRA adapters into the
     engine in anticipation of future requests using these adapters. To test
@@ -103,10 +130,14 @@ async def test_add_lora():
     We measure the request processing time in both cases and expect the time 
     to be lesser in the case with add_lora() calls.
     """
+<<<<<<< HEAD
 
     download_and_prepare_lora_module()
 
     lora_requests: List[LoRARequest] = get_lora_requests()
+=======
+    lora_requests: list[LoRARequest] = get_lora_requests(chatglm3_lora_files)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     max_loras = len(set([lr.lora_int_id for lr in lora_requests]))
     # Create engine in eager-mode. Due to high max_loras, the CI can
@@ -118,6 +149,10 @@ async def test_add_lora():
         max_lora_rank=LORA_RANK,
         max_model_len=128,
         gpu_memory_utilization=0.8,  #avoid OOM
+<<<<<<< HEAD
+=======
+        trust_remote_code=True,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         enforce_eager=True)
 
     # The run_with_both_engines_lora fixture sets up the `VLLM_USE_V1`
@@ -144,10 +179,21 @@ async def test_add_lora():
         await requests_processing_time(llm, dummy_run_requests)
 
         # Run with warmup
+<<<<<<< HEAD
         for lr in warmup_run_requests:
             await llm.add_lora(lr)
         # Wait for the add_lora function to complete on the server side.
         await asyncio.sleep(30)
+=======
+        add_lora_tasks = [llm.add_lora(lr) for lr in warmup_run_requests]
+        add_lora_results = await asyncio.gather(*add_lora_tasks)
+        if env.VLLM_USE_V1:
+            # Test that all all_lora calls are successful.
+            assert all(add_lora_results)
+        else:
+            # No way to check V0 engine results as the calls just return None.
+            pass
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         time_with_add_lora = await requests_processing_time(
             llm, warmup_run_requests)
 

@@ -6,10 +6,18 @@
 # ruff: noqa: E501
 
 import torch
+<<<<<<< HEAD
 import triton
 from einops import rearrange
 from packaging import version
 
+=======
+from einops import rearrange
+from packaging import version
+
+from vllm.triton_utils import triton
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .ssd_bmm import _bmm_chunk_fwd
 from .ssd_chunk_scan import _chunk_scan_fwd
 from .ssd_chunk_state import (_chunk_cumsum_fwd, _chunk_state_fwd,
@@ -30,6 +38,11 @@ def _mamba_chunk_scan_combined_fwd(x,
                                    dt_bias=None,
                                    initial_states=None,
                                    seq_idx=None,
+<<<<<<< HEAD
+=======
+                                   chunk_indices=None,
+                                   chunk_offsets=None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                    cu_seqlens=None,
                                    dt_softplus=False,
                                    dt_limit=(0.0, float("inf"))):
@@ -37,7 +50,10 @@ def _mamba_chunk_scan_combined_fwd(x,
     _, _, ngroups, dstate = B.shape
     assert nheads % ngroups == 0
     assert B.shape == (batch, seqlen, ngroups, dstate)
+<<<<<<< HEAD
     assert x.shape == (batch, seqlen, nheads, headdim)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert dt.shape == (batch, seqlen, nheads)
     assert A.shape == (nheads, )
     assert C.shape == B.shape
@@ -96,7 +112,11 @@ def _mamba_chunk_scan_combined_fwd(x,
     # 3. Compute the inter-chunk SSM recurrence; produces correct SSM states at chunk boundaries
     # (middle term of factorization of off-diag blocks; A terms)
     # - for handling chunked prefill, this requires i) initial_states
+<<<<<<< HEAD
     #   ii) seq_idx and iii) has_cu_seqlens to be all specified.
+=======
+    #   ii) seq_idx and iii) is_cont_batched to be all specified.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # - When a new seq_idx is detected, we will stop passing the prev_state
     #   and switch accordingly to the init_state corresponding to the new seq_idx.
     # - this will ensure that states will be updated with the rightmost flushed seq_idx
@@ -141,6 +161,11 @@ def _mamba_chunk_scan_combined_fwd(x,
         D=D,
         z=z,
         seq_idx=seq_idx,
+<<<<<<< HEAD
+=======
+        chunk_indices=chunk_indices,
+        chunk_offsets=chunk_offsets,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         initial_states=initial_states,
     )
     if cu_seqlens is None:
@@ -170,6 +195,11 @@ def mamba_chunk_scan_combined(x,
                               dt_bias=None,
                               initial_states=None,
                               seq_idx=None,
+<<<<<<< HEAD
+=======
+                              chunk_indices=None,
+                              chunk_offsets=None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                               cu_seqlens=None,
                               dt_softplus=False,
                               dt_limit=(0.0, float("inf")),
@@ -210,6 +240,11 @@ def mamba_chunk_scan_combined(x,
         dt_bias=dt_bias,
         initial_states=initial_states,
         seq_idx=seq_idx,
+<<<<<<< HEAD
+=======
+        chunk_indices=chunk_indices,
+        chunk_offsets=chunk_offsets,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         cu_seqlens=cu_seqlens,
         dt_softplus=dt_softplus,
         dt_limit=dt_limit)

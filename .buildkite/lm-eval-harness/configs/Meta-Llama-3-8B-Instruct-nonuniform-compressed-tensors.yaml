@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# For vllm script, with -t option (tensor parallel size).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # bash .buildkite/lm-eval-harness/run-lm-eval-gsm-vllm-baseline.sh -m nm-testing/Meta-Llama-3-8B-Instruct-nonuniform-test -b auto -l 1000 -f 5 -t 1
 model_name: "nm-testing/Meta-Llama-3-8B-Instruct-nonuniform-test"
 tasks:

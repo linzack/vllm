@@ -19,11 +19,19 @@ SPEC_MODEL = "JackFram/llama-160m"
         # Skip cuda graph recording for fast test.
         "enforce_eager": True,
 
+<<<<<<< HEAD
         # speculative model
         "speculative_model": "JackFram/llama-160m",
 
         # num speculative tokens
         "num_speculative_tokens": 3,
+=======
+        # speculative config
+        "speculative_config": {
+            "model": "JackFram/llama-160m",
+            "num_speculative_tokens": 3,
+        },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     }])
 @pytest.mark.parametrize("per_test_common_llm_kwargs", [{}])
 @pytest.mark.parametrize("baseline_llm_kwargs", [{"seed": 1}])

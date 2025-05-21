@@ -4,7 +4,10 @@ Define LoRA functionality mixin for model runners.
 """
 
 from contextlib import contextmanager
+<<<<<<< HEAD
 from typing import Set, Tuple
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import torch.nn as nn
@@ -29,13 +32,20 @@ class LoRAModelRunnerMixin:
                         scheduler_config: SchedulerConfig,
                         lora_config: LoRAConfig, device: str) -> nn.Module:
 
+<<<<<<< HEAD
         assert supports_lora(
             model), f"{model.__class__.__name__} does not support LoRA yet."
+=======
+        if not supports_lora(model):
+            raise ValueError(
+                f"{model.__class__.__name__} does not support LoRA yet.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if supports_multimodal(model):
             logger.warning("Regarding multimodal models, vLLM currently "
                            "only supports adding LoRA to language model.")
 
+<<<<<<< HEAD
         # It's necessary to distinguish between the max_position_embeddings
         # of VLMs and LLMs.
         if hasattr(model.config, "max_position_embeddings"):
@@ -43,6 +53,10 @@ class LoRAModelRunnerMixin:
         else:
             max_pos_embeddings = (
                 model.config.text_config.max_position_embeddings)
+=======
+        # Use get_text_config() in case of multimodal models
+        text_config = model_config.hf_config.get_text_config()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Add LoRA Manager to the Model Runner
         self.lora_manager = LRUCacheWorkerLoRAManager(
@@ -53,6 +67,7 @@ class LoRAModelRunnerMixin:
             device,
             model.embedding_modules,
             model.embedding_padding_modules,
+<<<<<<< HEAD
             max_position_embeddings=max_pos_embeddings,
         )
         return self.lora_manager.create_lora_manager(model)
@@ -66,6 +81,22 @@ class LoRAModelRunnerMixin:
         # We dont make any distinction between prefills and decodes in the
         # scheduler. To that effect, set is_prefill to True so we use the
         # sgmv punica kernels always.
+=======
+            max_position_embeddings=text_config.max_position_embeddings,
+        )
+        return self.lora_manager.create_lora_manager(model)
+
+    def _set_active_loras(self, prompt_lora_mapping: tuple[int, ...],
+                          token_lora_mapping: tuple[int, ...],
+                          lora_requests: set[LoRARequest]) -> None:
+        if not self.lora_manager:
+            raise RuntimeError("LoRA is not enabled.")
+
+        # Set is_prefill to True, so we always use the SGMV kernels on
+        # non-cuda platforms.
+        # On cuda platforms we use the same kernels for prefill and
+        # decode and this flag is generally ignored.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_mapping = LoRAMapping(token_lora_mapping,
                                    prompt_lora_mapping,
                                    is_prefill=True)
@@ -74,18 +105,30 @@ class LoRAModelRunnerMixin:
     def set_active_loras(self, input_batch: InputBatch,
                          num_scheduled_tokens: np.ndarray) -> None:
 
+<<<<<<< HEAD
         prompt_lora_mapping: Tuple[int, ...]  # of size input_batch.num_reqs
         token_lora_mapping: Tuple[int,
                                   ...]  # of size np.sum(num_scheduled_tokens)
         lora_requests: Set[LoRARequest]
+=======
+        prompt_lora_mapping: tuple[int, ...]  # of size input_batch.num_reqs
+        token_lora_mapping: tuple[int,
+                                  ...]  # of size np.sum(num_scheduled_tokens)
+        lora_requests: set[LoRARequest]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         prompt_lora_mapping, token_lora_mapping, lora_requests = \
                             input_batch.make_lora_inputs(num_scheduled_tokens)
         return self._set_active_loras(prompt_lora_mapping, token_lora_mapping,
                                       lora_requests)
 
     @contextmanager
+<<<<<<< HEAD
     def maybe_profile_with_lora(self, lora_config: LoRAConfig,
                                 num_scheduled_tokens: np.ndarray):
+=======
+    def maybe_dummy_run_with_lora(self, lora_config: LoRAConfig,
+                                  num_scheduled_tokens: np.ndarray):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if lora_config is None:
             yield
         else:
@@ -105,7 +148,11 @@ class LoRAModelRunnerMixin:
                                            num_scheduled_tokens)
 
             # Make dummy lora requests
+<<<<<<< HEAD
             lora_requests: Set[LoRARequest] = {
+=======
+            lora_requests: set[LoRARequest] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 LoRARequest(lora_name=f"warmup_{lora_id}",
                             lora_int_id=lora_id,
                             lora_path="/not/a/real/path")
@@ -131,4 +178,23 @@ class LoRAModelRunnerMixin:
     def add_lora(self, lora_request: LoRARequest) -> bool:
         if not self.lora_manager:
             raise RuntimeError("LoRA is not enabled.")
+<<<<<<< HEAD
         return self.lora_manager.add_adapter(lora_request)
+=======
+        return self.lora_manager.add_adapter(lora_request)
+
+    def remove_lora(self, lora_id: int) -> bool:
+        if not self.lora_manager:
+            raise RuntimeError("LoRA is not enabled.")
+        return self.lora_manager.remove_adapter(lora_id)
+
+    def pin_lora(self, lora_id: int) -> bool:
+        if not self.lora_manager:
+            raise RuntimeError("LoRA is not enabled.")
+        return self.lora_manager.pin_adapter(lora_id)
+
+    def list_loras(self) -> set[int]:
+        if not self.lora_manager:
+            raise RuntimeError("LoRA is not enabled.")
+        return self.lora_manager.list_adapters()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

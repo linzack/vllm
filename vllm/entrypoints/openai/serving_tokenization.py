@@ -1,7 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Final, List, Optional, Union
 
+=======
+from typing import Final, Optional, Union
+
+import jinja2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from fastapi import Request
 
 from vllm.config import ModelConfig
@@ -64,6 +70,11 @@ class OpenAIServingTokenization(OpenAIServing):
             tokenizer = await self.engine_client.get_tokenizer(lora_request)
 
             if isinstance(request, TokenizeChatRequest):
+<<<<<<< HEAD
+=======
+                tool_dicts = (None if request.tools is None else
+                              [tool.model_dump() for tool in request.tools])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 (
                     _,
                     request_prompts,
@@ -72,6 +83,10 @@ class OpenAIServingTokenization(OpenAIServing):
                     request,
                     tokenizer,
                     request.messages,
+<<<<<<< HEAD
+=======
+                    tool_dicts=tool_dicts,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     chat_template=request.chat_template or self.chat_template,
                     chat_template_content_format=self.
                     chat_template_content_format,
@@ -88,11 +103,19 @@ class OpenAIServingTokenization(OpenAIServing):
                      request.prompt,
                      add_special_tokens=request.add_special_tokens,
                  )
+<<<<<<< HEAD
         except ValueError as e:
             logger.exception("Error in preprocessing prompt inputs")
             return self.create_error_response(str(e))
 
         input_ids: List[int] = []
+=======
+        except (ValueError, TypeError, jinja2.TemplateError) as e:
+            logger.exception("Error in preprocessing prompt inputs")
+            return self.create_error_response(f"{e} {e.__cause__}")
+
+        input_ids: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for i, engine_prompt in enumerate(engine_prompts):
             self._log_inputs(request_id,
                              request_prompts[i],
@@ -102,8 +125,14 @@ class OpenAIServingTokenization(OpenAIServing):
 
             # Silently ignore prompt adapter since it does not affect
             # tokenization (Unlike in Embeddings API where an error is raised)
+<<<<<<< HEAD
 
             input_ids.extend(engine_prompt["prompt_token_ids"])
+=======
+            if isinstance(engine_prompt,
+                          dict) and "prompt_token_ids" in engine_prompt:
+                input_ids.extend(engine_prompt["prompt_token_ids"])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return TokenizeResponse(tokens=input_ids,
                                 count=len(input_ids),

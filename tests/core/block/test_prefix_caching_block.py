@@ -2,7 +2,11 @@
 
 import math
 import random
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from unittest.mock import MagicMock
 
 import pytest
@@ -123,11 +127,19 @@ class TestPrefixCachingBlock:
 
     @staticmethod
     def create_chain(block_size: int,
+<<<<<<< HEAD
                      token_ids: List[int],
                      num_empty_trailing_blocks=0) -> List[PrefixCachingBlock]:
         """Helper method which creates a chain of blocks.
         """
         blocks: List[PrefixCachingBlock] = []
+=======
+                     token_ids: list[int],
+                     num_empty_trailing_blocks=0) -> list[PrefixCachingBlock]:
+        """Helper method which creates a chain of blocks.
+        """
+        blocks: list[PrefixCachingBlock] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_blocks = math.ceil(
             len(token_ids) / block_size) + num_empty_trailing_blocks
 
@@ -161,7 +173,11 @@ class TestPrefixCachingBlockAllocator:
     @staticmethod
     def create_allocate_lambda(allocate_type: str, allocator: BlockAllocator,
                                prev_block: Optional[Block],
+<<<<<<< HEAD
                                token_ids: List[int]):
+=======
+                               token_ids: list[int]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if allocate_type == "immutable":
             allocate_block = lambda: allocator.allocate_immutable_block(
                 prev_block=prev_block, token_ids=token_ids)
@@ -839,6 +855,7 @@ class TestPrefixCachingBlockAllocator:
     @staticmethod
     def create_immutable_chain(
         block_size: int,
+<<<<<<< HEAD
         token_ids: List[int],
         allocator: PrefixCachingBlockAllocator,
         extra_hash: Optional[int] = None,
@@ -846,6 +863,15 @@ class TestPrefixCachingBlockAllocator:
         """Helper method which creates a chain of blocks.
         """
         blocks: List[Block] = []
+=======
+        token_ids: list[int],
+        allocator: PrefixCachingBlockAllocator,
+        extra_hash: Optional[int] = None,
+    ) -> list[PrefixCachingBlock]:
+        """Helper method which creates a chain of blocks.
+        """
+        blocks: list[Block] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_blocks = math.ceil(len(token_ids) / block_size)
 
         if num_blocks == 0:

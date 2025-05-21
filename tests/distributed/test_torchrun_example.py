@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # unit test for `examples/offline_inference/torchrun_example.py`
+<<<<<<< HEAD
 
+=======
+import os
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import random
 
 import torch.distributed as dist
@@ -9,6 +13,11 @@ import torch.distributed as dist
 from vllm import LLM, SamplingParams
 from vllm.distributed.parallel_state import get_world_group
 
+<<<<<<< HEAD
+=======
+dist.init_process_group(backend="gloo")
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Create prompts
 prompts = [
     "Hello, my name is",
@@ -23,9 +32,17 @@ sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 # to test if all ranks agree on the same kv cache configuration.
 llm = LLM(model="facebook/opt-125m",
           tensor_parallel_size=2,
+<<<<<<< HEAD
           distributed_executor_backend="external_launcher",
           gpu_memory_utilization=random.uniform(0.7, 0.9),
           swap_space=random.randint(1, 4))
+=======
+          pipeline_parallel_size=int(os.getenv("PP_SIZE", 1)),
+          distributed_executor_backend="external_launcher",
+          gpu_memory_utilization=random.uniform(0.7, 0.9),
+          swap_space=random.randint(1, 4),
+          seed=0)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 outputs = llm.generate(prompts, sampling_params)
 
@@ -48,6 +65,15 @@ test_consistent_across_ranks(
 test_consistent_across_ranks(
     llm.llm_engine.vllm_config.cache_config.num_gpu_blocks)
 
+<<<<<<< HEAD
+=======
+# make sure we can access the model parameters from the calling process
+# of the `LLM` instance.
+params = list(llm.llm_engine.model_executor.driver_worker.worker.model_runner.
+              model.parameters())
+test_consistent_across_ranks(len(params))
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # all ranks should have the same outputs
 for output in outputs:
     prompt = output.prompt

@@ -2,7 +2,11 @@
 
 import contextlib
 import os
+<<<<<<< HEAD
 from typing import Any, List, NamedTuple
+=======
+from typing import Any, NamedTuple
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import openai  # use the official client for correctness check
 import pytest
@@ -11,7 +15,10 @@ from ...utils import RemoteOpenAIServer
 
 # # any model with a chat template should work here
 MODEL_NAME = "Qwen/Qwen2-1.5B-Instruct"
+<<<<<<< HEAD
 DUMMY_CHAT_TEMPLATE = """{% for message in messages %}{{message['role'] + ': ' + message['content'] + '\\n'}}{% endfor %}"""  # noqa: E501
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 API_KEY = "abc-123"
 ERROR_API_KEY = "abc"
 ROOT_PATH = "llm"
@@ -28,8 +35,11 @@ def server():
         "4080",
         "--root-path",  # use --root-path=/llm for testing
         "/" + ROOT_PATH,
+<<<<<<< HEAD
         "--chat-template",
         DUMMY_CHAT_TEMPLATE,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ]
     envs = os.environ.copy()
 
@@ -40,7 +50,11 @@ def server():
 
 class TestCase(NamedTuple):
     model_name: str
+<<<<<<< HEAD
     base_url: List[str]
+=======
+    base_url: list[str]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     api_key: str
     expected_error: Any
 

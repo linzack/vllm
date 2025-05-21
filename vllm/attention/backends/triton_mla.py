@@ -4,7 +4,12 @@ from typing import Any, Dict, List, Optional, Type
 
 import torch
 
+<<<<<<< HEAD
 from vllm.attention.backends.abstract import AttentionType
+=======
+from vllm.attention.backends.abstract import (AttentionType,
+                                              is_quantized_kv_cache)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.attention.backends.mla.common import (MLACommonBackend,
                                                 MLACommonImpl,
                                                 MLACommonMetadata)
@@ -58,6 +63,13 @@ class TritonMLAImpl(MLACommonImpl[MLACommonMetadata]):
                                       "are not implemented for "
                                       "TritonMLAImpl")
 
+<<<<<<< HEAD
+=======
+        if is_quantized_kv_cache(self.kv_cache_dtype):
+            raise NotImplementedError(
+                "TritonMLA with FP8 KV cache not yet supported")
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def _forward_decode(
         self,
         q_nope: torch.Tensor,
@@ -66,8 +78,11 @@ class TritonMLAImpl(MLACommonImpl[MLACommonMetadata]):
         attn_metadata: MLACommonMetadata,
     ) -> torch.Tensor:
         assert kv_c_and_k_pe_cache.numel() > 0
+<<<<<<< HEAD
         if self.kv_cache_dtype.startswith("fp8"):
             raise NotImplementedError("FP8 Triton MLA not yet supported")
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         decode_meta = attn_metadata.decode_metadata
         assert decode_meta is not None
@@ -107,4 +122,8 @@ class TritonMLAImpl(MLACommonImpl[MLACommonMetadata]):
                              decode_meta.seq_lens_tensor, attn_logits,
                              num_kv_splits, self.scale, PAGE_SIZE)
 
+<<<<<<< HEAD
         return self._v_up_proj_and_o_proj(o)
+=======
+        return self._v_up_proj(o)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

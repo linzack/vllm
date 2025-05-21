@@ -8,6 +8,7 @@ purposes.
 import argparse
 import json
 import ssl
+<<<<<<< HEAD
 from typing import List, Optional, Sequence, Union, get_args
 
 from vllm.engine.arg_utils import AsyncEngineArgs, nullable_str
@@ -19,6 +20,22 @@ from vllm.entrypoints.openai.serving_models import (LoRAModulePath,
 from vllm.entrypoints.openai.tool_parsers import ToolParserManager
 from vllm.utils import FlexibleArgumentParser
 
+=======
+from collections.abc import Sequence
+from typing import Optional, Union, get_args
+
+from vllm.engine.arg_utils import AsyncEngineArgs, optional_type
+from vllm.entrypoints.chat_utils import (ChatTemplateContentFormatOption,
+                                         validate_chat_template)
+from vllm.entrypoints.openai.serving_models import (LoRAModulePath,
+                                                    PromptAdapterPath)
+from vllm.entrypoints.openai.tool_parsers import ToolParserManager
+from vllm.logger import init_logger
+from vllm.utils import FlexibleArgumentParser
+
+logger = init_logger(__name__)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class LoRAParserAction(argparse.Action):
 
@@ -34,7 +51,11 @@ class LoRAParserAction(argparse.Action):
         if isinstance(values, str):
             raise TypeError("Expected values to be a list")
 
+<<<<<<< HEAD
         lora_list: List[LoRAModulePath] = []
+=======
+        lora_list: list[LoRAModulePath] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for item in values:
             if item in [None, '']:  # Skip if item is None or empty string
                 continue
@@ -70,7 +91,11 @@ class PromptAdapterParserAction(argparse.Action):
         if isinstance(values, str):
             raise TypeError("Expected values to be a list")
 
+<<<<<<< HEAD
         adapter_list: List[PromptAdapterPath] = []
+=======
+        adapter_list: list[PromptAdapterPath] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for item in values:
             name, path = item.split('=')
             adapter_list.append(PromptAdapterPath(name, path))
@@ -79,7 +104,11 @@ class PromptAdapterParserAction(argparse.Action):
 
 def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
     parser.add_argument("--host",
+<<<<<<< HEAD
                         type=nullable_str,
+=======
+                        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         default=None,
                         help="Host name.")
     parser.add_argument("--port", type=int, default=8000, help="Port number.")
@@ -89,6 +118,12 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         default="info",
         choices=['debug', 'info', 'warning', 'error', 'critical', 'trace'],
         help="Log level for uvicorn.")
+<<<<<<< HEAD
+=======
+    parser.add_argument("--disable-uvicorn-access-log",
+                        action="store_true",
+                        help="Disable uvicorn access log.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     parser.add_argument("--allow-credentials",
                         action="store_true",
                         help="Allow credentials.")
@@ -105,13 +140,21 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
                         default=["*"],
                         help="Allowed headers.")
     parser.add_argument("--api-key",
+<<<<<<< HEAD
                         type=nullable_str,
+=======
+                        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         default=None,
                         help="If provided, the server will require this key "
                         "to be presented in the header.")
     parser.add_argument(
         "--lora-modules",
+<<<<<<< HEAD
         type=nullable_str,
+=======
+        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         default=None,
         nargs='+',
         action=LoRAParserAction,
@@ -123,14 +166,22 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         "\"base_model_name\": \"id\"}``")
     parser.add_argument(
         "--prompt-adapters",
+<<<<<<< HEAD
         type=nullable_str,
+=======
+        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         default=None,
         nargs='+',
         action=PromptAdapterParserAction,
         help="Prompt adapter configurations in the format name=path. "
         "Multiple adapters can be specified.")
     parser.add_argument("--chat-template",
+<<<<<<< HEAD
                         type=nullable_str,
+=======
+                        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         default=None,
                         help="The file path to the chat template, "
                         "or the template in single-line form "
@@ -148,11 +199,16 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         'similar to OpenAI schema. '
         'Example: ``[{"type": "text", "text": "Hello world!"}]``')
     parser.add_argument("--response-role",
+<<<<<<< HEAD
                         type=nullable_str,
+=======
+                        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         default="assistant",
                         help="The role name to return if "
                         "``request.add_generation_prompt=true``.")
     parser.add_argument("--ssl-keyfile",
+<<<<<<< HEAD
                         type=nullable_str,
                         default=None,
                         help="The file path to the SSL key file.")
@@ -162,6 +218,17 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
                         help="The file path to the SSL cert file.")
     parser.add_argument("--ssl-ca-certs",
                         type=nullable_str,
+=======
+                        type=optional_type(str),
+                        default=None,
+                        help="The file path to the SSL key file.")
+    parser.add_argument("--ssl-certfile",
+                        type=optional_type(str),
+                        default=None,
+                        help="The file path to the SSL cert file.")
+    parser.add_argument("--ssl-ca-certs",
+                        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         default=None,
                         help="The CA certificates file.")
     parser.add_argument(
@@ -177,13 +244,21 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
     )
     parser.add_argument(
         "--root-path",
+<<<<<<< HEAD
         type=nullable_str,
+=======
+        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         default=None,
         help="FastAPI root_path when app is behind a path based routing proxy."
     )
     parser.add_argument(
         "--middleware",
+<<<<<<< HEAD
         type=nullable_str,
+=======
+        type=optional_type(str),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         action="append",
         default=[],
         help="Additional ASGI middleware to apply to the app. "
@@ -215,6 +290,7 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         default=False,
         help="Enable auto tool choice for supported models. Use "
         "``--tool-call-parser`` to specify which parser to use.")
+<<<<<<< HEAD
     parser.add_argument(
         "--enable-reasoning",
         action="store_true",
@@ -232,6 +308,8 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         "Select the reasoning parser depending on the model that you're using."
         " This is used to parse the reasoning content into OpenAI API "
         "format. Required for ``--enable-reasoning``.")
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     valid_tool_parsers = ToolParserManager.tool_parsers.keys()
     parser.add_argument(
@@ -261,7 +339,11 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
                         default=None,
                         help='Max number of prompt characters or prompt '
                         'ID numbers being printed in log.'
+<<<<<<< HEAD
                         '\n\nDefault: Unlimited')
+=======
+                        ' The default of None means unlimited.')
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     parser.add_argument(
         "--disable-fastapi-docs",
@@ -274,6 +356,16 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         action='store_true',
         default=False,
         help="If set to True, enable prompt_tokens_details in usage.")
+<<<<<<< HEAD
+=======
+    parser.add_argument(
+        "--enable-server-load-tracking",
+        action='store_true',
+        default=False,
+        help=
+        "If set to True, enable tracking server_load_metrics in the app state."
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     return parser
 
@@ -290,6 +382,7 @@ def validate_parsed_serve_args(args: argparse.Namespace):
     if args.enable_auto_tool_choice and not args.tool_call_parser:
         raise TypeError("Error: --enable-auto-tool-choice requires "
                         "--tool-call-parser")
+<<<<<<< HEAD
 
     # Enable reasoning needs a reasoning parser to be valid
     if args.enable_reasoning and not args.reasoning_parser:
@@ -302,6 +395,20 @@ def validate_parsed_serve_args(args: argparse.Namespace):
         raise TypeError(
             "Error: --enable-auto-tool-choice and "
             "--enable-reasoning cannot be enabled at the same time")
+=======
+    if args.enable_prompt_embeds and args.enable_prompt_adapter:
+        raise ValueError(
+            "Cannot use prompt embeds and prompt adapter at the same time.")
+
+
+def log_non_default_args(args: argparse.Namespace):
+    non_default_args = {}
+    parser = make_arg_parser(FlexibleArgumentParser())
+    for arg, default in vars(parser.parse_args([])).items():
+        if default != getattr(args, arg):
+            non_default_args[arg] = getattr(args, arg)
+    logger.info("non-default args: %s", non_default_args)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def create_parser_for_docs() -> FlexibleArgumentParser:

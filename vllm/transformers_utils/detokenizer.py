@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.sequence import (VLLM_INVALID_TOKEN_ID, Logprob, SamplingParams,
                            Sequence, SequenceGroup)
@@ -8,13 +12,21 @@ from vllm.sequence import (VLLM_INVALID_TOKEN_ID, Logprob, SamplingParams,
 from .detokenizer_utils import (convert_prompt_ids_to_tokens,
                                 detokenize_incrementally)
 from .tokenizer import AnyTokenizer
+<<<<<<< HEAD
 from .tokenizer_group import BaseTokenizerGroup
+=======
+from .tokenizer_group import TokenizerGroup
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class Detokenizer:
     """Provides methods to decode the output of a model into text."""
 
+<<<<<<< HEAD
     def __init__(self, tokenizer_group: BaseTokenizerGroup):
+=======
+    def __init__(self, tokenizer_group: TokenizerGroup):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.tokenizer_group = tokenizer_group
 
     def get_tokenizer_for_seq(self, sequence: Sequence) -> AnyTokenizer:
@@ -22,7 +34,11 @@ class Detokenizer:
         return self.tokenizer_group.get_lora_tokenizer(sequence.lora_request)
 
     def decode_prompt_logprobs_inplace(self, seq_group: SequenceGroup,
+<<<<<<< HEAD
                                        prompt_logprobs: List[Optional[Dict[
+=======
+                                       prompt_logprobs: list[Optional[dict[
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                            int, Logprob]]],
                                        position_offset: int) -> None:
         """Decodes the logprobs for the prompt of a sequence group.
@@ -49,7 +65,11 @@ class Detokenizer:
         read_offset = 0
         next_iter_prefix_offset = 0
         next_iter_read_offset = 0
+<<<<<<< HEAD
         next_iter_tokens: List[str] = []
+=======
+        next_iter_tokens: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         prev_tokens = None
 
         for token_position_in_logprob, prompt_logprobs_for_token in enumerate(

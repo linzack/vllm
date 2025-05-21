@@ -1,13 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from functools import partial
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union
+=======
+from collections.abc import Iterable
+from functools import partial
+from typing import Any, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import PretrainedConfig
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import (get_pp_group, get_tensor_model_parallel_rank,
@@ -23,7 +33,10 @@ from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.pooler import Pooler, PoolingType
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.rotary_embedding import get_rope
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
@@ -82,7 +95,11 @@ class InternLM2Attention(nn.Module):
         num_heads: int,
         num_kv_heads: int,
         rope_theta: float = 10000,
+<<<<<<< HEAD
         rope_scaling: Optional[Dict[str, Any]] = None,
+=======
+        rope_scaling: Optional[dict[str, Any]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         max_position_embeddings: int = 8192,
         cache_config: Optional[CacheConfig] = None,
         quant_config: Optional[QuantizationConfig] = None,
@@ -175,13 +192,20 @@ class InternLM2Attention(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         qkv, _ = self.wqkv(hidden_states)
         q, k, v = self.split_qkv(qkv)
         q, k = self.rotary_emb(positions, q, k)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output, _ = self.wo(attn_output)
         return output
 
@@ -227,10 +251,15 @@ class InternLMDecoderLayer(nn.Module):
         self,
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
         residual: Optional[torch.Tensor],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+        residual: Optional[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Self Attention
         if residual is None:
             residual = hidden_states
@@ -241,8 +270,11 @@ class InternLMDecoderLayer(nn.Module):
         hidden_states = self.attention(
             positions=positions,
             hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         # Fully Connected
@@ -259,7 +291,11 @@ class InternLM2Model(nn.Module):
             *,
             vllm_config: VllmConfig,
             prefix: str = "",
+<<<<<<< HEAD
             layer_type: Type[InternLMDecoderLayer] = InternLMDecoderLayer):
+=======
+            layer_type: type[InternLMDecoderLayer] = InternLMDecoderLayer):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__()
 
         config = vllm_config.model_config.hf_config
@@ -267,7 +303,10 @@ class InternLM2Model(nn.Module):
         quant_config = vllm_config.quant_config
 
         self.config = config
+<<<<<<< HEAD
         self.padding_idx = config.pad_token_id
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.vocab_size = config.vocab_size
         self.tok_embeddings = VocabParallelEmbedding(
             config.vocab_size,
@@ -290,8 +329,11 @@ class InternLM2Model(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors] = None,
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -305,6 +347,7 @@ class InternLM2Model(nn.Module):
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
             residual = intermediate_tensors["residual"]
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             layer = self.layers[i]
             hidden_states, residual = layer(
@@ -314,6 +357,10 @@ class InternLM2Model(nn.Module):
                 attn_metadata,
                 residual,
             )
+=======
+        for layer in self.layers[self.start_layer:self.end_layer]:
+            hidden_states, residual = layer(positions, hidden_states, residual)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if not get_pp_group().is_last_rank:
             return IntermediateTensors({
                 "hidden_states": hidden_states,
@@ -333,7 +380,11 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
                  *,
                  vllm_config: VllmConfig,
                  prefix: str = "",
+<<<<<<< HEAD
                  model_type: Type[InternLM2Model] = InternLM2Model):
+=======
+                 model_type: type[InternLM2Model] = InternLM2Model):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__()
         config = vllm_config.model_config.hf_config
         quant_config = vllm_config.quant_config
@@ -352,7 +403,10 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
         if self.config.tie_word_embeddings:
             self.output.weight = self.model.tok_embeddings.weight
         self.logits_processor = LogitsProcessor(config.vocab_size)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.make_empty_intermediate_tensors = (
             self.model.make_empty_intermediate_tensors)
 
@@ -363,6 +417,7 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
         intermediate_tensors: Optional[IntermediateTensors],
@@ -370,6 +425,12 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
     ) -> torch.Tensor:
         hidden_states = self.model(input_ids, positions, kv_caches,
                                    attn_metadata, intermediate_tensors,
+=======
+        intermediate_tensors: Optional[IntermediateTensors],
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        hidden_states = self.model(input_ids, positions, intermediate_tensors,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                    inputs_embeds)
         return hidden_states
 
@@ -382,6 +443,7 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
                                        sampling_metadata)
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: torch.Tensor,
@@ -392,13 +454,21 @@ class InternLM2ForCausalLM(nn.Module, SupportsPP, SupportsLoRA):
 
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             ("gate_up_proj", "w1", 0),
             ("gate_up_proj", "w3", 1),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for name, loaded_weight in weights:
             if "rotary_emb.inv_freq" in name:
                 continue
@@ -436,13 +506,21 @@ class InternLM2ForRewardModel(InternLM2ForCausalLM):
         *,
         vllm_config: VllmConfig,
         prefix: str = "",
+<<<<<<< HEAD
         model_type: Type[InternLM2Model] = InternLM2Model,
+=======
+        model_type: type[InternLM2Model] = InternLM2Model,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ):
         super().__init__(vllm_config=vllm_config,
                          prefix=prefix,
                          model_type=model_type)
 
+<<<<<<< HEAD
         for attr in ("output", "logits_processor", "sampler"):
+=======
+        for attr in ("output", "logits_processor"):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             delattr(self, attr)
 
         config = vllm_config.model_config.hf_config
@@ -466,6 +544,7 @@ class InternLM2ForRewardModel(InternLM2ForCausalLM):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
         intermediate_tensors: Optional[IntermediateTensors] = None,
@@ -473,6 +552,12 @@ class InternLM2ForRewardModel(InternLM2ForCausalLM):
     ) -> Union[torch.Tensor, IntermediateTensors]:
         hidden_states = self.model(input_ids, positions, kv_caches,
                                    attn_metadata, intermediate_tensors,
+=======
+        intermediate_tensors: Optional[IntermediateTensors] = None,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> Union[torch.Tensor, IntermediateTensors]:
+        hidden_states = self.model(input_ids, positions, intermediate_tensors,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                    inputs_embeds)
         logits, _ = self.v_head(hidden_states)
         return logits

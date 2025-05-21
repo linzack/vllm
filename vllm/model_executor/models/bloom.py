@@ -18,13 +18,22 @@
 # limitations under the License.
 """Inference-only BLOOM model compatible with HuggingFace weights."""
 import math
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Set, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import BloomConfig
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata
+=======
+from vllm.attention import Attention
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import (get_pp_group, get_tensor_model_parallel_rank,
@@ -35,15 +44,23 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
                                                RowParallelLinear)
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
 from vllm.model_executor.sampling_metadata import SamplingMetadata
 from vllm.sequence import IntermediateTensors
 
+<<<<<<< HEAD
 from .interfaces import SupportsPP
 from .utils import (is_pp_missing_parameter,
+=======
+from .interfaces import SupportsPP, SupportsQuant, SupportsV0Only
+from .utils import (AutoWeightsLoader, is_pp_missing_parameter,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     make_empty_intermediate_tensors_factory, make_layers,
                     maybe_prefix)
 
@@ -126,13 +143,20 @@ class BloomAttention(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         del position_ids  # Unused.
         qkv, _ = self.query_key_value(hidden_states)
         q, k, v = qkv.chunk(chunks=3, dim=-1)
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output, _ = self.dense(attn_output)
         return output
 
@@ -193,8 +217,11 @@ class BloomBlock(nn.Module):
         self,
         position_ids: torch.Tensor,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         # Layer norm at the beginning of the transformer layer.
         layernorm_output = self.input_layernorm(hidden_states)
@@ -209,8 +236,11 @@ class BloomBlock(nn.Module):
         attention_output = self.self_attention(
             position_ids=position_ids,
             hidden_states=layernorm_output,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
         attention_output = attention_output + residual
         layernorm_output = self.post_attention_layernorm(attention_output)
@@ -235,6 +265,10 @@ class BloomModel(nn.Module):
         config = vllm_config.model_config.hf_config
         cache_config = vllm_config.cache_config
         quant_config = vllm_config.quant_config
+<<<<<<< HEAD
+=======
+        self.config = config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         self.embed_dim = config.hidden_size
 
@@ -266,8 +300,11 @@ class BloomModel(nn.Module):
         self,
         input_ids: torch.Tensor,
         position_ids: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors],
         inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, IntermediateTensors]:
@@ -279,6 +316,7 @@ class BloomModel(nn.Module):
         else:
             assert intermediate_tensors is not None
             hidden_states = intermediate_tensors["hidden_states"]
+<<<<<<< HEAD
         for i in range(self.start_layer, self.end_layer):
             layer = self.h[i]
             hidden_states = layer(
@@ -287,11 +325,16 @@ class BloomModel(nn.Module):
                 kv_caches[i - self.start_layer],
                 attn_metadata,
             )
+=======
+        for layer in self.h[self.start_layer:self.end_layer]:
+            hidden_states = layer(position_ids, hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if not get_pp_group().is_last_rank:
             return IntermediateTensors({"hidden_states": hidden_states})
         hidden_states = self.ln_f(hidden_states)
         return hidden_states
 
+<<<<<<< HEAD
 
 class BloomForCausalLM(nn.Module, SupportsPP):
 
@@ -358,6 +401,13 @@ class BloomForCausalLM(nn.Module, SupportsPP):
                 continue
             if not name.startswith("transformer."):
                 name = "transformer." + name
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        params_dict = dict(self.named_parameters(remove_duplicate=False))
+        loaded_params: set[str] = set()
+        for name, loaded_weight in weights:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if is_pp_missing_parameter(name, self):
                 continue
             param = params_dict[name]
@@ -382,4 +432,69 @@ class BloomForCausalLM(nn.Module, SupportsPP):
                                     default_weight_loader)
             weight_loader(param, loaded_weight)
             loaded_params.add(name)
+<<<<<<< HEAD
         return loaded_params
+=======
+
+        return loaded_params
+
+
+class BloomForCausalLM(nn.Module, SupportsPP, SupportsV0Only, SupportsQuant):
+
+    def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
+        super().__init__()
+        config = vllm_config.model_config.hf_config
+        quant_config = vllm_config.quant_config
+        self.config = config
+        self.quant_config = quant_config
+        self.transformer = BloomModel(vllm_config=vllm_config,
+                                      prefix=maybe_prefix(
+                                          prefix, "transformer"))
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.transformer.word_embeddings
+        else:
+            self.lm_head = ParallelLMHead(self.config.vocab_size,
+                                          self.config.hidden_size)
+
+        self.logits_processor = LogitsProcessor(config.vocab_size)
+        self.make_empty_intermediate_tensors = (
+            self.transformer.make_empty_intermediate_tensors)
+
+    def get_input_embeddings(self, input_ids: torch.Tensor) -> torch.Tensor:
+        return self.transformer.get_input_embeddings(input_ids)
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        positions: torch.Tensor,
+        intermediate_tensors: Optional[IntermediateTensors] = None,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> Union[torch.Tensor, IntermediateTensors]:
+        hidden_states = self.transformer(input_ids, positions,
+                                         intermediate_tensors, inputs_embeds)
+        return hidden_states
+
+    def compute_logits(
+        self,
+        hidden_states: torch.Tensor,
+        sampling_metadata: SamplingMetadata,
+    ) -> Optional[torch.Tensor]:
+        logits = self.logits_processor(self.lm_head, hidden_states,
+                                       sampling_metadata)
+        return logits
+
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        loader = AutoWeightsLoader(self, skip_prefixes=["lm_head.weight"])
+        weights = _add_transformer_prefix(weights)
+        return loader.load_weights(weights)
+
+
+def _add_transformer_prefix(
+    weights: Iterable[tuple[str, torch.Tensor]]
+) -> Iterable[tuple[str, torch.Tensor]]:
+    for name, tensor in weights:
+        if not name.startswith('transformer.'):
+            name = 'transformer.' + name
+        yield name, tensor
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -2,7 +2,11 @@
 
 import glob
 
+<<<<<<< HEAD
 requires_files = glob.glob('requirements*.txt')
+=======
+requires_files = glob.glob('requirements/*.txt')
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 requires_files += ["pyproject.toml"]
 for file in requires_files:
     print(f">>> cleaning {file}")

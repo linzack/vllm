@@ -84,6 +84,7 @@ class PoolingModelRunner(
         #  explore how to leverage it.
         if (prefill_meta is None and decode_meta is not None
                 and decode_meta.use_cuda_graph):
+<<<<<<< HEAD
             assert model_input.input_tokens is not None
             graph_batch_size = model_input.input_tokens.shape[0]
             model_executable = self.graph_runners[virtual_engine][
@@ -101,6 +102,22 @@ class PoolingModelRunner(
             for _ in range(num_layers)
         ]
 
+=======
+            if model_input.inputs_embeds is None:
+                assert model_input.input_tokens is not None
+                graph_batch_size = model_input.input_tokens.shape[0]
+                model_executable = (
+                    self.graph_runners[model_input.virtual_engine][(
+                        graph_batch_size, False)])
+            else:
+                graph_batch_size = model_input.inputs_embeds.shape[0]
+                model_executable = (
+                    self.graph_runners[model_input.virtual_engine][(
+                        graph_batch_size, True)])
+        else:
+            model_executable = self.model
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         multi_modal_kwargs = model_input.multi_modal_kwargs or {}
         seqlen_agnostic_kwargs = {
             "finished_requests_ids": model_input.finished_requests_ids,
@@ -121,8 +138,11 @@ class PoolingModelRunner(
             hidden_or_intermediate_states = model_executable(
                 input_ids=model_input.input_tokens,
                 positions=model_input.input_positions,
+<<<<<<< HEAD
                 kv_caches=kv_caches,
                 attn_metadata=model_input.attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 intermediate_tensors=intermediate_tensors,
                 **MultiModalKwargs.as_kwargs(multi_modal_kwargs,
                                              device=self.device),

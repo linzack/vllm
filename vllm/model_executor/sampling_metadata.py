@@ -2,7 +2,11 @@
 
 from array import array
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Dict, List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -25,10 +29,17 @@ class SequenceGroupToSample:
     #                                   |-- query_len ---|
 
     # Sequence ids for the sequence group in a previous step.
+<<<<<<< HEAD
     seq_ids: List[int]
     sampling_params: SamplingParams
     # seq_id -> sequence data.
     seq_data: Dict[int, SequenceData]
+=======
+    seq_ids: list[int]
+    sampling_params: SamplingParams
+    # seq_id -> sequence data.
+    seq_data: dict[int, SequenceData]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # The length of the sequence (all tokens seen in the past + new token to
     # compute attention) of the sequence group. None if it is in a decode
     # stage.
@@ -44,9 +55,15 @@ class SequenceGroupToSample:
     is_prompt: bool
     # Query token indices from logits. to compute prompt logprob. Empty if
     # prompt logprob is not required.
+<<<<<<< HEAD
     prompt_logprob_indices: List[int]
     # Sample token indices from logits. Empty if sampling is not required.
     sample_indices: List[int]
+=======
+    prompt_logprob_indices: list[int]
+    # Sample token indices from logits. Empty if sampling is not required.
+    sample_indices: list[int]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @property
     def do_sample(self):
@@ -78,7 +95,11 @@ class SamplingMetadataCache:
     """Used to cache SamplingMetadata objects between scheduler iterations"""
 
     def __init__(self):
+<<<<<<< HEAD
         self._seq_group_to_sample_cache: Dict[int, PyObjectCache] = {}
+=======
+        self._seq_group_to_sample_cache: dict[int, PyObjectCache] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def get_cached_seq_group_to_sample(self, num_seqs):
         if num_seqs not in self._seq_group_to_sample_cache:
@@ -130,9 +151,15 @@ class SamplingMetadata:
 
     def __init__(
         self,
+<<<<<<< HEAD
         seq_groups: List[SequenceGroupToSample],
         selected_token_indices: torch.Tensor,
         categorized_sample_indices: Dict[SamplingType, torch.Tensor],
+=======
+        seq_groups: list[SequenceGroupToSample],
+        selected_token_indices: torch.Tensor,
+        categorized_sample_indices: dict[SamplingType, torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_prompts: int,
         skip_sampler_cpu_output: bool = False,
         reuse_sampling_tensors: bool = False,
@@ -146,12 +173,21 @@ class SamplingMetadata:
 
     @staticmethod
     def prepare(
+<<<<<<< HEAD
         seq_group_metadata_list: List[SequenceGroupMetadata],
         seq_lens: List[int],
         query_lens: List[int],
         device: str,
         pin_memory: bool,
         generators: Optional[Dict[str, torch.Generator]] = None,
+=======
+        seq_group_metadata_list: list[SequenceGroupMetadata],
+        seq_lens: list[int],
+        query_lens: list[int],
+        device: str,
+        pin_memory: bool,
+        generators: Optional[dict[str, torch.Generator]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         cache: Optional[SamplingMetadataCache] = None,
     ) -> "SamplingMetadata":
         (
@@ -191,6 +227,7 @@ class SamplingMetadata:
             "SamplingMetadata("
             f"seq_groups={self.seq_groups}, "
             f"selected_token_indices={self.selected_token_indices}, "
+<<<<<<< HEAD
             f"categorized_sample_indices={self.categorized_sample_indices}), ")
 
 
@@ -205,6 +242,22 @@ def _prepare_seq_groups(
         List[SequenceGroupToSample],
         List[int],
         Dict[SamplingType, List[int]],
+=======
+            f"categorized_sample_indices={self.categorized_sample_indices})")
+
+
+def _prepare_seq_groups(
+    seq_group_metadata_list: list[SequenceGroupMetadata],
+    seq_lens: list[int],
+    query_lens: list[int],
+    device: str,
+    generators: Optional[dict[str, torch.Generator]] = None,
+    cache: Optional[SamplingMetadataCache] = None,
+) -> tuple[
+        list[SequenceGroupToSample],
+        list[int],
+        dict[SamplingType, list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         int,
 ]:
     """Prepare sequence groups and indices for sampling.
@@ -227,17 +280,28 @@ def _prepare_seq_groups(
         num_prompts: Total number of prompts from `seq_group_metadata_list`.
     """
     # Batched sequence groups for the current model forward stsep.
+<<<<<<< HEAD
     seq_groups: List[SequenceGroupToSample] = []
     # A list of token indices to sample/compute logprob. It is used to
     # prune the outcome logits from the model for the performance.
     selected_token_indices: List[int] = []
+=======
+    seq_groups: list[SequenceGroupToSample] = []
+    # A list of token indices to sample/compute logprob. It is used to
+    # prune the outcome logits from the model for the performance.
+    selected_token_indices: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Used for selected_token_indices.
     model_output_idx = 0
 
     # Sampling type -> (
     # indices to sample/prompt logprob within pruned output logits,
     # indices to sample within pruned logits)
+<<<<<<< HEAD
     categorized_sample_indices: Dict[SamplingType, List[int]] = {
+=======
+    categorized_sample_indices: dict[SamplingType, list[int]] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         t: []
         for t in SamplingType
     }
@@ -265,9 +329,15 @@ def _prepare_seq_groups(
         # If the current seq group is in decode stage, it is None.
         seq_len: Optional[int] = None
         query_len: Optional[int] = None
+<<<<<<< HEAD
         prompt_logprob_indices: List[int] = (sample_obj.prompt_logprob_indices
                                              if cache is not None else [])
         sample_indices: List[int] = (sample_obj.sample_indices
+=======
+        prompt_logprob_indices: list[int] = (sample_obj.prompt_logprob_indices
+                                             if cache is not None else [])
+        sample_indices: list[int] = (sample_obj.sample_indices
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                      if cache is not None else [])
         do_sample = seq_group_metadata.do_sample
 
@@ -389,6 +459,7 @@ class SamplingTensors:
         vocab_size: int,
         device: torch.device,
         dtype: torch.dtype,
+<<<<<<< HEAD
     ) -> Tuple["SamplingTensors", bool, bool, bool]:
         prompt_tokens: List[array] = []
         output_tokens: List[array] = []
@@ -399,6 +470,18 @@ class SamplingTensors:
         presence_penalties: List[float] = []
         frequency_penalties: List[float] = []
         repetition_penalties: List[float] = []
+=======
+    ) -> tuple["SamplingTensors", bool, bool, bool]:
+        prompt_tokens: list[array] = []
+        output_tokens: list[array] = []
+        top_ks: list[int] = []
+        temperatures: list[float] = []
+        top_ps: list[float] = []
+        min_ps: list[float] = []
+        presence_penalties: list[float] = []
+        frequency_penalties: list[float] = []
+        repetition_penalties: list[float] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         do_penalties = False
         do_top_p_top_k = False
         do_min_p = False
@@ -416,7 +499,11 @@ class SamplingTensors:
 
             # k should not be greater than the vocab size.
             top_k = min(sampling_params.top_k, vocab_size)
+<<<<<<< HEAD
             top_k = vocab_size if top_k == -1 else top_k
+=======
+            top_k = vocab_size if top_k < 1 else top_k
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if temperature < _SAMPLING_EPS:
                 # NOTE: Zero temperature means deterministic sampling
                 # (i.e., greedy sampling or beam search).
@@ -496,6 +583,7 @@ class SamplingTensors:
     @classmethod
     def from_lists(
         cls,
+<<<<<<< HEAD
         temperatures: List[float],
         top_ps: List[float],
         top_ks: List[int],
@@ -505,6 +593,17 @@ class SamplingTensors:
         repetition_penalties: List[float],
         prompt_tokens: List[array],
         output_tokens: List[array],
+=======
+        temperatures: list[float],
+        top_ps: list[float],
+        top_ks: list[int],
+        min_ps: list[float],
+        presence_penalties: list[float],
+        frequency_penalties: list[float],
+        repetition_penalties: list[float],
+        prompt_tokens: list[array],
+        output_tokens: list[array],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         vocab_size: int,
         device: torch.device,
         dtype: torch.dtype,

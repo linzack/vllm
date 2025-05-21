@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import operator
+<<<<<<< HEAD
 from typing import Iterable, Optional
+=======
+from collections.abc import Iterable
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from torch import fx
 from torch._higher_order_ops.auto_functionalize import auto_functionalized
@@ -12,6 +17,25 @@ def is_func(node: fx.Node, target) -> bool:
     return node.op == "call_function" and node.target == target
 
 
+<<<<<<< HEAD
+=======
+# Returns the first specified node with the given op (if it exists)
+def find_specified_fn_maybe(nodes: Iterable[fx.Node],
+                            op: OpOverload) -> Optional[fx.Node]:
+    for node in nodes:
+        if node.target == op:
+            return node
+    return None
+
+
+# Returns the first specified node with the given op
+def find_specified_fn(nodes: Iterable[fx.Node], op: OpOverload) -> fx.Node:
+    node = find_specified_fn_maybe(nodes, op)
+    assert node is not None, f"Could not find {op} in nodes {nodes}"
+    return node
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Returns the first auto_functionalized node with the given op (if it exists)
 def find_auto_fn_maybe(nodes: Iterable[fx.Node],
                        op: OpOverload) -> Optional[fx.Node]:

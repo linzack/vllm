@@ -3,3 +3,7 @@ Meta-Llama-3-70B-Instruct.yaml
 Mixtral-8x7B-Instruct-v0.1.yaml
 Qwen2-57B-A14-Instruct.yaml
 DeepSeek-V2-Lite-Chat.yaml
+<<<<<<< HEAD
+=======
+Meta-Llama-3-8B-QQQ.yaml
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

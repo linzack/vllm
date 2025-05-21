@@ -126,6 +126,7 @@ struct MacheteKernelTemplate {
            std::is_same_v<ElementSChannel, ElementSToken>),
       "Currently token and channel scales (if present) must be the same type");
 
+<<<<<<< HEAD
   using EpilogueDescriptor =
       cutlass::epilogue::collective::detail::EpilogueDescriptor<
           TileShape, cutlass::epilogue::collective::EpilogueTileAuto, ElementD,
@@ -135,6 +136,12 @@ struct MacheteKernelTemplate {
   using ChTokScalesEpilogue =
       typename vllm::c3x::ScaledEpilogue<ElementAccumulator, ElementD,
                                          EpilogueDescriptor>;
+=======
+  // Currently only supports float scales
+  using ChTokScalesEpilogue =
+      typename vllm::c3x::ScaledEpilogue<ElementAccumulator, ElementD,
+                                         TileShape>;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   static_assert((with_channel_scales || with_token_scales) ||
                     (std::is_same_v<ElementSChannel, float> &&
                      std::is_same_v<ElementSToken, float>),

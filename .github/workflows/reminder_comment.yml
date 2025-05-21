@@ -1,4 +1,9 @@
 name: PR Reminder Comment Bot
+<<<<<<< HEAD
+=======
+permissions:
+  pull-requests: write
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 on:
   pull_request_target:
     types: [opened]

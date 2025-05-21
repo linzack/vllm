@@ -6,10 +6,17 @@ from typing import List, Optional, Set, Tuple
 from vllm.model_executor.layers.sampler import SamplerOutput
 from vllm.sequence import ExecuteModelRequest
 from vllm.spec_decode.interfaces import SpeculativeProposer
+<<<<<<< HEAD
 from vllm.worker.worker_base import LoraNotSupportedWorkerBase
 
 
 class ProposerWorkerBase(LoraNotSupportedWorkerBase, SpeculativeProposer):
+=======
+from vllm.worker.worker_base import LoRANotSupportedWorkerBase
+
+
+class ProposerWorkerBase(LoRANotSupportedWorkerBase, SpeculativeProposer):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Interface for proposer workers"""
 
     @abstractmethod

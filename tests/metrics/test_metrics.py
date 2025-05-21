@@ -1,28 +1,52 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import time
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import ray
 from prometheus_client import REGISTRY
 
+<<<<<<< HEAD
 from vllm import EngineArgs, LLMEngine
 from vllm.config import LoadFormat
+=======
+import vllm.envs as envs
+from vllm import EngineArgs, LLMEngine
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.distributed import cleanup_dist_env_and_memory
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
 from vllm.engine.metrics import RayPrometheusStatLogger
 from vllm.sampling_params import SamplingParams
+<<<<<<< HEAD
 
 from ..conftest import MODEL_WEIGHTS_S3_BUCKET
+=======
+from vllm.test_utils import MODEL_WEIGHTS_S3_BUCKET
+
+
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch):
+    """
+    This module tests V0 internals, so set VLLM_USE_V1=0.
+    """
+    monkeypatch.setenv('VLLM_USE_V1', '0')
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 MODELS = [
     "distilbert/distilgpt2",
 ]
 
+<<<<<<< HEAD
 RUNAI_STREAMER_LOAD_FORMAT = LoadFormat.RUNAI_STREAMER
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 @pytest.mark.parametrize("model", MODELS)
 @pytest.mark.parametrize("dtype", ["float"])
@@ -136,7 +160,11 @@ def test_metric_counter_generation_tokens_multi_step(
     "served_model_name",
     [None, [], ["ModelName0"], ["ModelName0", "ModelName1", "ModelName2"]])
 def test_metric_set_tag_model_name(vllm_runner, model: str, dtype: str,
+<<<<<<< HEAD
                                    served_model_name: List[str]) -> None:
+=======
+                                   served_model_name: list[str]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with vllm_runner(model,
                      dtype=dtype,
                      disable_log_stats=False,
@@ -145,10 +173,18 @@ def test_metric_set_tag_model_name(vllm_runner, model: str, dtype: str,
         stat_logger = vllm_model.model.llm_engine.stat_loggers['prometheus']
         metrics_tag_content = stat_logger.labels["model_name"]
 
+<<<<<<< HEAD
     if served_model_name is None or served_model_name == []:
         actual_model_name = f"{MODEL_WEIGHTS_S3_BUCKET}/{model}"
         assert metrics_tag_content == actual_model_name, (
             f"Metrics tag model_name is wrong! expect: {actual_model_name!r}\n"
+=======
+    if envs.VLLM_CI_USE_S3:
+        model = f"{MODEL_WEIGHTS_S3_BUCKET}/{model}"
+    if served_model_name is None or served_model_name == []:
+        assert metrics_tag_content == model, (
+            f"Metrics tag model_name is wrong! expect: {model!r}\n"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             f"actual: {metrics_tag_content!r}")
     else:
         assert metrics_tag_content == served_model_name[0], (
@@ -174,10 +210,18 @@ async def test_async_engine_log_metrics_regression(
     when disable_log_stats=False
     (see: https://github.com/vllm-project/vllm/pull/4150#pullrequestreview-2008176678)
     """
+<<<<<<< HEAD
     engine_args = AsyncEngineArgs(model=model,
                                   dtype=dtype,
                                   disable_log_stats=disable_log_stats,
                                   load_format=RUNAI_STREAMER_LOAD_FORMAT)
+=======
+    engine_args = AsyncEngineArgs(
+        model=model,
+        dtype=dtype,
+        disable_log_stats=disable_log_stats,
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     async_engine = AsyncLLMEngine.from_engine_args(engine_args)
     for i, prompt in enumerate(example_prompts):
         results = async_engine.generate(
@@ -189,7 +233,11 @@ async def test_async_engine_log_metrics_regression(
         async for _ in results:
             pass
 
+<<<<<<< HEAD
     assert_metrics(async_engine.engine, disable_log_stats,
+=======
+    assert_metrics(model, async_engine.engine, disable_log_stats,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                    len(example_prompts))
 
 
@@ -204,10 +252,18 @@ def test_engine_log_metrics_regression(
     max_tokens: int,
     disable_log_stats: bool,
 ) -> None:
+<<<<<<< HEAD
     engine_args = EngineArgs(model=model,
                              dtype=dtype,
                              disable_log_stats=disable_log_stats,
                              load_format=RUNAI_STREAMER_LOAD_FORMAT)
+=======
+    engine_args = EngineArgs(
+        model=model,
+        dtype=dtype,
+        disable_log_stats=disable_log_stats,
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     engine = LLMEngine.from_engine_args(engine_args)
     for i, prompt in enumerate(example_prompts):
         engine.add_request(
@@ -218,7 +274,13 @@ def test_engine_log_metrics_regression(
     while engine.has_unfinished_requests():
         engine.step()
 
+<<<<<<< HEAD
     assert_metrics(engine, disable_log_stats, len(example_prompts))
+=======
+    if envs.VLLM_CI_USE_S3:
+        model = f"{MODEL_WEIGHTS_S3_BUCKET}/{model}"
+    assert_metrics(model, engine, disable_log_stats, len(example_prompts))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.parametrize("model", MODELS)
@@ -238,8 +300,15 @@ def test_metric_spec_decode(
             dtype=dtype,
             disable_log_stats=False,
             gpu_memory_utilization=0.4,
+<<<<<<< HEAD
             speculative_model=model,
             num_speculative_tokens=k,
+=======
+            speculative_config={
+                "model": model,
+                "num_speculative_tokens": k,
+            },
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) as vllm_model:
 
         # Force log interval to be 0 to catch all metrics.
@@ -285,6 +354,7 @@ def test_metric_spec_decode_interval(
 ) -> None:
     k = 5
 
+<<<<<<< HEAD
     engine_args = EngineArgs(model=model,
                              dtype=dtype,
                              disable_log_stats=False,
@@ -293,6 +363,19 @@ def test_metric_spec_decode_interval(
                              num_speculative_tokens=k,
                              enforce_eager=True,
                              load_format=RUNAI_STREAMER_LOAD_FORMAT)
+=======
+    engine_args = EngineArgs(
+        model=model,
+        dtype=dtype,
+        disable_log_stats=False,
+        gpu_memory_utilization=0.4,
+        speculative_config={
+            "model": model,
+            "num_speculative_tokens": k,
+        },
+        enforce_eager=True,
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     engine = LLMEngine.from_engine_args(engine_args)
 
@@ -359,7 +442,11 @@ def test_metric_spec_decode_interval(
         cleanup_dist_env_and_memory()
 
 
+<<<<<<< HEAD
 def assert_metrics(engine: LLMEngine, disable_log_stats: bool,
+=======
+def assert_metrics(model: str, engine: LLMEngine, disable_log_stats: bool,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                    num_requests: int) -> None:
     if disable_log_stats:
         with pytest.raises(AttributeError):
@@ -370,7 +457,11 @@ def assert_metrics(engine: LLMEngine, disable_log_stats: bool,
         # Ensure the count bucket of request-level histogram metrics matches
         # the number of requests as a simple sanity check to ensure metrics are
         # generated
+<<<<<<< HEAD
         labels = {'model_name': engine.model_config.model}
+=======
+        labels = {'model_name': model}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request_histogram_metrics = [
             "vllm:e2e_request_latency_seconds",
             "vllm:request_prompt_tokens",

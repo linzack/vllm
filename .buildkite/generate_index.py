@@ -22,5 +22,10 @@ with open("index.html", "w") as f:
     print(f"Generated index.html for {args.wheel}")
     # cloudfront requires escaping the '+' character
     f.write(
+<<<<<<< HEAD
         template.format(wheel=filename,
                         wheel_html_escaped=filename.replace("+", "%2B")))
+=======
+        template.format(wheel=filename, wheel_html_escaped=filename.replace("+", "%2B"))
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

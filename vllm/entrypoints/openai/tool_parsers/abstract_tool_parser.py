@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+<<<<<<< HEAD
 from functools import cached_property
 from typing import Callable, Dict, List, Optional, Sequence, Type, Union
+=======
+from collections.abc import Sequence
+from functools import cached_property
+from typing import Callable, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.entrypoints.openai.protocol import (ChatCompletionRequest,
                                               DeltaMessage,
@@ -22,16 +28,28 @@ class ToolParser:
     """
 
     def __init__(self, tokenizer: AnyTokenizer):
+<<<<<<< HEAD
         self.prev_tool_call_arr: List[Dict] = []
         # the index of the tool call that is currently being parsed
         self.current_tool_id: int = -1
         self.current_tool_name_sent: bool = False
         self.streamed_args_for_tool: List[str] = []
+=======
+        self.prev_tool_call_arr: list[dict] = []
+        # the index of the tool call that is currently being parsed
+        self.current_tool_id: int = -1
+        self.current_tool_name_sent: bool = False
+        self.streamed_args_for_tool: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         self.model_tokenizer = tokenizer
 
     @cached_property
+<<<<<<< HEAD
     def vocab(self) -> Dict[str, int]:
+=======
+    def vocab(self) -> dict[str, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # NOTE: Only PreTrainedTokenizerFast is guaranteed to have .vocab
         # whereas all tokenizers have .get_vocab()
         return self.model_tokenizer.get_vocab()
@@ -79,10 +97,17 @@ class ToolParser:
 
 
 class ToolParserManager:
+<<<<<<< HEAD
     tool_parsers: Dict[str, Type] = {}
 
     @classmethod
     def get_tool_parser(cls, name) -> Type:
+=======
+    tool_parsers: dict[str, type] = {}
+
+    @classmethod
+    def get_tool_parser(cls, name) -> type:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Get tool parser by name which is registered by `register_module`.
 
@@ -95,8 +120,13 @@ class ToolParserManager:
 
     @classmethod
     def _register_module(cls,
+<<<<<<< HEAD
                          module: Type,
                          module_name: Optional[Union[str, List[str]]] = None,
+=======
+                         module: type,
+                         module_name: Optional[Union[str, list[str]]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                          force: bool = True) -> None:
         if not issubclass(module, ToolParser):
             raise TypeError(
@@ -116,9 +146,15 @@ class ToolParserManager:
     @classmethod
     def register_module(
             cls,
+<<<<<<< HEAD
             name: Optional[Union[str, List[str]]] = None,
             force: bool = True,
             module: Union[Type, None] = None) -> Union[type, Callable]:
+=======
+            name: Optional[Union[str, list[str]]] = None,
+            force: bool = True,
+            module: Union[type, None] = None) -> Union[type, Callable]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Register module with the given name or name list. it can be used as a
         decoder(with module as None) or normal function(with module as not 

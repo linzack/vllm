@@ -9,7 +9,15 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+<<<<<<< HEAD
 namespace marlin {
+=======
+#ifndef MARLIN_NAMESPACE_NAME
+  #define MARLIN_NAMESPACE_NAME marlin
+#endif
+
+namespace MARLIN_NAMESPACE_NAME {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 // Marlin params
 
@@ -23,6 +31,10 @@ static constexpr int pipe_stages =
 
 static constexpr int min_thread_n = 64;
 static constexpr int min_thread_k = 64;
+<<<<<<< HEAD
+=======
+static constexpr int max_thread_n = 256;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 static constexpr int tile_size = 16;
 static constexpr int max_par = 16;
@@ -84,4 +96,8 @@ __device__ inline void cp_async_wait() {
 
 #endif
 
+<<<<<<< HEAD
 }  // namespace marlin
+=======
+}  // namespace MARLIN_NAMESPACE_NAME
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

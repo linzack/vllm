@@ -1,14 +1,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Callable, List, Optional
+=======
+from typing import Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch.nn import Parameter
 
 from vllm.model_executor.layers.quantization.quark.schemes import QuarkScheme
 from vllm.model_executor.layers.quantization.utils.w8a8_utils import (
+<<<<<<< HEAD
     apply_fp8_linear, cutlass_fp8_supported, normalize_e4m3fn_to_e4m3fnuz,
     requantize_with_max_scale)
+=======
+    Fp8LinearOp, normalize_e4m3fn_to_e4m3fnuz, requantize_with_max_scale)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.parameter import (ChannelQuantScaleParameter,
                                            ModelWeightParameter,
                                            PerTensorScaleParameter)
@@ -22,7 +30,12 @@ class QuarkW8A8Fp8(QuarkScheme):
     def __init__(self, qscheme: str, is_static_input_scheme: Optional[bool]):
         self.qscheme = qscheme
         self.is_static_input_scheme = is_static_input_scheme
+<<<<<<< HEAD
         self.cutlass_fp8_supported = cutlass_fp8_supported()
+=======
+        self.fp8_linear = Fp8LinearOp(use_per_token_if_dynamic=False)
+        self.out_dtype = torch.get_default_dtype()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @classmethod
     def get_min_capability(cls) -> int:
@@ -34,6 +47,7 @@ class QuarkW8A8Fp8(QuarkScheme):
         # tensor scales (thus N scales being passed to the kernel),
         # requantize so we can always run per tensor
         if self.qscheme == "per_tensor":
+<<<<<<< HEAD
             max_w_scale, weight = requantize_with_max_scale(
                 weight=layer.weight,
                 weight_scale=layer.weight_scale,
@@ -48,6 +62,26 @@ class QuarkW8A8Fp8(QuarkScheme):
                 if input_scale is not None:
                     layer.input_scale = Parameter(input_scale,
                                                   requires_grad=False)
+=======
+            if current_platform.is_rocm():
+                input_scale = getattr(layer, 'input_scale', None)
+                weight, max_w_scale, input_scale = normalize_e4m3fn_to_e4m3fnuz(
+                    weight=layer.weight,
+                    weight_scale=layer.weight_scale,
+                    input_scale=input_scale)
+                if input_scale is not None:
+                    layer.input_scale = Parameter(input_scale,
+                                                  requires_grad=False)
+            else:
+                max_w_scale = layer.weight_scale
+                weight = layer.weight
+
+            max_w_scale, weight = requantize_with_max_scale(
+                weight=weight,
+                weight_scale=max_w_scale,
+                logical_widths=layer.logical_widths,
+            )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             layer.weight = Parameter(weight.t(), requires_grad=False)
             layer.weight_scale = Parameter(max_w_scale, requires_grad=False)
@@ -56,12 +90,21 @@ class QuarkW8A8Fp8(QuarkScheme):
         elif self.qscheme == "per_channel":
             weight = layer.weight
 
+<<<<<<< HEAD
             if current_platform.is_rocm():
+=======
+            if current_platform.is_fp8_fnuz():
+                input_scale = getattr(layer, 'input_scale', None)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 weight, weight_scale, input_scale = \
                     normalize_e4m3fn_to_e4m3fnuz(
                         weight=weight,
                         weight_scale=layer.weight_scale,
+<<<<<<< HEAD
                         input_scale=layer.input_scale)
+=======
+                        input_scale=input_scale)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 if input_scale is not None:
                     layer.input_scale = Parameter(input_scale,
                                                   requires_grad=False)
@@ -83,7 +126,11 @@ class QuarkW8A8Fp8(QuarkScheme):
             layer.input_scale = None
 
     def create_weights(self, layer: torch.nn.Module,
+<<<<<<< HEAD
                        output_partition_sizes: List[int],
+=======
+                       output_partition_sizes: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        input_size_per_partition: int,
                        params_dtype: torch.dtype, weight_loader: Callable,
                        **kwargs):
@@ -105,7 +152,11 @@ class QuarkW8A8Fp8(QuarkScheme):
         # the newly added parameters
         if self.qscheme == "per_channel":
             weight_scale = ChannelQuantScaleParameter(
+<<<<<<< HEAD
                 data=torch.empty((sum(output_partition_sizes), 1),
+=======
+                data=torch.empty((sum(output_partition_sizes)),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                  dtype=torch.float32),
                 output_dim=0,
                 weight_loader=weight_loader)
@@ -132,6 +183,7 @@ class QuarkW8A8Fp8(QuarkScheme):
                       x: torch.Tensor,
                       bias: Optional[torch.Tensor] = None) -> torch.Tensor:
 
+<<<<<<< HEAD
         return apply_fp8_linear(
             input=x,
             weight=layer.weight,
@@ -140,3 +192,11 @@ class QuarkW8A8Fp8(QuarkScheme):
             bias=bias,
             cutlass_fp8_supported=self.cutlass_fp8_supported,
             use_per_token_if_dynamic=True)
+=======
+        return self.fp8_linear.apply(input=x,
+                                     weight=layer.weight,
+                                     weight_scale=layer.weight_scale,
+                                     out_dtype=self.out_dtype,
+                                     input_scale=layer.input_scale,
+                                     bias=bias)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

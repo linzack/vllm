@@ -9,7 +9,11 @@ PATH=${cuda_home}/bin:$PATH
 LD_LIBRARY_PATH=${cuda_home}/lib64:$LD_LIBRARY_PATH
 
 # Install requirements
+<<<<<<< HEAD
 $python_executable -m pip install -r requirements-build.txt -r requirements-cuda.txt
+=======
+$python_executable -m pip install -r requirements/build.txt -r requirements/cuda.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # Limit the number of parallel jobs to avoid OOM
 export MAX_JOBS=1

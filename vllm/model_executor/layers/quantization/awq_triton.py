@@ -1,8 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import torch
+<<<<<<< HEAD
 import triton
 import triton.language as tl
+=======
+
+from vllm.triton_utils import tl, triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 AWQ_TRITON_SUPPORTED_GROUP_SIZES = [-1, 32, 64, 128]
 

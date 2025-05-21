@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 import asyncio
 import os
 import sys
@@ -35,20 +36,40 @@ async def test_tokenizer_group(tokenizer_group_type):
     reference_tokenizer = AutoTokenizer.from_pretrained("gpt2")
     tokenizer_group = get_tokenizer_group(
         get_tokenizer_pool_config(tokenizer_group_type),
+=======
+import pytest
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
+
+from vllm.transformers_utils.tokenizer_group import TokenizerGroup
+
+
+@pytest.mark.asyncio
+async def test_tokenizer_group():
+    reference_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    tokenizer_group = TokenizerGroup(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         tokenizer_id="gpt2",
         enable_lora=False,
         max_num_seqs=1,
         max_input_length=None,
     )
     assert reference_tokenizer.encode("prompt") == tokenizer_group.encode(
+<<<<<<< HEAD
         request_id="request_id", prompt="prompt", lora_request=None)
     assert reference_tokenizer.encode(
         "prompt") == await tokenizer_group.encode_async(
             request_id="request_id", prompt="prompt", lora_request=None)
+=======
+        prompt="prompt", lora_request=None)
+    assert reference_tokenizer.encode(
+        "prompt") == await tokenizer_group.encode_async(prompt="prompt",
+                                                        lora_request=None)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert isinstance(tokenizer_group.get_lora_tokenizer(None),
                       PreTrainedTokenizerBase)
     assert tokenizer_group.get_lora_tokenizer(
         None) == await tokenizer_group.get_lora_tokenizer_async(None)
+<<<<<<< HEAD
     if tokenizer_group_type is CustomTokenizerGroup:
         assert tokenizer_group._i > 0
 
@@ -214,3 +235,5 @@ async def test_tokenizer_group_ray_pool_fault_tolerance(tokenizer_group_type):
                                             lora_request=None)
     # Actors should stay the same.
     assert tokenizer_group_pool.tokenizer_actors == tokenizer_actors
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

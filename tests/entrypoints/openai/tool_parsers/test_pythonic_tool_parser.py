@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from unittest.mock import MagicMock
 
 import pytest
@@ -125,7 +128,11 @@ TEST_CASES = [
 @pytest.mark.parametrize("streaming, model_output, expected_tool_calls",
                          TEST_CASES)
 def test_tool_call(streaming: bool, model_output: str,
+<<<<<<< HEAD
                    expected_tool_calls: List[FunctionCall]):
+=======
+                   expected_tool_calls: list[FunctionCall]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     mock_tokenizer = MagicMock()
     tool_parser: ToolParser = ToolParserManager.get_tool_parser("pythonic")(
         mock_tokenizer)

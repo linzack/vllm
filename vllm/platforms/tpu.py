@@ -1,18 +1,40 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Optional
 
 import torch
 
 import vllm.envs as envs
 from vllm.logger import init_logger
+=======
+from typing import TYPE_CHECKING, Optional, Union, cast
+
+import torch
+from tpu_info import device
+
+import vllm.envs as envs
+from vllm.inputs import ProcessorInputs, PromptType
+from vllm.logger import init_logger
+from vllm.sampling_params import SamplingParams, SamplingType
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .interface import Platform, PlatformEnum, _Backend
 
 if TYPE_CHECKING:
+<<<<<<< HEAD
     from vllm.config import VllmConfig
 else:
     VllmConfig = None
+=======
+    from vllm.config import BlockSize, ModelConfig, VllmConfig
+    from vllm.pooling_params import PoolingParams
+else:
+    BlockSize = None
+    ModelConfig = None
+    VllmConfig = None
+    PoolingParams = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -24,9 +46,18 @@ class TpuPlatform(Platform):
     dispatch_key: str = "XLA"
     ray_device_key: str = "TPU"
     device_control_env_var: str = "TPU_VISIBLE_CHIPS"
+<<<<<<< HEAD
 
     supported_quantization: list[str] = [
         "tpu_int8", "compressed-tensors", "compressed_tensors"
+=======
+    simple_compile_backend: str = "openxla"
+
+    supported_quantization: list[str] = ["tpu_int8", "compressed-tensors"]
+
+    additional_env_vars: list[str] = [
+        "TPU_CHIPS_PER_HOST_BOUNDS", "TPU_HOST_BOUNDS"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ]
 
     @classmethod
@@ -47,7 +78,12 @@ class TpuPlatform(Platform):
 
     @classmethod
     def get_device_name(cls, device_id: int = 0) -> str:
+<<<<<<< HEAD
         return "tpu"
+=======
+        chip_type, _ = device.get_local_chips()
+        return f"TPU {chip_type.name}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @classmethod
     def get_device_total_memory(cls, device_id: int = 0) -> int:
@@ -58,6 +94,25 @@ class TpuPlatform(Platform):
         return not envs.VLLM_USE_V1
 
     @classmethod
+<<<<<<< HEAD
+=======
+    def get_punica_wrapper(cls) -> str:
+        return "vllm.lora.punica_wrapper.punica_tpu.PunicaWrapperTPU"
+
+    @classmethod
+    def get_infinity_values(cls, dtype: torch.dtype) -> tuple[float, float]:
+        return torch.finfo(dtype).min, torch.finfo(dtype).max
+
+    @classmethod
+    def can_update_inplace(cls):
+        return False
+
+    @classmethod
+    def get_lora_vocab_padding_size(cls) -> int:
+        return 1
+
+    @classmethod
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def inference_mode(cls):
         return torch.no_grad()
 
@@ -66,9 +121,15 @@ class TpuPlatform(Platform):
         from vllm.config import CompilationLevel
 
         cache_config = vllm_config.cache_config
+<<<<<<< HEAD
         if cache_config and cache_config.block_size is None:
             cache_config.block_size = 16
 
+=======
+        # For v0, the default block size is 16.
+        if cache_config and cache_config.block_size is None:
+            cache_config.block_size = cast(BlockSize, 16)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         compilation_config = vllm_config.compilation_config
 
         # TPU only supports DYNAMO_ONCE compilation level
@@ -88,6 +149,7 @@ class TpuPlatform(Platform):
                 "Using bfloat16 instead.", vllm_config.model_config.dtype)
             vllm_config.model_config.dtype = torch.bfloat16
 
+<<<<<<< HEAD
         parallel_config = vllm_config.parallel_config
         scheduler_config = vllm_config.scheduler_config
         if parallel_config.worker_cls == "auto":
@@ -98,10 +160,45 @@ class TpuPlatform(Platform):
                 if scheduler_config.is_multi_step:
                     parallel_config.worker_cls = \
                         "vllm.worker.multi_step_tpu_worker.MultiStepTPUWorker"
+=======
+        if envs.VLLM_USE_V1:
+            from vllm.v1.attention.backends.pallas import (
+                PallasAttentionBackend)
+            cache_config.block_size = PallasAttentionBackend.get_page_size(
+                vllm_config)  # type: ignore[assignment]
+            min_page_size = PallasAttentionBackend.get_min_page_size(
+                vllm_config)
+            if min_page_size > cache_config.block_size:
+                logger.warning(
+                    "Increase the page size from %s to %s to make sure there's"
+                    "no SMEM OOM",
+                    cache_config.block_size,
+                    min_page_size,
+                )
+                cache_config.block_size = min_page_size  # type: ignore[assignment]
+
+        parallel_config = vllm_config.parallel_config
+        scheduler_config = vllm_config.scheduler_config
+        if parallel_config.worker_cls == "auto":
+            if scheduler_config.is_multi_step:
+                if envs.VLLM_USE_V1:
+                    raise NotImplementedError(
+                        "Multi-step scheduling is not supported (and not "
+                        "needed) on vLLM V1. Please launch without "
+                        "--num-scheduler-steps.")
+                else:
+                    parallel_config.worker_cls = \
+                        "vllm.worker.multi_step_tpu_worker.MultiStepTPUWorker"
+            else:
+                if envs.VLLM_USE_V1:
+                    parallel_config.worker_cls = \
+                        "vllm.v1.worker.tpu_worker.TPUWorker"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 else:
                     parallel_config.worker_cls = \
                         "vllm.worker.tpu_worker.TPUWorker"
 
+<<<<<<< HEAD
         # Adjust scheduler config for V1
         # TODO: Add support for these
         if envs.VLLM_USE_V1 and vllm_config.cache_config.enable_prefix_caching:
@@ -111,6 +208,18 @@ class TpuPlatform(Platform):
         assert not vllm_config.speculative_config, (
             "Speculative decoding is not yet supported for TPU backend")
 
+=======
+        assert not vllm_config.speculative_config, (
+            "Speculative decoding is not yet supported for TPU backend")
+
+        if scheduler_config.is_multimodal_model and not \
+            scheduler_config.disable_chunked_mm_input:
+            logger.warning("TPU does not support running Multimodal models"\
+            " without setting `--disable_chunked_mm_input`. " \
+            "Forcing --disable_chunked_mm_input.")
+            scheduler_config.disable_chunked_mm_input = True
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     @classmethod
     def is_pin_memory_available(cls):
         logger.warning("Pin memory is not supported on TPU.")
@@ -119,3 +228,39 @@ class TpuPlatform(Platform):
     @classmethod
     def get_device_communicator_cls(cls) -> str:
         return "vllm.distributed.device_communicators.tpu_communicator.TpuCommunicator"  # noqa
+<<<<<<< HEAD
+=======
+
+    @classmethod
+    def use_all_gather(cls) -> bool:
+        return True
+
+    @classmethod
+    def supports_v1(cls, model_config: ModelConfig) -> bool:
+        # V1 support on TPU is experimental
+        return True
+
+    @classmethod
+    def validate_request(
+        cls,
+        prompt: PromptType,
+        params: Union[SamplingParams, PoolingParams],
+        processed_inputs: ProcessorInputs,
+    ) -> None:
+        """Raises if this request is unsupported on this platform"""
+        if isinstance(params, SamplingParams):
+            if params.guided_decoding is not None and not envs.VLLM_USE_V1:
+                raise ValueError("Structured output is not supported on "
+                                 f"{cls.device_name} V0.")
+            if params.sampling_type == SamplingType.RANDOM_SEED:
+                raise ValueError(
+                    "Torch XLA does not support per-request seed.")
+
+
+try:
+    from tpu_commons.platforms import TpuPlatform as TpuCommonsPlatform
+    TpuPlatform = TpuCommonsPlatform  # type: ignore
+except ImportError:
+    logger.info("tpu_commons not found, using vLLM's TpuPlatform")
+    pass
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

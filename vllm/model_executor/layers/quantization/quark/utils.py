@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import re
+<<<<<<< HEAD
 from types import MappingProxyType
 from typing import Any, Iterable, List, Mapping, Optional
+=======
+from collections.abc import Iterable, Mapping
+from types import MappingProxyType
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def deep_compare(dict1: Any, dict2: Any) -> bool:
@@ -21,7 +27,11 @@ def deep_compare(dict1: Any, dict2: Any) -> bool:
 def should_ignore_layer(
     layer_name: Optional[str],
     ignore: Iterable[str],
+<<<<<<< HEAD
     fused_mapping: Mapping[str, List[str]] = MappingProxyType({})
+=======
+    fused_mapping: Mapping[str, list[str]] = MappingProxyType({})
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> bool:
     if layer_name is None:
         return False

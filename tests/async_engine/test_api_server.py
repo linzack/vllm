@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
+=======
+import os
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import subprocess
 import sys
 import time
@@ -44,7 +48,14 @@ def api_server(tokenizer_pool_size: int, distributed_executor_backend: str):
         distributed_executor_backend,
     ]
 
+<<<<<<< HEAD
     uvicorn_process = subprocess.Popen(commands)
+=======
+    # API Server Test Requires V0.
+    my_env = os.environ.copy()
+    my_env["VLLM_USE_V1"] = "0"
+    uvicorn_process = subprocess.Popen(commands, env=my_env)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     yield
     uvicorn_process.terminate()
 

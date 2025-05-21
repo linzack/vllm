@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# For vllm script, with -t option (tensor parallel size).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # bash ./run-lm-eval-gsm-vllm-baseline.sh -m neuralmagic/Mixtral-8x22B-Instruct-v0.1-FP8-dynamic -b "auto" -l 250 -f 5 -t 8
 model_name: "neuralmagic/Mixtral-8x22B-Instruct-v0.1-FP8-dynamic"
 tasks:

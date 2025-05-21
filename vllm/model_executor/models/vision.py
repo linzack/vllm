@@ -19,10 +19,18 @@ _C = TypeVar("_C", bound=PretrainedConfig)
 
 class VisionEncoderInfo(ABC, Generic[_C]):
 
+<<<<<<< HEAD
     def __init__(self, vision_config: _C) -> None:
         super().__init__()
 
         self.vision_config = vision_config
+=======
+    def __init__(self, hf_config: _C) -> None:
+        super().__init__()
+
+        self.hf_config = hf_config
+        self.vision_config = hf_config.vision_config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @abstractmethod
     def get_num_image_tokens(
@@ -34,10 +42,13 @@ class VisionEncoderInfo(ABC, Generic[_C]):
         raise NotImplementedError
 
     @abstractmethod
+<<<<<<< HEAD
     def get_max_image_tokens(self) -> int:
         raise NotImplementedError
 
     @abstractmethod
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_image_size(self) -> int:
         raise NotImplementedError
 
@@ -61,6 +72,7 @@ def get_vision_encoder_info(
     from .pixtral import PixtralHFEncoderInfo, PixtralVisionConfig
     from .siglip import SiglipEncoderInfo, SiglipVisionConfig
 
+<<<<<<< HEAD
     vision_config = hf_config.vision_config
     if isinstance(vision_config, CLIPVisionConfig):
         return CLIPEncoderInfo(vision_config)
@@ -70,6 +82,16 @@ def get_vision_encoder_info(
         return SiglipEncoderInfo(vision_config)
 
     msg = f"Unsupported vision config: {type(vision_config)}"
+=======
+    if isinstance(hf_config.vision_config, CLIPVisionConfig):
+        return CLIPEncoderInfo(hf_config)
+    if isinstance(hf_config.vision_config, PixtralVisionConfig):
+        return PixtralHFEncoderInfo(hf_config)
+    if isinstance(hf_config.vision_config, SiglipVisionConfig):
+        return SiglipEncoderInfo(hf_config)
+
+    msg = f"Unsupported vision config: {type(hf_config.vision_config)}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     raise NotImplementedError(msg)
 
 

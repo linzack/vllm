@@ -46,15 +46,25 @@ class HpuPlatform(Platform):
     def check_and_update_config(cls, vllm_config: VllmConfig) -> None:
 
         scheduler_config = vllm_config.scheduler_config
+<<<<<<< HEAD
         if scheduler_config.is_multi_step:
             raise NotImplementedError(
                 "Multi-step execution is not implemented for HPU")
+=======
+        parallel_config = vllm_config.parallel_config
+        if scheduler_config.is_multi_step:
+            parallel_config.worker_cls = \
+                "vllm.worker.multi_step_hpu_worker.MultiStepHPUWorker"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if vllm_config.speculative_config is not None:
             raise NotImplementedError(
                 "Speculative decoding is not implemented for HPU")
 
+<<<<<<< HEAD
         parallel_config = vllm_config.parallel_config
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if parallel_config.worker_cls == "auto":
             parallel_config.worker_cls = "vllm.worker.hpu_worker.HPUWorker"
 

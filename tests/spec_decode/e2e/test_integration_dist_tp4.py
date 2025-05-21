@@ -3,6 +3,11 @@
 tensor parallelism.
 """
 
+<<<<<<< HEAD
+=======
+import json
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import openai
 import pytest
 import torch
@@ -24,12 +29,16 @@ SPEC_MODEL = "JackFram/llama-68m"
         "4",
     ]])
 @pytest.mark.parametrize("per_test_common_llm_kwargs", [
+<<<<<<< HEAD
     [
         "--speculative-model",
         f"{SPEC_MODEL}",
         "--num-speculative-tokens",
         "5",
     ],
+=======
+    [],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ])
 @pytest.mark.parametrize("baseline_llm_kwargs", [[]])
 @pytest.mark.parametrize(
@@ -37,8 +46,17 @@ SPEC_MODEL = "JackFram/llama-68m"
     [
         #TODO(wooyeon): add spec_draft_dp=2 case
         [
+<<<<<<< HEAD
             "--speculative-draft-tensor-parallel-size",
             "1",
+=======
+            "--speculative_config",
+            json.dumps({
+                "model": f"{SPEC_MODEL}",
+                "num_speculative_tokens": 5,
+                "draft_tensor_parallel_size": 1,
+            }),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         ],
     ])
 @pytest.mark.parametrize("batch_size", [2])
@@ -78,6 +96,7 @@ def test_draft_model_tp_lt_target_model_tp4(common_llm_kwargs,
     "test_llm_kwargs",
     [
         [
+<<<<<<< HEAD
             "--speculative-model",
             f"{SPEC_MODEL}",
             "--num-speculative-tokens",
@@ -87,6 +106,16 @@ def test_draft_model_tp_lt_target_model_tp4(common_llm_kwargs,
             # to skip speculation once the sequences grow beyond 32-k tokens.
             "--speculative-max-model-len",
             "32",
+=======
+            # Artificially limit the draft model max model len; this forces vLLM
+            # to skip speculation once the sequences grow beyond 32-k tokens.
+            "--speculative_config",
+            json.dumps({
+                "model": f"{SPEC_MODEL}",
+                "num_speculative_tokens": 5,
+                "max_model_len": 32,
+            }),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         ],
     ])
 @pytest.mark.parametrize("batch_size", [8])

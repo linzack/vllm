@@ -19,6 +19,7 @@ FP8 computation is supported on NVIDIA GPUs with compute capability > 8.9 (Ada L
 FP8 models will run on compute capability > 8.0 (Ampere) as weight-only W8A16, utilizing FP8 Marlin.
 :::
 
+<<<<<<< HEAD
 ## Quick Start with Online Dynamic Quantization
 
 Dynamic quantization of an original precision BF16/FP16 model to FP8 can be achieved with vLLM without any calibration data required. You can enable the feature by specifying `--quantization="fp8"` in the command line or setting `quantization="fp8"` in the LLM constructor.
@@ -36,6 +37,8 @@ result = model.generate("Hello, my name is")
 Currently, we load the model at original precision before quantizing down to 8-bits, so you need enough memory to load the whole model.
 :::
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ## Installation
 
 To produce performant FP8 quantized models with vLLM, you'll need to install the [llm-compressor](https://github.com/vllm-project/llm-compressor/) library:
@@ -86,7 +89,11 @@ recipe = QuantizationModifier(
 # Apply the quantization algorithm.
 oneshot(model=model, recipe=recipe)
 
+<<<<<<< HEAD
 # Save the model.
+=======
+# Save the model: Meta-Llama-3-8B-Instruct-FP8-Dynamic
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 SAVE_DIR = MODEL_ID.split("/")[1] + "-FP8-Dynamic"
 model.save_pretrained(SAVE_DIR)
 tokenizer.save_pretrained(SAVE_DIR)
@@ -94,7 +101,11 @@ tokenizer.save_pretrained(SAVE_DIR)
 
 ### 3. Evaluating Accuracy
 
+<<<<<<< HEAD
 Install `vllm` and `lm-evaluation-harness`:
+=======
+Install `vllm` and `lm-evaluation-harness` for evaluation:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ```console
 pip install vllm lm-eval==0.4.4
@@ -105,7 +116,12 @@ Load and run the model in `vllm`:
 ```python
 from vllm import LLM
 model = LLM("./Meta-Llama-3-8B-Instruct-FP8-Dynamic")
+<<<<<<< HEAD
 model.generate("Hello my name is")
+=======
+result = model.generate("Hello my name is")
+print(result[0].outputs[0].text)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 Evaluate accuracy with `lm_eval` (for example on 250 samples of `gsm8k`):
@@ -133,6 +149,7 @@ Here's an example of the resulting scores:
 
 ## Troubleshooting and Support
 
+<<<<<<< HEAD
 If you encounter any issues or have feature requests, please open an issue on the `vllm-project/llm-compressor` GitHub repository.
 
 ## Deprecated Flow
@@ -189,3 +206,24 @@ model = LLM(model="Meta-Llama-3-8B-Instruct-FP8/")
 # INFO 06-10 21:15:41 model_runner.py:159] Loading model weights took 8.4596 GB
 result = model.generate("Hello, my name is")
 ```
+=======
+If you encounter any issues or have feature requests, please open an issue on the [vllm-project/llm-compressor](https://github.com/vllm-project/llm-compressor/issues) GitHub repository.
+
+## Online Dynamic Quantization
+
+Dynamic quantization of an original precision BF16/FP16 model to FP8 can be achieved with vLLM without any calibration data required. You can enable the feature by specifying `--quantization="fp8"` in the command line or setting `quantization="fp8"` in the LLM constructor.
+
+In this mode, all Linear modules (except for the final `lm_head`) have their weights quantized down to FP8_E4M3 precision with a per-tensor scale. Activations have their minimum and maximum values calculated during each forward pass to provide a dynamic per-tensor scale for high accuracy. As a result, latency improvements are limited in this mode.
+
+```python
+from vllm import LLM
+model = LLM("facebook/opt-125m", quantization="fp8")
+# INFO 06-10 17:55:42 model_runner.py:157] Loading model weights took 0.1550 GB
+result = model.generate("Hello, my name is")
+print(result[0].outputs[0].text)
+```
+
+:::{warning}
+Currently, we load the model at original precision before quantizing down to 8-bits, so you need enough memory to load the whole model.
+:::
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

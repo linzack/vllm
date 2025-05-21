@@ -34,13 +34,21 @@ class UniProcExecutor(ExecutorBase):
         if len(device_info) > 1:
             local_rank = int(device_info[1])
         rank = 0
+<<<<<<< HEAD
+=======
+        is_driver_worker = True
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         kwargs = dict(
             vllm_config=self.vllm_config,
             local_rank=local_rank,
             rank=rank,
             distributed_init_method=distributed_init_method,
+<<<<<<< HEAD
             is_driver_worker=(not self.parallel_config)
             or (rank % self.parallel_config.tensor_parallel_size == 0),
+=======
+            is_driver_worker=is_driver_worker,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
         self.collective_rpc("init_worker", args=([kwargs], ))
         self.collective_rpc("init_device")
@@ -86,22 +94,36 @@ class ExecutorWithExternalLauncher(UniProcExecutor):
     def _init_executor(self) -> None:
         """Initialize the worker and load the model.
         """
+<<<<<<< HEAD
         assert self.vllm_config.parallel_config.pipeline_parallel_size == 1, \
             ("ExecutorWithExternalLauncher does not "
             "support pipeline parallelism.")
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert self.vllm_config.scheduler_config.delay_factor == 0.0, \
             ("ExecutorWithExternalLauncher needs deterministic "
             "execution, so it"
             "does not support delay_factor in scheduling")
+<<<<<<< HEAD
         assert not envs.VLLM_USE_V1, \
             ("V1 architecture cannot guarantee deterministic execution, "
             "so it is not supported in ExecutorWithExternalLauncher.")
+=======
+        if envs.VLLM_USE_V1:
+            assert not envs.VLLM_ENABLE_V1_MULTIPROCESSING, \
+            ("To get deterministic execution in V1, "
+            "please set VLLM_ENABLE_V1_MULTIPROCESSING=0")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.driver_worker = WorkerWrapperBase(vllm_config=self.vllm_config,
                                                rpc_rank=0)
         # engines are launched in torchrun-compatible launchers
         # so we can use the env:// method.
         # required env vars:
         # - RANK
+<<<<<<< HEAD
+=======
+        # - LOCAL_RANK
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # - MASTER_ADDR
         # - MASTER_PORT
         distributed_init_method = "env://"

@@ -4,7 +4,10 @@ import argparse
 import dataclasses
 import os
 import time
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import torch_xla.debug.profiler as xp
@@ -35,7 +38,11 @@ def main(args: argparse.Namespace):
     dummy_prompt_token_ids = np.random.randint(10000,
                                                size=(args.batch_size,
                                                      args.input_len))
+<<<<<<< HEAD
     dummy_prompts: List[PromptType] = [{
+=======
+    dummy_prompts: list[PromptType] = [{
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "prompt_token_ids": batch
     } for batch in dummy_prompt_token_ids.tolist()]
 

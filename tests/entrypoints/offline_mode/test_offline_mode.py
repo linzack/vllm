@@ -53,6 +53,7 @@ def cache_models():
 
 @pytest.mark.skip_global_cleanup
 @pytest.mark.usefixtures("cache_models")
+<<<<<<< HEAD
 def test_offline_mode(monkeypatch):
     # Set HF to offline mode and ensure we can still construct an LLM
     try:
@@ -79,6 +80,39 @@ def test_offline_mode(monkeypatch):
         monkeypatch.delenv("VLLM_NO_USAGE_STATS")
         _re_import_modules()
         pass
+=======
+def test_offline_mode(monkeypatch: pytest.MonkeyPatch):
+    # Set HF to offline mode and ensure we can still construct an LLM
+    with monkeypatch.context() as m:
+        try:
+            m.setenv("HF_HUB_OFFLINE", "1")
+            m.setenv("VLLM_NO_USAGE_STATS", "1")
+
+            def disable_connect(*args, **kwargs):
+                raise RuntimeError("No http calls allowed")
+
+            m.setattr(
+                urllib3.connection.HTTPConnection,
+                "connect",
+                disable_connect,
+            )
+            m.setattr(
+                urllib3.connection.HTTPSConnection,
+                "connect",
+                disable_connect,
+            )
+
+            # Need to re-import huggingface_hub
+            # and friends to setup offline mode
+            _re_import_modules()
+            # Cached model files should be used in offline mode
+            for model_config in MODEL_CONFIGS:
+                LLM(**model_config)
+        finally:
+            # Reset the environment after the test
+            # NB: Assuming tests are run in online mode
+            _re_import_modules()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def _re_import_modules():

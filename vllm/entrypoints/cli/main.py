@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # The CLI entrypoint to vLLM.
+<<<<<<< HEAD
 import os
 import signal
 import sys
@@ -16,6 +17,24 @@ logger = init_logger(__name__)
 CMD_MODULES = [
     vllm.entrypoints.cli.openai,
     vllm.entrypoints.cli.serve,
+=======
+import signal
+import sys
+
+import vllm.entrypoints.cli.benchmark.main
+import vllm.entrypoints.cli.collect_env
+import vllm.entrypoints.cli.openai
+import vllm.entrypoints.cli.serve
+import vllm.version
+from vllm.entrypoints.utils import cli_env_setup
+from vllm.utils import FlexibleArgumentParser
+
+CMD_MODULES = [
+    vllm.entrypoints.cli.openai,
+    vllm.entrypoints.cli.serve,
+    vllm.entrypoints.cli.benchmark.main,
+    vllm.entrypoints.cli.collect_env,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ]
 
 
@@ -28,6 +47,7 @@ def register_signal_handlers():
     signal.signal(signal.SIGTSTP, signal_handler)
 
 
+<<<<<<< HEAD
 def env_setup():
     # The safest multiprocessing method is `spawn`, as the default `fork` method
     # is not compatible with some accelerators. The default method will be
@@ -51,6 +71,10 @@ def env_setup():
 
 def main():
     env_setup()
+=======
+def main():
+    cli_env_setup()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     parser = FlexibleArgumentParser(description="vLLM CLI")
     parser.add_argument('-v',

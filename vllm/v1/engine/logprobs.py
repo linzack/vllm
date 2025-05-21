@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import itertools
+<<<<<<< HEAD
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+=======
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.logger import init_logger
 from vllm.sequence import Logprob, PromptLogprobs, SampleLogprobs
@@ -13,12 +19,23 @@ from vllm.v1.outputs import LogprobsLists, LogprobsTensors
 
 logger = init_logger(__name__)
 
+<<<<<<< HEAD
+=======
+NONES = itertools.repeat(None)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 @dataclass
 class LogprobsProcessor:
 
+<<<<<<< HEAD
     # Tokenizer for this request
     tokenizer: AnyTokenizer
+=======
+    # Tokenizer for this request,
+    # None if detokenization is disabled.
+    tokenizer: Optional[AnyTokenizer]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Logprobs for this request
     logprobs: Optional[SampleLogprobs]
@@ -30,7 +47,11 @@ class LogprobsProcessor:
     @classmethod
     def from_new_request(
         cls,
+<<<<<<< HEAD
         tokenizer: AnyTokenizer,
+=======
+        tokenizer: Optional[AnyTokenizer],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request: EngineCoreRequest,
     ) -> "LogprobsProcessor":
         num_logprobs = request.sampling_params.logprobs
@@ -66,8 +87,13 @@ class LogprobsProcessor:
                                              token_ids_lst):
 
             # Detokenize (non-incrementally).
+<<<<<<< HEAD
             decoded_tokens = convert_ids_list_to_tokens(
                 self.tokenizer, token_ids)
+=======
+            decoded_tokens = NONES if self.tokenizer is None else (
+                convert_ids_list_to_tokens(self.tokenizer, token_ids))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             # Sampler puts the sampled logprob in first.
             sampled_token_logprob = logprobs[0]
@@ -103,15 +129,24 @@ class LogprobsProcessor:
 
         # Detokenize non-incrementally.
         # Output is flat: [num_tok, num_lps] -> [num_tok * num_lps]
+<<<<<<< HEAD
         decoded_tokens = convert_ids_list_to_tokens(
             self.tokenizer,
             token_ids.flatten().tolist())
+=======
+        decoded_tokens = None if self.tokenizer is None else (
+            convert_ids_list_to_tokens(self.tokenizer,
+                                       token_ids.flatten().tolist()))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Recover shapes.
         num_prompt_tokens, num_logprobs = logprobs.shape
 
         # Pythonize the torch tensors.
+<<<<<<< HEAD
         # TODO(rob): experiment with doing this in EngineCore?
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         prompt_token_ranks = ranks.tolist()
         prompt_logprobs = logprobs.tolist()
         token_ids = token_ids.tolist()
@@ -121,7 +156,12 @@ class LogprobsProcessor:
             # Handle flattening.
             offset = pos * num_logprobs
             offset_end = offset + num_logprobs
+<<<<<<< HEAD
             decoded_tokens_for_pos = decoded_tokens[offset:offset_end]
+=======
+            decoded_tokens_for_pos = NONES \
+            if decoded_tokens is None else decoded_tokens[offset:offset_end]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             # Update with the Logprob dictionary for this pos.
             self.prompt_logprobs.append(
@@ -151,12 +191,21 @@ class LogprobsProcessor:
 
     @staticmethod
     def _make_logprob_dict(
+<<<<<<< HEAD
         logprobs: List[float],
         logprob_token_ids: List[int],
         decoded_tokens: List[str],
         rank: int,
         num_logprobs: int,
     ) -> Dict[int, Logprob]:
+=======
+        logprobs: list[float],
+        logprob_token_ids: list[int],
+        decoded_tokens: Iterable[Optional[str]],
+        rank: int,
+        num_logprobs: int,
+    ) -> dict[int, Logprob]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Make a Logprob dictionary for a position.
 
         Args:
@@ -168,7 +217,11 @@ class LogprobsProcessor:
             by the user (in addition to sampled logprob)
 
         Returns:
+<<<<<<< HEAD
           Dict[token id, Logprob]
+=======
+          dict[token id, Logprob]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
 
         # We do not need a special case for the sampled token

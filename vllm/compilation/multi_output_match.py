@@ -3,7 +3,11 @@
 import abc
 import operator
 from abc import abstractmethod
+<<<<<<< HEAD
 from typing import Iterable, List, Tuple
+=======
+from collections.abc import Iterable
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from torch import fx
 from torch._higher_order_ops.auto_functionalize import auto_functionalized
@@ -56,7 +60,11 @@ class MultiOutputMatch(abc.ABC):
         raise NotImplementedError
 
     @property
+<<<<<<< HEAD
     def nodes(self) -> List[fx.Node]:
+=======
+    def nodes(self) -> list[fx.Node]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return self.match.nodes
 
     @property
@@ -87,7 +95,11 @@ class MultiOutputMatch(abc.ABC):
         return self.graph.inserting_after(last_node_in_match)
 
     def insert_getitems(self, tuple_node: fx.Node,
+<<<<<<< HEAD
                         indices: Iterable[int]) -> Tuple[fx.Node, ...]:
+=======
+                        indices: Iterable[int]) -> tuple[fx.Node, ...]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Insert operator.getitem nodes to extract elements from a tuple node.
 

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from array import array
+<<<<<<< HEAD
 from typing import List, Optional, Union
 
 import torch
@@ -9,16 +10,31 @@ from xformers.ops.fmha.attn_bias import BlockDiagonalMask
 
 from vllm.attention import AttentionMetadata
 from vllm.attention.backends.xformers import XFormersImpl
+=======
+from typing import Optional
+
+import torch
+import torch.nn as nn
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import ModelConfig, VllmConfig
 from vllm.logger import init_logger
 from vllm.model_executor.layers.pooler import PoolerHead
 from vllm.model_executor.models.llama import LlamaForCausalLM
 from vllm.model_executor.pooling_metadata import (PoolingMetadata,
                                                   PoolingTensors)
+<<<<<<< HEAD
 from vllm.sequence import (IntermediateTensors, PoolerOutput,
                            PoolingSequenceGroupOutput)
 from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
 
+=======
+from vllm.sequence import PoolerOutput, PoolingSequenceGroupOutput
+from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
+
+from .interfaces import SupportsV0Only
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 logger = init_logger(__name__)
 
 
@@ -90,8 +106,13 @@ class GritLMPooler(nn.Module):
 
         # Return no instruction in case of missing BOS token.
         if prompt_token_ids[0] != self.token_ids["<s>"]:
+<<<<<<< HEAD
             logger.warning("BOS token not found in prompt,"
                            "thus using empty string for instruction."
+=======
+            logger.warning("BOS token not found in prompt, "
+                           "thus using empty string for instruction. "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                            "GritLM requires BOS token in prompt.")
             return instruction_len
 
@@ -111,8 +132,13 @@ class GritLMPooler(nn.Module):
         if found_embed_pattern_idx != -1:
             instruction_len = found_embed_pattern_idx + len(embed_pattern_ids)
         else:
+<<<<<<< HEAD
             logger.warning("Query instruction not found in prompt,"
                            "thus using BOS token as instruction instead."
+=======
+            logger.warning("Query instruction not found in prompt, "
+                           "thus using BOS token as instruction instead. "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                            "GritLM requires query instruction in prompt.")
             instruction_len = 1
 
@@ -168,7 +194,12 @@ class GritLMPooler(nn.Module):
         mean_embeddings = sum_embeddings / num_non_instruction_tokens.unsqueeze(
             1)
 
+<<<<<<< HEAD
         pooled_data = self.head(mean_embeddings)
+=======
+        pooled_data = self.head(mean_embeddings,
+                                pooling_metadata=pooling_metadata)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         pooled_outputs = [
             PoolingSequenceGroupOutput(data) for data in pooled_data
@@ -177,7 +208,11 @@ class GritLMPooler(nn.Module):
         return PoolerOutput(outputs=pooled_outputs)
 
 
+<<<<<<< HEAD
 class GritLM(LlamaForCausalLM):
+=======
+class GritLM(LlamaForCausalLM, SupportsV0Only):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """This class implements the embedding model for parasail-ai/GritLM-7B-vllm.
 
     The class inherits from LlamaForCausalLM and provides a custom pooling
@@ -201,6 +236,7 @@ class GritLM(LlamaForCausalLM):
         prefix: str = "",
         **kwargs,
     ) -> None:
+<<<<<<< HEAD
         super().__init__(vllm_config=vllm_config, prefix=prefix, **kwargs)
 
         self.runner_type = vllm_config.model_config.runner_type
@@ -237,6 +273,23 @@ class GritLM(LlamaForCausalLM):
             **kwargs,
         )
 
+=======
+        # Use full attention for pooling
+        if vllm_config.model_config.runner_type == "pooling":
+            hf_config = vllm_config.model_config.hf_config
+            hf_config.is_causal = False
+
+            vllm_config.cache_config.sliding_window = None
+
+            for attr in ("sliding_window", "interleaved_sliding_window"):
+                if hasattr(hf_config, attr):
+                    delattr(hf_config, attr)
+
+        super().__init__(vllm_config=vllm_config, prefix=prefix, **kwargs)
+
+        self._pooler = GritLMPooler(vllm_config.model_config)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def pooler(
         self,
         hidden_states: torch.Tensor,

@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
+<<<<<<< HEAD
 from typing import Iterable, List, Set, Tuple
+=======
+from collections.abc import Iterable
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -148,7 +152,11 @@ class MLPSpeculator(nn.Module):
         previous_hidden_states: torch.Tensor,
         num_predict_tokens: int,
         sampling_metadata: SamplingMetadata,
+<<<<<<< HEAD
     ) -> List[SamplerOutput]:
+=======
+    ) -> list[SamplerOutput]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if num_predict_tokens > self.max_speculative_tokens:
             raise ValueError(f"Max speculative tokens for model is "
                              f"{self.max_speculative_tokens}, but "
@@ -190,10 +198,17 @@ class MLPSpeculator(nn.Module):
 
         return next_tokens
 
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
         params_dict = dict(self.named_parameters())
         loaded_params: Set[str] = set()
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        params_dict = dict(self.named_parameters())
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for name, loaded_weight in weights:
             name = name.replace("speculator.", "")
             param = params_dict.get(name)

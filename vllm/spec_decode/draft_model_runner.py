@@ -16,7 +16,11 @@ try:
             ROCmFlashAttentionMetadata as FlashAttentionMetadata)
 except (ModuleNotFoundError, ImportError) as err:
     raise RuntimeError(
+<<<<<<< HEAD
         "Draft model speculative decoding currently only supports"
+=======
+        "Draft model speculative decoding currently only supports "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "CUDA and ROCm flash attention backend.") from err
 
 from vllm.logger import init_logger
@@ -50,12 +54,15 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
     """
 
     def __init__(self, model_runner: ModelRunnerBase):
+<<<<<<< HEAD
         if hasattr(
                 model_runner,
                 "return_hidden_states") and model_runner.return_hidden_states:
             raise ValueError(
                 "return_hidden_states is not supported for TP1DraftModelRunner."
             )
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__(model_runner)
 
         self.indices_of_seq_with_bonus_tokens = None
@@ -139,7 +146,11 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
     def supports_gpu_multi_step(self, execute_model_req: ExecuteModelRequest):
         """Determines if draft_model_runner GPU multi-step can be used.
         Currently required conditions are:
+<<<<<<< HEAD
             1. Only decodes 
+=======
+            1. Only decodes
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             2. Only flash-attn
             3. No LORA
             4. No prompt_adapter_config
@@ -153,7 +164,11 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
                 return False
 
         # TODO: Add support for other attn backends
+<<<<<<< HEAD
         if self.attn_backend.get_name() not in ("FLASH_ATTN", "TRITON_MLA"):
+=======
+        if self.attn_backend.get_name() not in ("FLASH_ATTN", ):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return False
 
         # TODO: Add support for LORA
@@ -177,12 +192,20 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
         num_steps: int = 1,
         **kwargs,
     ) -> Optional[List[SamplerOutput]]:
+<<<<<<< HEAD
         """Executes num_steps forward passes with advacement of input tensors 
+=======
+        """Executes num_steps forward passes with advacement of input tensors
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         on the GPU. Look at supports_gpu_multi_step(..) for pre-conditions.
 
         Optimizations used:
             1. Input tensors are updated on the GPU directly
+<<<<<<< HEAD
             2. Skips GPU=>CPU serialization of sampler outputs (we don't need 
+=======
+            2. Skips GPU=>CPU serialization of sampler outputs (we don't need
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 them since we do batch expansion later that uses GPU outputs)
             3. Reuses sampling tensors (since we run only decodes and they have
                 a repeating sampling logic)
@@ -207,6 +230,12 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
             if self.prompt_adapter_config is not None:
                 raise ValueError("TP1DraftModelRunner has no support for "
                                  "prompt_adapter_config")
+<<<<<<< HEAD
+=======
+            if model_input.inputs_embeds is not None:
+                raise ValueError("TP1DraftModelRunner has no support for "
+                                 "inputs_embeds")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if model_input.multi_modal_kwargs:
                 raise ValueError(
                     "TP1DraftModelRunner has no support for multi_modal_kwargs"
@@ -248,9 +277,22 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
 
         # Get model
         if use_cuda_graph:
+<<<<<<< HEAD
             graph_batch_size = model_input.input_tokens.shape[0]
             model_executable = (self.graph_runners[model_input.virtual_engine]
                                 [graph_batch_size])
+=======
+            if model_input.inputs_embeds is None:
+                graph_batch_size = model_input.input_tokens.shape[0]
+                model_executable = (
+                    self.graph_runners[model_input.virtual_engine][(
+                        graph_batch_size, False)])
+            else:
+                graph_batch_size = model_input.inputs_embeds.shape[0]
+                model_executable = (
+                    self.graph_runners[model_input.virtual_engine][(
+                        graph_batch_size, True)])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             if previous_hidden_states is not None:
                 hidden_states = torch.cat([
@@ -287,9 +329,14 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
                                      self.vllm_config):
                 hidden_states = model_executable(
                     input_ids=model_input.input_tokens,
+<<<<<<< HEAD
                     positions=model_input.input_positions,
                     kv_caches=kv_caches,
                     attn_metadata=model_input.attn_metadata,
+=======
+                    inputs_embeds=None,
+                    positions=model_input.input_positions,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     intermediate_tensors=intermediate_tensors,
                     **MultiModalKwargs.as_kwargs(multi_modal_kwargs,
                                                  device=self.device),
@@ -303,12 +350,27 @@ class TP1DraftModelRunner(ModelRunnerWrapperBase):
             if not self.is_driver_worker:
                 return []
             # Sample the next token.
+<<<<<<< HEAD
             output = self.model.sample(
+=======
+            output = self.model_runner.sampler(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 logits=logits,
                 sampling_metadata=model_input.sampling_metadata,
             )
             outputs.append(output)
 
+<<<<<<< HEAD
+=======
+            if self.return_hidden_states and is_fallback:
+                if use_cuda_graph:
+                    indices = model_input.sampling_metadata\
+                      .selected_token_indices
+                    output.hidden_states = hidden_states[:len(indices)]
+                else:
+                    output.hidden_states = hidden_states
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if model_input.attn_metadata.num_prefills == 0 \
                 and self.indices_of_seq_with_bonus_tokens is not None:
                 assert output.sampled_token_ids is not None

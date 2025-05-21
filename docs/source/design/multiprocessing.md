@@ -24,7 +24,11 @@ This document describes how vLLM deals with these challenges.
 [Python multiprocessing methods](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods) include:
 
 - `spawn` - spawn a new Python process. This will be the default as of Python
+<<<<<<< HEAD
   3.14.
+=======
+  3.14. In macOS, this is already the default.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 - `fork` - Use `os.fork()` to fork the Python interpreter. This is the default
   in Python versions prior to 3.14.
@@ -34,7 +38,11 @@ This document describes how vLLM deals with these challenges.
 ### Tradeoffs
 
 `fork` is the fastest method, but is incompatible with dependencies that use
+<<<<<<< HEAD
 threads.
+=======
+threads. If you are under macOS, using `fork` may cause the process to crash.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 `spawn` is more compatible with dependencies, but can be problematic when vLLM
 is used as a library. If the consuming code does not use a `__main__` guard (`if

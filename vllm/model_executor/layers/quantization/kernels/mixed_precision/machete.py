@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from functools import partial
+<<<<<<< HEAD
 from typing import Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -25,18 +29,28 @@ class MacheteLinearKernel(MPLinearKernel):
 
     @classmethod
     def can_implement(cls,
+<<<<<<< HEAD
                       c: MPLinearLayerConfig) -> Tuple[bool, Optional[str]]:
+=======
+                      c: MPLinearLayerConfig) -> tuple[bool, Optional[str]]:
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if c.has_g_idx and\
             c.partition_weight_shape[0] != c.full_weight_shape[0]:
             return False, "Act reordering currently not supported by Machete, "\
                           "when the input features are partitioned across "\
                           "devices"
+<<<<<<< HEAD
 
         if c.zero_points:
             return False, "Zero points currently not supported by "\
                           " Compressed Tensors + Machete. (Kernel supports it"\
                           " but CompressedTensorsWNA16 does not so support has"\
                           " not been added to MacheteWNA16Kernel yet"
+=======
+        if c.zero_points:
+            return False, "Zero points currently not supported by Machete"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if c.weight_type not in query_machete_supported_quant_types(
                 c.zero_points):

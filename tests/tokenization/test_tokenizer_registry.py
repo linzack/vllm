@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+=======
+from typing import TYPE_CHECKING, Any, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.transformers_utils.tokenizer import get_tokenizer
 from vllm.transformers_utils.tokenizer_base import (TokenizerBase,
@@ -17,6 +21,7 @@ class TestTokenizer(TokenizerBase):
         return TestTokenizer()
 
     @property
+<<<<<<< HEAD
     def all_special_tokens_extended(self) -> List[str]:
         raise NotImplementedError()
 
@@ -26,6 +31,17 @@ class TestTokenizer(TokenizerBase):
 
     @property
     def all_special_ids(self) -> List[int]:
+=======
+    def all_special_tokens_extended(self) -> list[str]:
+        raise NotImplementedError()
+
+    @property
+    def all_special_tokens(self) -> list[str]:
+        raise NotImplementedError()
+
+    @property
+    def all_special_ids(self) -> list[int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError()
 
     @property
@@ -58,7 +74,11 @@ class TestTokenizer(TokenizerBase):
 
     def __call__(
         self,
+<<<<<<< HEAD
         text: Union[str, List[str], List[int]],
+=======
+        text: Union[str, list[str], list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         text_pair: Optional[str] = None,
         add_special_tokens: bool = False,
         truncation: bool = False,
@@ -66,10 +86,17 @@ class TestTokenizer(TokenizerBase):
     ):
         raise NotImplementedError()
 
+<<<<<<< HEAD
     def get_vocab(self) -> Dict[str, int]:
         raise NotImplementedError()
 
     def get_added_vocab(self) -> Dict[str, int]:
+=======
+    def get_vocab(self) -> dict[str, int]:
+        raise NotImplementedError()
+
+    def get_added_vocab(self) -> dict[str, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError()
 
     def encode_one(
@@ -77,11 +104,16 @@ class TestTokenizer(TokenizerBase):
         text: str,
         truncation: bool = False,
         max_length: Optional[int] = None,
+<<<<<<< HEAD
     ) -> List[int]:
+=======
+    ) -> list[int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError()
 
     def encode(self,
                text: str,
+<<<<<<< HEAD
                add_special_tokens: Optional[bool] = None) -> List[int]:
         raise NotImplementedError()
 
@@ -96,14 +128,36 @@ class TestTokenizer(TokenizerBase):
 
     def decode(self,
                ids: Union[List[int], int],
+=======
+               add_special_tokens: Optional[bool] = None) -> list[int]:
+        raise NotImplementedError()
+
+    def apply_chat_template(self,
+                            messages: list["ChatCompletionMessageParam"],
+                            tools: Optional[list[dict[str, Any]]] = None,
+                            **kwargs) -> list[int]:
+        raise NotImplementedError()
+
+    def convert_tokens_to_string(self, tokens: list[str]) -> str:
+        raise NotImplementedError()
+
+    def decode(self,
+               ids: Union[list[int], int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                skip_special_tokens: bool = True) -> str:
         raise NotImplementedError()
 
     def convert_ids_to_tokens(
         self,
+<<<<<<< HEAD
         ids: List[int],
         skip_special_tokens: bool = True,
     ) -> List[str]:
+=======
+        ids: list[int],
+        skip_special_tokens: bool = True,
+    ) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError()
 
 

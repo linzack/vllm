@@ -6,7 +6,11 @@ import uuid
 from asyncio import CancelledError
 from copy import copy
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import pytest_asyncio
@@ -41,7 +45,11 @@ class MockEngine:
         self.abort_request_calls = 0
         self.request_id = None
         # Ugly, remove dependency when possible
+<<<<<<< HEAD
         self.parallel_config = ParallelConfig(1, 1, False)
+=======
+        self.parallel_config = ParallelConfig()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.model_config = MockModelConfig()
 
     async def step_async(self, virtual_engine):
@@ -151,6 +159,13 @@ def uid() -> str:
 
 @pytest_asyncio.fixture(scope="module")
 async def async_engine():
+<<<<<<< HEAD
+=======
+    # We cannot use monkeypatch since this is a module
+    # scoped fixture and monkeypatch is function scoped.
+    previous_value = os.getenv("VLLM_USE_V1", None)
+    os.environ["VLLM_USE_V1"] = "0"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     engine = await asyncio.get_event_loop().run_in_executor(executor=None,
                                                             func=start_engine)
     try:
@@ -161,6 +176,14 @@ async def async_engine():
         await asyncio.sleep(0.1)
         cleanup_dist_env_and_memory()
 
+<<<<<<< HEAD
+=======
+        if previous_value:
+            os.environ["VLLM_USE_V1"] = previous_value
+        else:
+            del os.environ["VLLM_USE_V1"]
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 @pytest.fixture()
 def should_do_global_cleanup_after_test(request) -> bool:
@@ -254,7 +277,11 @@ async def test_output_kinds(async_engine, stop):
         params.output_kind = RequestOutputKind.DELTA
 
         prompt_tokens = None
+<<<<<<< HEAD
         output_tokens: List[int] = []
+=======
+        output_tokens: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output_text = ""
         output_count = 0
         final_output = None

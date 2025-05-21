@@ -74,8 +74,11 @@ def forward(
     self,
     input_ids: torch.Tensor,
     positions: torch.Tensor,
+<<<<<<< HEAD
     kv_caches: List[torch.Tensor],
     attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> torch.Tensor:
     ...
 ```

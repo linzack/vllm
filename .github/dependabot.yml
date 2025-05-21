@@ -23,7 +23,11 @@ updates:
       - dependency-name: "lm-format-enforcer"
       - dependency-name: "gguf"
       - dependency-name: "compressed-tensors"
+<<<<<<< HEAD
       - dependency-name: "ray[adag]"
+=======
+      - dependency-name: "ray[cgraph]" # Ray Compiled Graph
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       - dependency-name: "lm-eval"
     groups:
       minor-update:

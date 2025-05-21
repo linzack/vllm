@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Dict, List, Set, Tuple
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import torch
 
 from vllm.model_executor.layers.utils import apply_penalties
@@ -9,13 +12,22 @@ from vllm.utils import is_pin_memory_available, make_tensor_with_pad
 
 
 def apply_min_token_penalties(
+<<<<<<< HEAD
         logits: torch.Tensor, output_token_ids: List[List[int]],
         min_tokens: Dict[int, Tuple[int, Set[int]]]) -> None:
+=======
+        logits: torch.Tensor, output_token_ids: list[list[int]],
+        min_tokens: dict[int, tuple[int, set[int]]]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Applies minimum token penalty by setting the logits of the stop tokens
     to -inf.
     """
+<<<<<<< HEAD
     min_tokens_logits_to_penalize: List[Tuple[int, int]] = []
+=======
+    min_tokens_logits_to_penalize: list[tuple[int, int]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for index, (min_token, stop_token_ids) in min_tokens.items():
         if len(output_token_ids[index]) < min_token:
             for stop_token_id in stop_token_ids:
@@ -30,7 +42,11 @@ def apply_all_penalties(
     presence_penalties: torch.Tensor,
     frequency_penalties: torch.Tensor,
     repetition_penalties: torch.Tensor,
+<<<<<<< HEAD
     output_token_ids: List[List[int]],
+=======
+    output_token_ids: list[list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> torch.Tensor:
     """
     Applies presence, frequency and repetition penalties to the logits.
@@ -43,7 +59,11 @@ def apply_all_penalties(
                            repetition_penalties)
 
 
+<<<<<<< HEAD
 def _convert_to_tensors(output_token_ids: List[List[int]], vocab_size: int,
+=======
+def _convert_to_tensors(output_token_ids: list[list[int]], vocab_size: int,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         device: torch.device) -> torch.Tensor:
     """
     Convert the different list data structures to tensors.

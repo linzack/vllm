@@ -41,6 +41,7 @@ class CPUPoolingModelRunner(
             raise ValueError(
                 "CPU worker does not support multi-step execution.")
 
+<<<<<<< HEAD
         num_layers = self.model_config.get_num_layers(self.parallel_config)
         # use an empty tensor instead of `None`` to force Dynamo to pass
         # it by reference, rather by specializing on the value ``None``.
@@ -51,6 +52,8 @@ class CPUPoolingModelRunner(
             for _ in range(num_layers)
         ]
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_executable = self.model
         cross_enc_kwargs = {}
         if model_input.token_type_ids is not None:
@@ -60,10 +63,13 @@ class CPUPoolingModelRunner(
             model_input.input_tokens,
             "positions":
             model_input.input_positions,
+<<<<<<< HEAD
             "kv_caches":
             kv_caches,
             "attn_metadata":
             model_input.attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             **MultiModalKwargs.as_kwargs(model_input.multi_modal_kwargs or {},
                                          device=self.device),
             **cross_enc_kwargs,

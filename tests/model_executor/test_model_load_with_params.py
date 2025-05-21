@@ -14,7 +14,11 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "BAAI/bge-base-en-v1.5")
 REVISION = os.environ.get("REVISION", "main")
 
 MODEL_NAME_ROBERTA = os.environ.get("MODEL_NAME",
+<<<<<<< HEAD
                                     "intfloat/multilingual-e5-large")
+=======
+                                    "intfloat/multilingual-e5-small")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 REVISION_ROBERTA = os.environ.get("REVISION", "main")
 
 
@@ -83,7 +87,11 @@ def test_roberta_model_loading_with_params(vllm_runner):
         assert model_config.pooler_config.pooling_norm
 
         # asserts on the tokenizer loaded
+<<<<<<< HEAD
         assert model_tokenizer.tokenizer_id == "intfloat/multilingual-e5-large"
+=======
+        assert model_tokenizer.tokenizer_id == "intfloat/multilingual-e5-small"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert not model_tokenizer.tokenizer_config["do_lower_case"]
 
         def check_model(model):

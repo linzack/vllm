@@ -10,7 +10,10 @@ from pqdm.threads import pqdm
 from vllm.multimodal import MULTIMODAL_REGISTRY
 from vllm.multimodal.parse import ImageSize
 from vllm.multimodal.processing import BaseMultiModalProcessor
+<<<<<<< HEAD
 from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from ...utils import build_model_context
 
@@ -36,6 +39,7 @@ def _validate_image_max_tokens_one(
 @pytest.mark.parametrize("model_id", ["llava-hf/llava-v1.6-mistral-7b-hf"])
 def test_processor_max_tokens(model_id):
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model_id,
         tokenizer_name=model_id,
         mm_processor_kwargs=None,
@@ -45,6 +49,13 @@ def test_processor_max_tokens(model_id):
         ctx.model_config,
         tokenizer=cached_tokenizer_from_config(ctx.model_config),
     )
+=======
+        model_id,
+        mm_processor_kwargs=None,
+        limit_mm_per_prompt={"image": 1},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     info = processor.info
 
     seen_aspect_ratios = set[float]()
@@ -97,8 +108,13 @@ def _validate_image_prompt_replacements_one(
         first_placeholder = image_placeholders[0]
 
         # NOTE: There is a BOS token
+<<<<<<< HEAD
         assert first_placeholder["offset"] == 1
         assert first_placeholder["length"] == (
+=======
+        assert first_placeholder.offset == 1
+        assert first_placeholder.length == (
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             len(processed_inputs["prompt_token_ids"]) - 1) // num_imgs
 
     except Exception as exc:
@@ -136,6 +152,7 @@ def _test_image_prompt_replacements(
 @pytest.mark.parametrize("num_imgs", [1, 2])
 def test_processor_prompt_replacements_regression(model_id, num_imgs):
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model_id,
         tokenizer_name=model_id,
         mm_processor_kwargs=None,
@@ -145,6 +162,13 @@ def test_processor_prompt_replacements_regression(model_id, num_imgs):
         ctx.model_config,
         tokenizer=cached_tokenizer_from_config(ctx.model_config),
     )
+=======
+        model_id,
+        mm_processor_kwargs=None,
+        limit_mm_per_prompt={"image": num_imgs},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     image_ratios = [(171, 152), (184, 161), (198, 176), (333, 296), (369, 328),
                     (488, 183), (2560, 1669)]
@@ -166,6 +190,7 @@ def test_processor_prompt_replacements_regression(model_id, num_imgs):
 @pytest.mark.parametrize("num_imgs", [1])
 def test_processor_prompt_replacements_all(model_id, num_imgs):
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model_id,
         tokenizer_name=model_id,
         mm_processor_kwargs=None,
@@ -175,6 +200,13 @@ def test_processor_prompt_replacements_all(model_id, num_imgs):
         ctx.model_config,
         tokenizer=cached_tokenizer_from_config(ctx.model_config),
     )
+=======
+        model_id,
+        mm_processor_kwargs=None,
+        limit_mm_per_prompt={"image": num_imgs},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     seen_aspect_ratios = set[float]()
     image_sizes = list[ImageSize]()

@@ -20,7 +20,11 @@ NUM_CONCURRENT = 500
 TASK = "gsm8k"
 FILTER = "exact_match,strict-match"
 RTOL = 0.03
+<<<<<<< HEAD
 EXPECTED_VALUE = 0.58
+=======
+EXPECTED_VALUE = 0.54
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 DEFAULT_ARGS = ["--max-model-len", "4096", "--disable-log-requests"]
 MORE_ARGS_LIST = [
     [],  # Default
@@ -70,7 +74,11 @@ def run_test(more_args):
 @pytest.mark.skipif(not current_platform.is_cuda()
                     and not current_platform.is_tpu(),
                     reason="V1 currently only supported on CUDA and TPU")
+<<<<<<< HEAD
 def test_lm_eval_accuracy_v1_engine(monkeypatch):
+=======
+def test_lm_eval_accuracy_v1_engine(monkeypatch: pytest.MonkeyPatch):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Run with the V1 Engine."""
 
     with monkeypatch.context() as m:
@@ -85,7 +93,12 @@ def test_lm_eval_accuracy_v1_engine(monkeypatch):
 
 
 @pytest.mark.parametrize("more_args", MORE_ARGS_LIST)
+<<<<<<< HEAD
 def test_lm_eval_accuracy_v0_engine(monkeypatch, more_args):
+=======
+def test_lm_eval_accuracy_v0_engine(monkeypatch: pytest.MonkeyPatch,
+                                    more_args):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Run with the V0 Engine."""
 
     with monkeypatch.context() as m:

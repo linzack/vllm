@@ -2,15 +2,24 @@
 
 from itertools import groupby
 from pathlib import Path
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Optional, TypeVar, Union
+=======
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from urllib.parse import ParseResult, urlparse
 
 import numpy as np
 import numpy.typing as npt
+<<<<<<< HEAD
+=======
+import torch
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from PIL import Image
 
 import vllm.envs as envs
 from vllm.connections import HTTPConnection, global_http_connection
+<<<<<<< HEAD
 from vllm.logger import init_logger
 from vllm.transformers_utils.tokenizer import AnyTokenizer
 
@@ -22,11 +31,27 @@ from .video import VideoMediaIO
 
 logger = init_logger(__name__)
 
+=======
+
+from .audio import AudioMediaIO
+from .base import MediaIO
+from .image import ImageEmbeddingMediaIO, ImageMediaIO
+from .inputs import PlaceholderRange
+from .video import VideoMediaIO
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 _M = TypeVar("_M")
 
 if TYPE_CHECKING:
     from .hasher import MultiModalHashDict
     from .inputs import MultiModalKwargs, MultiModalPlaceholderDict
+<<<<<<< HEAD
+=======
+else:
+    MultiModalHashDict = Any
+    MultiModalKwargs = Any
+    MultiModalPlaceholderDict = Any
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MediaConnector:
@@ -245,9 +270,26 @@ class MediaConnector:
             fetch_timeout=envs.VLLM_VIDEO_FETCH_TIMEOUT,
         )
 
+<<<<<<< HEAD
 
 global_media_connector = MediaConnector()
 """The global :class:`MediaConnector` instance used by vLLM."""
+=======
+    def fetch_image_embedding(
+        self,
+        data: str,
+    ) -> torch.Tensor:
+        """
+        Load image embedding from a URL.
+        """
+        image_embedding_io = ImageEmbeddingMediaIO()
+
+        return image_embedding_io.load_base64("", data)
+
+
+global_media_connector = MediaConnector()
+"""The global {class}`MediaConnector` instance used by vLLM."""
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 fetch_audio = global_media_connector.fetch_audio
 fetch_image = global_media_connector.fetch_image
@@ -256,7 +298,11 @@ fetch_video = global_media_connector.fetch_video
 
 def encode_audio_base64(
     audio: np.ndarray,
+<<<<<<< HEAD
     sampling_rate: int,
+=======
+    sampling_rate: float,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> str:
     """Encode audio as base64."""
     audio_io = AudioMediaIO()
@@ -284,6 +330,7 @@ def encode_video_base64(frames: npt.NDArray) -> str:
     return video_io.encode_base64(frames)
 
 
+<<<<<<< HEAD
 # Utilities for input processors
 _T = TypeVar("_T", str, int)
 
@@ -422,6 +469,27 @@ def merge_and_sort_multimodal_metadata(
             mm_positions.
         Optional[list[str]]: Sorted list of all hashes from mm_hashes if 
             given, None otherwise.
+=======
+def merge_and_sort_multimodal_metadata(
+    mm_positions: MultiModalPlaceholderDict,
+    mm_hashes: Optional[MultiModalHashDict],
+) -> tuple[list[str], list[PlaceholderRange], Optional[list[str]]]:
+    """Given a MultiModalPlaceholderDict, merge all PlaceholderRange
+    objects from all available modalities into a single list of 
+    PlaceholderRange, sorted by their offset (starting index in the input
+    sequence) in the ascending order.
+
+    Optionally if a `MultiModalHashDict` is given, same operation will be
+    applied to the object and the sorted list of hashes will be returned.
+    
+    Returns:
+        list[str]: List of item modalities in order of their positions in the
+        input sequence.
+        list[PlaceholderRange]: Sorted list of all PlaceholdeRanges from
+        mm_positions.
+        Optional[list[str]]: Sorted list of all hashes from mm_hashes if given,
+        None otherwise.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     modalities = list(mm_positions.keys())
@@ -431,6 +499,7 @@ def merge_and_sort_multimodal_metadata(
     # For single modality, placeholder ranges and hashes are already sorted
     # so we can return the list directly.
     if len(modalities) == 1:
+<<<<<<< HEAD
         if mm_hashes is None:
             return modalities, list(mm_positions[modalities[0]]), None
         else:
@@ -475,28 +544,73 @@ def merge_and_sort_multimodal_metadata(
             merged_hashes.extend(hash_list)
     else:
         merged_hashes = None
+=======
+        modality = modalities[0]
+        placeholder_list = list(mm_positions[modality])
+
+        return [modality] * len(
+            placeholder_list
+        ), placeholder_list, None if not mm_hashes else mm_hashes[modality]
+
+    # Create a list of (modality, placeholder, hash) tuples for all placeholders
+    all_items = []
+    for modality in modalities:
+        placeholder_list = list(mm_positions[modality])
+        hash_list: list[Optional[str]] = list(
+            mm_hashes[modality]) if mm_hashes and modality in mm_hashes else [
+                None
+            ] * len(placeholder_list)
+
+        for placeholder, hash_value in zip(placeholder_list, hash_list):
+            all_items.append((modality, placeholder, hash_value))
+
+    # Sort all items by offset
+    all_items.sort(key=lambda x: x[1].offset)
+
+    # Split into separate lists
+    sorted_modalities = [item[0] for item in all_items]
+    merged_placeholders = [item[1] for item in all_items]
+    merged_hashes = [str(item[2])
+                     for item in all_items] if mm_hashes is not None else None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     return sorted_modalities, merged_placeholders, merged_hashes
 
 
 def group_mm_inputs_by_modality(
+<<<<<<< HEAD
         mm_inputs: list["MultiModalKwargs"]) -> list[list["MultiModalKwargs"]]:
     """Group consecutive MultiModalKwargs from mm_inputs with the same modality 
     together into the same list for batching purpose. For MultiModalKwargs with 
+=======
+        mm_inputs: list[MultiModalKwargs]) -> list[list[MultiModalKwargs]]:
+    """Group consecutive MultiModalKwargs from mm_inputs with the same modality
+    together into the same list for batching purpose. For MultiModalKwargs with
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     multiple modalities, put them into their own list.
 
     Args:
         mm_inputs: List of MultiModalKwargs.
 
     Returns:
+<<<<<<< HEAD
         list[list[MultiModalKwargs]]: List of list of MultiModalKwargs, each 
         inner list contains consecutive MultiModalKwargs with same modality, or
         one with multimodal modalities.
+=======
+        list[list[vllm.multimodal.MultiModalKwargs]]: List of list of
+        `MultiModalKwargs`, each inner list contains consecutive
+        `MultiModalKwargs` with same modality.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     if not mm_inputs:
         return []
 
+<<<<<<< HEAD
     def modality_group_func(mm_input: "MultiModalKwargs") -> Union[str, int]:
+=======
+    def modality_group_func(mm_input: MultiModalKwargs) -> Union[str, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # If the input has multiple modalities, return a id as the unique key
         # for the mm_input input.
         if len(mm_input.modalities) > 1:

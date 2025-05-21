@@ -116,7 +116,11 @@ Once neuronx-cc and transformers-neuronx packages are installed, we will be able
 ```console
 git clone https://github.com/vllm-project/vllm.git
 cd vllm
+<<<<<<< HEAD
 pip install -U -r requirements-neuron.txt
+=======
+pip install -U -r requirements/neuron.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 VLLM_TARGET_DEVICE="neuron" pip install .
 ```
 
@@ -132,7 +136,11 @@ Currently, there are no pre-built Neuron images.
 
 See <project:#deployment-docker-build-image-from-source> for instructions on building the Docker image.
 
+<<<<<<< HEAD
 Make sure to use <gh-file:Dockerfile.neuron> in place of the default Dockerfile.
+=======
+Make sure to use <gh-file:docker/Dockerfile.neuron> in place of the default Dockerfile.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ## Extra information
 

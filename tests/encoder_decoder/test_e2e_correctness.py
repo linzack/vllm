@@ -3,7 +3,11 @@
 
 Run `pytest tests/encoder_decoder/test_e2e_correctness.py`.
 """
+<<<<<<< HEAD
 from typing import List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 from transformers import AutoModelForSeq2SeqLM
@@ -21,8 +25,22 @@ LIST_ENC_DEC_SUPPORTED_BACKENDS = [
 ]
 
 
+<<<<<<< HEAD
 def vllm_to_hf_output(
     vllm_output: Tuple[List[int], str, Optional[SampleLogprobs]],
+=======
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch):
+    """
+    Since this module is V0 only, set VLLM_USE_V1=0 for
+    all tests in the module.
+    """
+    monkeypatch.setenv('VLLM_USE_V1', '0')
+
+
+def vllm_to_hf_output(
+    vllm_output: tuple[list[int], str, Optional[SampleLogprobs]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     decoder_prompt_type: DecoderPromptType,
 ):
     """Sanitize vllm output to be comparable with hf output."""

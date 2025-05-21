@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+<<<<<<< HEAD
 import time
 from datetime import datetime
 from itertools import product
@@ -18,6 +19,27 @@ from vllm.utils import FlexibleArgumentParser
 
 FP8_DTYPE = torch.float8_e4m3fnuz if current_platform.is_rocm(
 ) else torch.float8_e4m3fn
+=======
+import json
+import time
+from contextlib import nullcontext
+from datetime import datetime
+from itertools import product
+from types import SimpleNamespace
+from typing import Any, TypedDict
+
+import ray
+import torch
+from ray.experimental.tqdm_ray import tqdm
+
+from vllm.model_executor.layers.fused_moe.fused_moe import *
+from vllm.platforms import current_platform
+from vllm.transformers_utils.config import get_config
+from vllm.triton_utils import triton
+from vllm.utils import FlexibleArgumentParser
+
+FP8_DTYPE = current_platform.fp8_dtype()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class BenchmarkConfig(TypedDict):
@@ -40,10 +62,16 @@ def benchmark_config(
     use_fp8_w8a8: bool,
     use_int8_w8a16: bool,
     num_iters: int = 100,
+<<<<<<< HEAD
+=======
+    block_quant_shape: List[int] = None,
+    use_deep_gemm: bool = False,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> float:
     init_dtype = torch.float16 if use_fp8_w8a8 else dtype
     x = torch.randn(num_tokens, hidden_size, dtype=dtype)
     if use_int8_w8a16:
+<<<<<<< HEAD
         w1 = torch.randint(-127,
                            127, (
                                num_experts,
@@ -71,18 +99,78 @@ def benchmark_config(
                                 num_tokens,
                                 num_experts,
                                 dtype=torch.float32)
+=======
+        w1 = torch.randint(
+            -127,
+            127,
+            (
+                num_experts,
+                shard_intermediate_size,
+                hidden_size,
+            ),
+            dtype=torch.int8,
+        )
+        w2 = torch.randint(
+            -127,
+            127,
+            (
+                num_experts,
+                hidden_size,
+                shard_intermediate_size // 2,
+            ),
+            dtype=torch.int8,
+        )
+    else:
+        w1 = torch.randn(
+            num_experts, shard_intermediate_size, hidden_size, dtype=init_dtype
+        )
+        w2 = torch.randn(
+            num_experts, hidden_size, shard_intermediate_size // 2, dtype=init_dtype
+        )
+    gating_output = torch.randn(num_iters, num_tokens, num_experts, dtype=torch.float32)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     w1_scale = None
     w2_scale = None
     a1_scale = None
     a2_scale = None
     if use_int8_w8a16:
+<<<<<<< HEAD
         w1_scale = torch.randn((num_experts, 2 * shard_intermediate_size),
                                dtype=torch.float32)
         w2_scale = torch.randn((hidden_size, num_experts), dtype=torch.float32)
     if use_fp8_w8a8:
         w1_scale = torch.randn(num_experts, dtype=torch.float32)
         w2_scale = torch.randn(num_experts, dtype=torch.float32)
+=======
+        w1_scale = torch.randn(
+            (num_experts, 2 * shard_intermediate_size), dtype=torch.float32
+        )
+        w2_scale = torch.randn((hidden_size, num_experts), dtype=torch.float32)
+    if use_fp8_w8a8:
+        if block_quant_shape:
+            block_n, block_k = block_quant_shape[0], block_quant_shape[1]
+            E = num_experts
+            N = shard_intermediate_size // 2
+            K = hidden_size
+            factor_for_scale = 1e-2
+            n_tiles_w1 = (2 * N + block_n - 1) // block_n
+            n_tiles_w2 = (K + block_n - 1) // block_n
+            k_tiles_w1 = (K + block_k - 1) // block_k
+            k_tiles_w2 = (N + block_k - 1) // block_k
+            w1_scale = (
+                torch.rand((E, n_tiles_w1, k_tiles_w1), dtype=torch.float32)
+                * factor_for_scale
+            )
+            w2_scale = (
+                torch.rand((E, n_tiles_w2, k_tiles_w2), dtype=torch.float32)
+                * factor_for_scale
+            )
+        else:
+            w1_scale = torch.randn(num_experts, dtype=torch.float32)
+            w2_scale = torch.randn(num_experts, dtype=torch.float32)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         a1_scale = torch.randn(1, dtype=torch.float32)
         a2_scale = torch.randn(1, dtype=torch.float32)
 
@@ -96,6 +184,7 @@ def benchmark_config(
 
     def run():
         from vllm.model_executor.layers.fused_moe import override_config
+<<<<<<< HEAD
         with override_config(config):
             fused_moe(
                 x,
@@ -112,6 +201,46 @@ def benchmark_config(
                 a1_scale=a1_scale,
                 a2_scale=a2_scale,
             )
+=======
+
+        with override_config(config):
+            if use_deep_gemm:
+                topk_weights, topk_ids, token_expert_indices = fused_topk(
+                    x, input_gating, topk, False
+                )
+                return fused_experts(
+                    x,
+                    w1,
+                    w2,
+                    topk_weights,
+                    topk_ids,
+                    inplace=True,
+                    use_fp8_w8a8=use_fp8_w8a8,
+                    w1_scale=w1_scale,
+                    w2_scale=w2_scale,
+                    a1_scale=a1_scale,
+                    a2_scale=a2_scale,
+                    block_shape=block_quant_shape,
+                    allow_deep_gemm=True,
+                )
+            else:
+                fused_moe(
+                    x,
+                    w1,
+                    w2,
+                    input_gating,
+                    topk,
+                    renormalize=True,
+                    inplace=True,
+                    use_fp8_w8a8=use_fp8_w8a8,
+                    use_int8_w8a16=use_int8_w8a16,
+                    w1_scale=w1_scale,
+                    w2_scale=w2_scale,
+                    a1_scale=a1_scale,
+                    a2_scale=a2_scale,
+                    block_shape=block_quant_shape,
+                )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # JIT compilation & warmup
     run()
@@ -132,7 +261,11 @@ def benchmark_config(
     start_event = torch.cuda.Event(enable_timing=True)
     end_event = torch.cuda.Event(enable_timing=True)
 
+<<<<<<< HEAD
     latencies: List[float] = []
+=======
+    latencies: list[float] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for i in range(num_iters):
         prepare(i)
         torch.cuda.synchronize()
@@ -175,8 +308,13 @@ def get_rocm_tuning_space(use_fp16):
     return param_ranges
 
 
+<<<<<<< HEAD
 def get_configs_compute_bound(use_fp16) -> List[Dict[str, int]]:
     configs: List[BenchmarkConfig] = []
+=======
+def get_configs_compute_bound(use_fp16, block_quant_shape) -> list[dict[str, int]]:
+    configs: list[BenchmarkConfig] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     if current_platform.is_rocm():
         param_ranges = get_rocm_tuning_space(use_fp16)
@@ -204,6 +342,7 @@ def get_configs_compute_bound(use_fp16) -> List[Dict[str, int]]:
     for config_values in product(*values):
         config = dict(zip(keys, config_values))
         configs.append(config)
+<<<<<<< HEAD
     return configs
 
 
@@ -215,6 +354,34 @@ def prune_rocm_search_space(num_tokens, shard_intermediate_size, hidden_size,
                                         is_fp16)
     pruned_space_2 = prune_rocm_configs(num_tokens * 2, N2, K2, search_space,
                                         is_fp16)
+=======
+
+    # Remove configs that are not compatible with fp8 block quantization
+    # BLOCK_SIZE_K must be a multiple of block_k
+    # BLOCK_SIZE_N must be a multiple of block_n
+    if block_quant_shape is not None and not use_fp16:
+        block_n, block_k = block_quant_shape[0], block_quant_shape[1]
+        for config in configs[:]:
+            if (
+                config["BLOCK_SIZE_K"] % block_k != 0
+                or config["BLOCK_SIZE_N"] % block_n != 0
+            ):
+                configs.remove(config)
+    return configs
+
+
+def prune_rocm_search_space(
+    num_tokens, shard_intermediate_size, hidden_size, search_space, is_fp16, topk
+):
+    N1, K1 = shard_intermediate_size, hidden_size
+    N2, K2 = hidden_size, shard_intermediate_size // 2
+    pruned_space_1 = prune_rocm_configs(
+        num_tokens * topk, N1, K1, search_space, is_fp16
+    )
+    pruned_space_2 = prune_rocm_configs(
+        num_tokens * topk, N2, K2, search_space, is_fp16
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     search_space = merge_unique_dicts(pruned_space_1, pruned_space_2)
     return search_space
 
@@ -252,6 +419,7 @@ def prune_rocm_configs(M, N, K, configs, is_fp16=True):
         SPLIT_K = config.get("SPLIT_K", 1)
         GROUP_M = config.get("GROUP_SIZE_M")
         if is_fp16:
+<<<<<<< HEAD
             if (matrix_instr_nonkdim > BLOCK_SIZE_M
                     or matrix_instr_nonkdim > BLOCK_SIZE_N):
                 continue
@@ -260,6 +428,16 @@ def prune_rocm_configs(M, N, K, configs, is_fp16=True):
                 continue
             if (matrix_instr_nonkdim >= N
                     and matrix_instr_nonkdim != BLOCK_SIZE_N):
+=======
+            if (
+                matrix_instr_nonkdim > BLOCK_SIZE_M
+                or matrix_instr_nonkdim > BLOCK_SIZE_N
+            ):
+                continue
+            if matrix_instr_nonkdim >= M and matrix_instr_nonkdim != BLOCK_SIZE_M:
+                continue
+            if matrix_instr_nonkdim >= N and matrix_instr_nonkdim != BLOCK_SIZE_N:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 continue
         # Skip BLOCK_SIZE that is too large compare to M/N
         # unless BLOCK_SIZE is already small enough
@@ -280,8 +458,15 @@ def prune_rocm_configs(M, N, K, configs, is_fp16=True):
             continue
         # out of shared memory resource
         # TODO (zhanglx): This does not consider the LDS usage in the epilogue
+<<<<<<< HEAD
         LDS = (BLOCK_SIZE_K * BLOCK_SIZE_M * elemBytes_a +
                BLOCK_SIZE_K * BLOCK_SIZE_N * elemBytes_b)
+=======
+        LDS = (
+            BLOCK_SIZE_K * BLOCK_SIZE_M * elemBytes_a
+            + BLOCK_SIZE_K * BLOCK_SIZE_N * elemBytes_b
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if LDS > 65536:
             continue
         # Skip small block sizes and num_warps for large gemm
@@ -315,7 +500,10 @@ def merge_unique_dicts(list1, list2):
 
 @ray.remote(num_gpus=1)
 class BenchmarkWorker:
+<<<<<<< HEAD
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def __init__(self, seed: int) -> None:
         torch.set_default_device("cuda")
         current_platform.seed_everything(seed)
@@ -335,6 +523,7 @@ class BenchmarkWorker:
         dtype: torch.dtype,
         use_fp8_w8a8: bool,
         use_int8_w8a16: bool,
+<<<<<<< HEAD
     ) -> Tuple[Dict[str, int], float]:
         current_platform.seed_everything(self.seed)
         dtype_str = get_config_dtype_str(dtype,
@@ -359,6 +548,46 @@ class BenchmarkWorker:
                                        shard_intermediate_size, hidden_size,
                                        topk, dtype, use_fp8_w8a8,
                                        use_int8_w8a16)
+=======
+        block_quant_shape: List[int] = None,
+        use_deep_gemm: bool = False,
+    ) -> tuple[dict[str, int], float]:
+        current_platform.seed_everything(self.seed)
+        dtype_str = get_config_dtype_str(
+            dtype, use_int8_w8a16=use_int8_w8a16, use_fp8_w8a8=use_fp8_w8a8
+        )
+        # NOTE(woosuk): The current naming convention uses w2.shape[2], which
+        # is the intermediate size after silu_and_mul.
+        op_config = get_moe_configs(
+            num_experts, shard_intermediate_size // 2, dtype_str
+        )
+        if op_config is None:
+            config = get_default_config(
+                num_tokens,
+                num_experts,
+                shard_intermediate_size,
+                hidden_size,
+                topk,
+                dtype_str,
+                is_marlin=False,
+            )
+        else:
+            config = op_config[min(op_config.keys(), key=lambda x: abs(x - num_tokens))]
+        kernel_time = benchmark_config(
+            config,
+            num_tokens,
+            num_experts,
+            shard_intermediate_size,
+            hidden_size,
+            topk,
+            dtype,
+            use_fp8_w8a8,
+            use_int8_w8a16,
+            num_iters=100,
+            block_quant_shape=block_quant_shape,
+            use_deep_gemm=use_deep_gemm,
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return config, kernel_time
 
     def tune(
@@ -371,12 +600,20 @@ class BenchmarkWorker:
         dtype: torch.dtype,
         use_fp8_w8a8: bool,
         use_int8_w8a16: bool,
+<<<<<<< HEAD
         search_space: List[Dict[str, int]],
     ) -> Dict[str, int]:
+=======
+        search_space: list[dict[str, int]],
+        block_quant_shape: list[int],
+        use_deep_gemm: bool,
+    ) -> dict[str, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         best_config = None
         best_time = float("inf")
         if current_platform.is_rocm():
             is_fp16 = not (use_fp8_w8a8 or use_int8_w8a16)
+<<<<<<< HEAD
             search_space = prune_rocm_search_space(num_tokens,
                                                    shard_intermediate_size,
                                                    hidden_size, search_space,
@@ -395,6 +632,40 @@ class BenchmarkWorker:
                                                    use_fp8_w8a8,
                                                    use_int8_w8a16,
                                                    num_iters=20)
+=======
+            search_space = prune_rocm_search_space(
+                num_tokens,
+                shard_intermediate_size,
+                hidden_size,
+                search_space,
+                is_fp16,
+                topk,
+            )
+
+        need_device_guard = False
+        if current_platform.is_rocm():
+            visible_device = os.environ.get("ROCR_VISIBLE_DEVICES", None)
+            if visible_device != f"{self.device_id}":
+                need_device_guard = True
+
+        with torch.cuda.device(self.device_id) if need_device_guard else nullcontext():
+            for config in tqdm(search_space):
+                try:
+                    kernel_time = benchmark_config(
+                        config,
+                        num_tokens,
+                        num_experts,
+                        shard_intermediate_size,
+                        hidden_size,
+                        topk,
+                        dtype,
+                        use_fp8_w8a8,
+                        use_int8_w8a16,
+                        num_iters=20,
+                        block_quant_shape=block_quant_shape,
+                        use_deep_gemm=use_deep_gemm,
+                    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 except triton.runtime.autotuner.OutOfResources:
                     # Some configurations may be invalid and fail to compile.
                     continue
@@ -410,6 +681,7 @@ class BenchmarkWorker:
 
 def sort_config(config: BenchmarkConfig) -> BenchmarkConfig:
     return {
+<<<<<<< HEAD
         "BLOCK_SIZE_M":
         config["BLOCK_SIZE_M"],
         "BLOCK_SIZE_N":
@@ -446,6 +718,46 @@ def save_configs(configs: Dict[int, BenchmarkConfig], num_experts: int,
     # is the intermediate size after silu_and_mul.
     filename = get_config_file_name(num_experts, shard_intermediate_size // 2,
                                     dtype_str)
+=======
+        "BLOCK_SIZE_M": config["BLOCK_SIZE_M"],
+        "BLOCK_SIZE_N": config["BLOCK_SIZE_N"],
+        "BLOCK_SIZE_K": config["BLOCK_SIZE_K"],
+        "GROUP_SIZE_M": config["GROUP_SIZE_M"],
+        "num_warps": config["num_warps"],
+        "num_stages": config["num_stages"],
+        **(
+            {"waves_per_eu": config["waves_per_eu"]} if "waves_per_eu" in config else {}
+        ),
+        **(
+            {"matrix_instr_nonkdim": config["matrix_instr_nonkdim"]}
+            if "matrix_instr_nonkdim" in config
+            else {}
+        ),
+        **({"kpack": config["kpack"]} if "kpack" in config else {}),
+    }
+
+
+def save_configs(
+    configs: dict[int, BenchmarkConfig],
+    num_experts: int,
+    shard_intermediate_size: int,
+    hidden_size: int,
+    topk: int,
+    dtype: torch.dtype,
+    use_fp8_w8a8: bool,
+    use_int8_w8a16: bool,
+    block_quant_shape: List[int],
+) -> None:
+    dtype_str = get_config_dtype_str(
+        dtype, use_int8_w8a16=use_int8_w8a16, use_fp8_w8a8=use_fp8_w8a8
+    )
+
+    # NOTE(woosuk): The current naming convention uses w2.shape[2], which
+    # is the intermediate size after silu_and_mul.
+    filename = get_config_file_name(
+        num_experts, shard_intermediate_size // 2, dtype_str, block_quant_shape
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     print(f"Writing best config to {filename}...")
     with open(filename, "w") as f:
@@ -453,11 +765,29 @@ def save_configs(configs: Dict[int, BenchmarkConfig], num_experts: int,
         f.write("\n")
 
 
+<<<<<<< HEAD
 def main(args: argparse.Namespace):
     print(args)
 
     config = AutoConfig.from_pretrained(
         args.model, trust_remote_code=args.trust_remote_code)
+=======
+def get_weight_block_size_safety(config, default_value=None):
+    quantization_config = getattr(config, "quantization_config", {})
+    if isinstance(quantization_config, dict):
+        return quantization_config.get("weight_block_size", default_value)
+    return default_value
+
+
+def main(args: argparse.Namespace):
+    print(args)
+
+    config = get_config(model=args.model, trust_remote_code=args.trust_remote_code)
+    if args.model_prefix:
+        config = getattr(config, args.model_prefix)
+    config = SimpleNamespace(**config)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if config.architectures[0] == "DbrxForCausalLM":
         E = config.ffn_config.moe_num_experts
         topk = config.ffn_config.moe_top_k
@@ -468,12 +798,27 @@ def main(args: argparse.Namespace):
         topk = config.num_experts_per_tok
         intermediate_size = config.intermediate_size
         shard_intermediate_size = 2 * intermediate_size // args.tp_size
+<<<<<<< HEAD
     elif config.architectures[0] == "DeepseekV3ForCausalLM":
+=======
+    elif config.architectures[0] in ("DeepseekV3ForCausalLM", "DeepseekV2ForCausalLM"):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         E = config.n_routed_experts
         topk = config.num_experts_per_tok
         intermediate_size = config.moe_intermediate_size
         shard_intermediate_size = 2 * intermediate_size // args.tp_size
+<<<<<<< HEAD
     else:
+=======
+    elif config.architectures[0] in ("Qwen2MoeForCausalLM", "Qwen3MoeForCausalLM"):
+        E = config.num_experts
+        topk = config.num_experts_per_tok
+        intermediate_size = config.moe_intermediate_size
+        shard_intermediate_size = 2 * intermediate_size // args.tp_size
+    else:
+        # Support for llama4
+        config = config.get_text_config()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Default: Mixtral.
         E = config.num_local_experts
         topk = config.num_experts_per_tok
@@ -481,6 +826,7 @@ def main(args: argparse.Namespace):
         shard_intermediate_size = 2 * intermediate_size // args.tp_size
 
     hidden_size = config.hidden_size
+<<<<<<< HEAD
     dtype = torch.float16 if current_platform.is_rocm() else config.torch_dtype
     use_fp8_w8a8 = args.dtype == "fp8_w8a8"
     use_int8_w8a16 = args.dtype == "int8_w8a16"
@@ -489,15 +835,65 @@ def main(args: argparse.Namespace):
         batch_sizes = [
             1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128, 256, 512, 1024, 1536,
             2048, 3072, 4096
+=======
+    dtype = (
+        torch.float16
+        if current_platform.is_rocm()
+        else getattr(torch, config.torch_dtype)
+    )
+    use_fp8_w8a8 = args.dtype == "fp8_w8a8"
+    use_int8_w8a16 = args.dtype == "int8_w8a16"
+    block_quant_shape = get_weight_block_size_safety(config)
+
+    if args.batch_size is None:
+        batch_sizes = [
+            1,
+            2,
+            4,
+            8,
+            16,
+            24,
+            32,
+            48,
+            64,
+            96,
+            128,
+            256,
+            512,
+            1024,
+            1536,
+            2048,
+            3072,
+            4096,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         ]
     else:
         batch_sizes = [args.batch_size]
 
+<<<<<<< HEAD
+=======
+    use_deep_gemm = bool(args.use_deep_gemm)
+
+    if current_platform.is_rocm() and "HIP_VISIBLE_DEVICES" in os.environ:
+        # Ray will set ROCR_VISIBLE_DEVICES for device visibility
+        logger.warning(
+            "Ray uses ROCR_VISIBLE_DEVICES to control device accessibility."
+            "Replacing HIP_VISIBLE_DEVICES with ROCR_VISIBLE_DEVICES."
+        )
+        val = os.environ["HIP_VISIBLE_DEVICES"]
+        os.environ["ROCR_VISIBLE_DEVICES"] = val
+        del os.environ["HIP_VISIBLE_DEVICES"]
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ray.init()
     num_gpus = int(ray.available_resources()["GPU"])
     workers = [BenchmarkWorker.remote(args.seed) for _ in range(num_gpus)]
 
+<<<<<<< HEAD
     def _distribute(method: str, inputs: List[Any]) -> List[Any]:
+=======
+    def _distribute(method: str, inputs: list[Any]) -> list[Any]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         outputs = []
         worker_idx = 0
         for input_args in inputs:
@@ -510,11 +906,16 @@ def main(args: argparse.Namespace):
 
     if args.tune:
         is_fp16 = not (use_fp8_w8a8 or use_int8_w8a16)
+<<<<<<< HEAD
         search_space = get_configs_compute_bound(is_fp16)
+=======
+        search_space = get_configs_compute_bound(is_fp16, block_quant_shape)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         print(f"Start tuning over {len(search_space)} configurations...")
 
         start = time.time()
         configs = _distribute(
+<<<<<<< HEAD
             "tune", [(batch_size, E, shard_intermediate_size, hidden_size,
                       topk, dtype, use_fp8_w8a8, use_int8_w8a16, search_space)
                      for batch_size in batch_sizes])
@@ -524,13 +925,67 @@ def main(args: argparse.Namespace):
         }
         save_configs(best_configs, E, shard_intermediate_size, hidden_size,
                      topk, dtype, use_fp8_w8a8, use_int8_w8a16)
+=======
+            "tune",
+            [
+                (
+                    batch_size,
+                    E,
+                    shard_intermediate_size,
+                    hidden_size,
+                    topk,
+                    dtype,
+                    use_fp8_w8a8,
+                    use_int8_w8a16,
+                    search_space,
+                    block_quant_shape,
+                    use_deep_gemm,
+                )
+                for batch_size in batch_sizes
+            ],
+        )
+        best_configs = {
+            M: sort_config(config) for M, config in zip(batch_sizes, configs)
+        }
+        save_configs(
+            best_configs,
+            E,
+            shard_intermediate_size,
+            hidden_size,
+            topk,
+            dtype,
+            use_fp8_w8a8,
+            use_int8_w8a16,
+            block_quant_shape,
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         end = time.time()
         print(f"Tuning took {end - start:.2f} seconds")
     else:
         outputs = _distribute(
+<<<<<<< HEAD
             "benchmark", [(batch_size, E, shard_intermediate_size, hidden_size,
                            topk, dtype, use_fp8_w8a8, use_int8_w8a16)
                           for batch_size in batch_sizes])
+=======
+            "benchmark",
+            [
+                (
+                    batch_size,
+                    E,
+                    shard_intermediate_size,
+                    hidden_size,
+                    topk,
+                    dtype,
+                    use_fp8_w8a8,
+                    use_int8_w8a16,
+                    block_quant_shape,
+                    use_deep_gemm,
+                )
+                for batch_size in batch_sizes
+            ],
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for batch_size, (config, kernel_time) in zip(batch_sizes, outputs):
             print(f"Batch size: {batch_size}, config: {config}")
@@ -539,6 +994,7 @@ def main(args: argparse.Namespace):
 
 if __name__ == "__main__":
     parser = FlexibleArgumentParser()
+<<<<<<< HEAD
     parser.add_argument("--model",
                         type=str,
                         default="mistralai/Mixtral-8x7B-Instruct-v0.1")
@@ -551,10 +1007,26 @@ if __name__ == "__main__":
                         type=str,
                         choices=["auto", "fp8_w8a8", "int8_w8a16"],
                         default="auto")
+=======
+    parser.add_argument(
+        "--model", type=str, default="mistralai/Mixtral-8x7B-Instruct-v0.1"
+    )
+    parser.add_argument(
+        "--tp-size", "-tp", "--tensor-parallel-size", type=int, default=2
+    )
+    parser.add_argument(
+        "--dtype", type=str, choices=["auto", "fp8_w8a8", "int8_w8a16"], default="auto"
+    )
+    parser.add_argument("--use-deep-gemm", action="store_true")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--batch-size", type=int, required=False)
     parser.add_argument("--tune", action="store_true")
     parser.add_argument("--trust-remote-code", action="store_true")
+<<<<<<< HEAD
+=======
+    parser.add_argument("--model-prefix", type=str, required=False)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     args = parser.parse_args()
 
     main(args)

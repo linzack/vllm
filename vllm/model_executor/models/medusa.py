@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Set, Tuple
+=======
+from collections.abc import Iterable
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -50,7 +55,14 @@ class Medusa(nn.Module):
        needs to have truncated_vocab_size (=k) as an attribute."""
 
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = "") -> None:
+<<<<<<< HEAD
         config = vllm_config.model_config.hf_config
+=======
+        if hasattr(vllm_config, 'draft_model_config'):
+            config = vllm_config.draft_model_config.hf_config
+        else:
+            config = vllm_config.model_config.hf_config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__()
         self.config = config
         self.blocks = nn.ModuleList([
@@ -96,6 +108,7 @@ class Medusa(nn.Module):
         # checkpoint file has token_map tensor.
         self.token_map = None
 
+<<<<<<< HEAD
     def forward(self, hidden_states: torch.Tensor) -> List[torch.Tensor]:
         return [block(hidden_states) for block in self.blocks]
 
@@ -103,6 +116,15 @@ class Medusa(nn.Module):
             self, hidden_states: List[torch.Tensor],
             sampling_metadata: SamplingMetadata) -> List[torch.Tensor]:
         logits_lst: List[torch.Tensor] = []
+=======
+    def forward(self, hidden_states: torch.Tensor) -> list[torch.Tensor]:
+        return [block(hidden_states) for block in self.blocks]
+
+    def compute_logits(
+            self, hidden_states: list[torch.Tensor],
+            sampling_metadata: SamplingMetadata) -> list[torch.Tensor]:
+        logits_lst: list[torch.Tensor] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for hs, lm_head in zip(hidden_states, self.lm_heads):
             _logits = self.logits_processor(lm_head, hs, sampling_metadata)
@@ -127,9 +149,15 @@ class Medusa(nn.Module):
 
     def sample(
         self,
+<<<<<<< HEAD
         logits: List[torch.Tensor],
         sampling_metadata: SamplingMetadata,
     ) -> List[SamplerOutput]:
+=======
+        logits: list[torch.Tensor],
+        sampling_metadata: SamplingMetadata,
+    ) -> list[SamplerOutput]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         logits = torch.stack(logits, dim=0).float()
         logprobs = torch.log_softmax(logits, dim=-1)
         token_ids = logits.argmax(-1)  # support only top-1 for now
@@ -144,7 +172,11 @@ class Medusa(nn.Module):
             token_prob_list.append(probs[:, seq_group.sample_indices])
             token_logprob_list.append(logprobs[:, seq_group.sample_indices])
 
+<<<<<<< HEAD
         outputs: List[Optional[SamplerOutput]] = []
+=======
+        outputs: list[Optional[SamplerOutput]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for idx in range(len(sampling_metadata.seq_groups)):
             outputs.append(
                 SamplerOutput(
@@ -160,7 +192,18 @@ class Medusa(nn.Module):
         self,
         previous_hidden_states: torch.Tensor,
         sampling_metadata: SamplingMetadata,
+<<<<<<< HEAD
     ) -> List[SamplerOutput]:
+=======
+    ) -> Optional[list[SamplerOutput]]:
+        # During preemption, we may receive an empty tensor (batch_size=0)
+        if previous_hidden_states.size(0) == 0:
+            # Return None to signal the Top1Proposer that no proposals
+            # were generated for this batch, allowing it to handle this
+            # special case appropriately
+            return None
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return self.sample(
             logits=self.compute_logits(
                 hidden_states=self.forward(previous_hidden_states),
@@ -169,10 +212,17 @@ class Medusa(nn.Module):
             sampling_metadata=sampling_metadata,
         )
 
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
         params_dict = dict(self.named_parameters())
         loaded_params: Set[str] = set()
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        params_dict = dict(self.named_parameters())
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         weights_map = {}
 

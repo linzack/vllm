@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Any, Dict, List, Tuple
+=======
+from typing import Any
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -23,9 +27,15 @@ class PoolingMetadata:
 
     def __init__(
         self,
+<<<<<<< HEAD
         seq_groups: List[Tuple[List[int], PoolingParams]],
         seq_data: Dict[int, Any],  # Specific data related to sequences
         prompt_lens: List[int],
+=======
+        seq_groups: list[tuple[list[int], PoolingParams]],
+        seq_data: dict[int, Any],  # Specific data related to sequences
+        prompt_lens: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> None:
         self.seq_groups = seq_groups
         self.seq_data = seq_data

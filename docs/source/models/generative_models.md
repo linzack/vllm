@@ -14,7 +14,11 @@ Usually, this is automatically inferred so you don't have to specify it.
 ## Offline Inference
 
 The {class}`~vllm.LLM` class provides various methods for offline inference.
+<<<<<<< HEAD
 See [Engine Arguments](#engine-args) for a list of options when initializing the model.
+=======
+See <project:#configuration> for a list of options when initializing the model.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ### `LLM.generate`
 
@@ -23,6 +27,11 @@ It is similar to [its counterpart in HF Transformers](https://huggingface.co/doc
 except that tokenization and detokenization are also performed automatically.
 
 ```python
+<<<<<<< HEAD
+=======
+from vllm import LLM
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 llm = LLM(model="facebook/opt-125m")
 outputs = llm.generate("Hello, my name is")
 
@@ -36,6 +45,11 @@ You can optionally control the language generation by passing {class}`~vllm.Samp
 For example, you can use greedy sampling by setting `temperature=0`:
 
 ```python
+<<<<<<< HEAD
+=======
+from vllm import LLM, SamplingParams
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 llm = LLM(model="facebook/opt-125m")
 params = SamplingParams(temperature=0)
 outputs = llm.generate("Hello, my name is", params)
@@ -46,10 +60,19 @@ for output in outputs:
     print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
 ```
 
+<<<<<<< HEAD
+=======
+:::{important}
+By default, vLLM will use sampling parameters recommended by model creator by applying the `generation_config.json` from the huggingface model repository if it exists. In most cases, this will provide you with the best results by default if {class}`~vllm.SamplingParams` is not specified.
+
+However, if vLLM's default sampling parameters are preferred, please pass `generation_config="vllm"` when creating the {class}`~vllm.LLM` instance.
+:::
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 A code example can be found here: <gh-file:examples/offline_inference/basic/basic.py>
 
 ### `LLM.beam_search`
 
+<<<<<<< HEAD
 The {class}`~vllm.LLM.beam_search` method implements [beam search](https://huggingface.co/docs/transformers/en/generation_strategies#beam-search-decoding) on top of {class}`~vllm.LLM.generate`.
 For example, to search using 5 beams and output at most 50 tokens:
 
@@ -62,6 +85,22 @@ for output in outputs:
     prompt = output.prompt
     generated_text = output.outputs[0].text
     print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
+=======
+The {class}`~vllm.LLM.beam_search` method implements [beam search](https://huggingface.co/docs/transformers/en/generation_strategies#beam-search) on top of {class}`~vllm.LLM.generate`.
+For example, to search using 5 beams and output at most 50 tokens:
+
+```python
+from vllm import LLM
+from vllm.sampling_params import BeamSearchParams
+
+llm = LLM(model="facebook/opt-125m")
+params = BeamSearchParams(beam_width=5, max_tokens=50)
+outputs = llm.beam_search([{"prompt": "Hello, my name is "}], params)
+
+for output in outputs:
+    generated_text = output.sequences[0].text
+    print(f"Generated text: {generated_text!r}")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 ### `LLM.chat`
@@ -76,6 +115,11 @@ Base models may perform poorly as they are not trained to respond to the chat co
 :::
 
 ```python
+<<<<<<< HEAD
+=======
+from vllm import LLM
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct")
 conversation = [
     {

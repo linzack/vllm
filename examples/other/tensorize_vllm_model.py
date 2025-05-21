@@ -27,7 +27,11 @@ https://github.com/coreweave/tensorizer
 To serialize a model, install vLLM from source, then run something 
 like this from the root level of this repository:
 
+<<<<<<< HEAD
 python -m examples.offline_inference.tensorize_vllm_model \
+=======
+python -m examples.other.tensorize_vllm_model \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
    --model facebook/opt-125m \
    serialize \
    --serialized-directory s3://my-bucket \
@@ -47,7 +51,11 @@ providing a `--keyfile` argument.
 To deserialize a model, you can run something like this from the root 
 level of this repository:
 
+<<<<<<< HEAD
 python -m examples.offline_inference.tensorize_vllm_model \
+=======
+python -m examples.other.tensorize_vllm_model \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
    --model EleutherAI/gpt-j-6B \
    --dtype float16 \
    deserialize \
@@ -65,11 +73,19 @@ shard's rank. Sharded models serialized with this script will be named as
 model-rank-%03d.tensors
 
 For more information on the available arguments for serializing, run 
+<<<<<<< HEAD
 `python -m examples.offline_inference.tensorize_vllm_model serialize --help`.
 
 Or for deserializing:
 
 `python -m examples.offline_inference.tensorize_vllm_model deserialize --help`.
+=======
+`python -m examples.other.tensorize_vllm_model serialize --help`.
+
+Or for deserializing:
+
+`python -m examples.other.tensorize_vllm_model deserialize --help`.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 Once a model is serialized, tensorizer can be invoked with the `LLM` class 
 directly to load models:
@@ -90,7 +106,11 @@ TensorizerConfig arguments desired.
 In order to see all of the available arguments usable to configure 
 loading with tensorizer that are given to `TensorizerConfig`, run:
 
+<<<<<<< HEAD
 `python -m examples.offline_inference.tensorize_vllm_model deserialize --help`
+=======
+`python -m examples.other.tensorize_vllm_model deserialize --help`
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 under the `tensorizer options` section. These can also be used for
 deserialization in this example script, although `--tensorizer-uri` and

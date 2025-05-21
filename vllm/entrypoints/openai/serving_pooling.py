@@ -3,8 +3,15 @@
 import asyncio
 import base64
 import time
+<<<<<<< HEAD
 from typing import AsyncGenerator, Final, List, Literal, Optional, Union, cast
 
+=======
+from collections.abc import AsyncGenerator
+from typing import Final, Literal, Optional, Union, cast
+
+import jinja2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import numpy as np
 from fastapi import Request
 from typing_extensions import assert_never
@@ -19,6 +26,10 @@ from vllm.entrypoints.openai.protocol import (ErrorResponse,
                                               PoolingResponseData, UsageInfo)
 from vllm.entrypoints.openai.serving_engine import OpenAIServing
 from vllm.entrypoints.openai.serving_models import OpenAIServingModels
+<<<<<<< HEAD
+=======
+from vllm.entrypoints.utils import _validate_truncation_size
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.logger import init_logger
 from vllm.outputs import PoolingOutput, PoolingRequestOutput
 from vllm.utils import merge_async_iterators
@@ -29,7 +40,11 @@ logger = init_logger(__name__)
 def _get_data(
     output: PoolingOutput,
     encoding_format: Literal["float", "base64"],
+<<<<<<< HEAD
 ) -> Union[List[float], str]:
+=======
+) -> Union[list[float], str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if encoding_format == "float":
         return output.data.tolist()
     elif encoding_format == "base64":
@@ -83,6 +98,7 @@ class OpenAIServingPooling(OpenAIServing):
         request_id = f"pool-{self._base_request_id(raw_request)}"
         created_time = int(time.time())
 
+<<<<<<< HEAD
         truncate_prompt_tokens = None
 
         if request.truncate_prompt_tokens is not None:
@@ -95,6 +111,13 @@ class OpenAIServingPooling(OpenAIServing):
                     " Please, select a smaller truncation size.")
 
         try:
+=======
+        truncate_prompt_tokens = request.truncate_prompt_tokens
+
+        try:
+            truncate_prompt_tokens = _validate_truncation_size(
+                self.max_model_len, truncate_prompt_tokens)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             (
                 lora_request,
                 prompt_adapter_request,
@@ -134,12 +157,20 @@ class OpenAIServingPooling(OpenAIServing):
                      truncate_prompt_tokens=truncate_prompt_tokens,
                      add_special_tokens=request.add_special_tokens,
                  )
+<<<<<<< HEAD
         except ValueError as e:
+=======
+        except (ValueError, TypeError, jinja2.TemplateError) as e:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             logger.exception("Error in preprocessing prompt inputs")
             return self.create_error_response(str(e))
 
         # Schedule the request and get the result generator.
+<<<<<<< HEAD
         generators: List[AsyncGenerator[PoolingRequestOutput, None]] = []
+=======
+        generators: list[AsyncGenerator[PoolingRequestOutput, None]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         try:
             pooling_params = request.to_pooling_params()
 
@@ -174,7 +205,11 @@ class OpenAIServingPooling(OpenAIServing):
         num_prompts = len(engine_prompts)
 
         # Non-streaming response
+<<<<<<< HEAD
         final_res_batch: List[Optional[PoolingRequestOutput]]
+=======
+        final_res_batch: list[Optional[PoolingRequestOutput]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         final_res_batch = [None] * num_prompts
         try:
             async for i, res in result_generator:
@@ -182,7 +217,11 @@ class OpenAIServingPooling(OpenAIServing):
 
             assert all(final_res is not None for final_res in final_res_batch)
 
+<<<<<<< HEAD
             final_res_batch_checked = cast(List[PoolingRequestOutput],
+=======
+            final_res_batch_checked = cast(list[PoolingRequestOutput],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                            final_res_batch)
 
             response = self.request_output_to_pooling_response(
@@ -202,13 +241,21 @@ class OpenAIServingPooling(OpenAIServing):
 
     def request_output_to_pooling_response(
         self,
+<<<<<<< HEAD
         final_res_batch: List[PoolingRequestOutput],
+=======
+        final_res_batch: list[PoolingRequestOutput],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request_id: str,
         created_time: int,
         model_name: str,
         encoding_format: Literal["float", "base64"],
     ) -> PoolingResponse:
+<<<<<<< HEAD
         items: List[PoolingResponseData] = []
+=======
+        items: list[PoolingResponseData] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_prompt_tokens = 0
 
         for idx, final_res in enumerate(final_res_batch):

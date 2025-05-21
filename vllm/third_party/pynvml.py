@@ -1119,7 +1119,11 @@ class _PrintableStructure(Structure):
     e.g. class that has _field_ 'hex_value', c_uint could be formatted with
       _fmt_ = {"hex_value" : "%08X"}
     to produce nicer output.
+<<<<<<< HEAD
     Default fomratting string for all fields can be set with key "<default>" like:
+=======
+    Default formatting string for all fields can be set with key "<default>" like:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       _fmt_ = {"<default>" : "%d MHz"} # e.g all values are numbers in MHz.
     If not set it's assumed to be just "%s"
 

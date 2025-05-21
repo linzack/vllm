@@ -1,15 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
+<<<<<<< HEAD
 from functools import cached_property
 from typing import (Iterable, List, Literal, Mapping, Optional, Set, Tuple,
                     TypedDict, Union)
+=======
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Literal, Optional, TypedDict, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
 from transformers import (BatchFeature, LlavaNextVideoConfig,
                           LlavaNextVideoProcessor)
 
+<<<<<<< HEAD
 from vllm.attention import AttentionMetadata
 from vllm.config import VllmConfig
 from vllm.model_executor.layers.activation import get_act_fn
@@ -28,6 +34,25 @@ from vllm.sequence import IntermediateTensors
 from vllm.utils import is_list_of
 
 from .interfaces import SupportsMultiModal, SupportsPP
+=======
+from vllm.config import VllmConfig
+from vllm.model_executor.layers.activation import get_act_fn
+from vllm.model_executor.models.clip import CLIPVisionModel
+from vllm.model_executor.sampling_metadata import SamplingMetadata
+from vllm.multimodal import MULTIMODAL_REGISTRY
+from vllm.multimodal.inputs import (MultiModalDataDict, MultiModalFieldConfig,
+                                    MultiModalKwargs)
+from vllm.multimodal.parse import (ImageSize, MultiModalDataItems,
+                                   VideoEmbeddingItems, VideoProcessorItems)
+from vllm.multimodal.processing import (BaseMultiModalProcessor,
+                                        BaseProcessingInfo, PromptReplacement,
+                                        PromptUpdate)
+from vllm.multimodal.profiling import BaseDummyInputsBuilder
+from vllm.sequence import IntermediateTensors
+from vllm.utils import is_list_of
+
+from .interfaces import MultiModalEmbeddings, SupportsMultiModal, SupportsPP
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .llava import init_vision_tower_for_llava
 from .siglip import SiglipVisionModel
 from .utils import (AutoWeightsLoader, init_vllm_registered_model,
@@ -37,7 +62,11 @@ from .vision import get_vision_encoder_info
 
 class LlavaNextVideoPixelInputs(TypedDict):
     type: Literal["pixel_values_videos"]
+<<<<<<< HEAD
     data: Union[torch.Tensor, List[torch.Tensor]]
+=======
+    data: Union[torch.Tensor, list[torch.Tensor]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Shape: `(batch_size, num_frames, num_channels, height, width)`
 
@@ -62,6 +91,7 @@ class LlavaNextVideoProcessingInfo(BaseProcessingInfo):
     def get_supported_mm_limits(self) -> Mapping[str, Optional[int]]:
         return {"video": 1}
 
+<<<<<<< HEAD
     def get_mm_max_tokens_per_item(
         self,
         seq_len: int,
@@ -77,6 +107,8 @@ class LlavaNextVideoProcessingInfo(BaseProcessingInfo):
 
         return {"video": max_video_tokens}
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_image_size_with_most_features(self) -> ImageSize:
         vision_encoder_info = self.get_vision_encoder_info()
         width = height = vision_encoder_info.get_image_size()
@@ -131,9 +163,18 @@ class LlavaNextVideoProcessingInfo(BaseProcessingInfo):
 
         return num_frames
 
+<<<<<<< HEAD
     def get_num_frames_with_most_features(self, seq_len: int) -> int:
         mm_config = self.ctx.get_mm_config()
         max_videos = mm_config.limit_per_prompt.get("video", 1)
+=======
+    def get_num_frames_with_most_features(
+        self,
+        seq_len: int,
+        mm_counts: Mapping[str, int],
+    ) -> int:
+        max_videos = mm_counts.get("video", 0)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         max_total_frames = self._get_max_video_frames(seq_len)
 
@@ -143,22 +184,44 @@ class LlavaNextVideoProcessingInfo(BaseProcessingInfo):
 class LlavaNextVideoDummyInputsBuilder(
         BaseDummyInputsBuilder[LlavaNextVideoProcessingInfo]):
 
+<<<<<<< HEAD
     def get_dummy_processor_inputs(
         self,
         seq_len: int,
         mm_counts: Mapping[str, int],
     ) -> ProcessorInputs:
+=======
+    def get_dummy_text(self, mm_counts: Mapping[str, int]) -> str:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_videos = mm_counts.get("video", 0)
 
         processor = self.info.get_hf_processor()
         video_token = processor.video_token
 
+<<<<<<< HEAD
         target_width, target_height = \
             self.info.get_image_size_with_most_features()
         target_num_frames = \
             self.info.get_num_frames_with_most_features(seq_len)
 
         mm_data = {
+=======
+        return video_token * num_videos
+
+    def get_dummy_mm_data(
+        self,
+        seq_len: int,
+        mm_counts: Mapping[str, int],
+    ) -> MultiModalDataDict:
+        num_videos = mm_counts.get("video", 0)
+
+        target_width, target_height = \
+            self.info.get_image_size_with_most_features()
+        target_num_frames = \
+            self.info.get_num_frames_with_most_features(seq_len, mm_counts)
+
+        return {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "video":
             self._get_dummy_videos(
                 width=target_width,
@@ -168,11 +231,14 @@ class LlavaNextVideoDummyInputsBuilder(
             )
         }
 
+<<<<<<< HEAD
         return ProcessorInputs(
             prompt_text=video_token * num_videos,
             mm_data=mm_data,
         )
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class LlavaNextVideoMultiModalProcessor(
         BaseMultiModalProcessor[LlavaNextVideoProcessingInfo]):
@@ -184,12 +250,20 @@ class LlavaNextVideoMultiModalProcessor(
     ) -> Mapping[str, MultiModalFieldConfig]:
         return dict(pixel_values_videos=MultiModalFieldConfig.batched("video"))
 
+<<<<<<< HEAD
     def _get_prompt_replacements(
+=======
+    def _get_prompt_updates(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self,
         mm_items: MultiModalDataItems,
         hf_processor_mm_kwargs: Mapping[str, object],
         out_mm_kwargs: MultiModalKwargs,
+<<<<<<< HEAD
     ) -> list[PromptReplacement]:
+=======
+    ) -> Sequence[PromptUpdate]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         hf_config = self.info.get_hf_config()
         video_token_id = hf_config.video_token_index
 
@@ -313,6 +387,7 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
         self.make_empty_intermediate_tensors = (
             self.language_model.model.make_empty_intermediate_tensors)
 
+<<<<<<< HEAD
     @cached_property
     def sampler(self):
         if hasattr(self.language_model, "sampler"):
@@ -323,6 +398,11 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
     def _validate_video_pixel_values(
         self, data: Union[torch.Tensor, List[torch.Tensor]]
     ) -> Union[torch.Tensor, List[torch.Tensor]]:
+=======
+    def _validate_video_pixel_values(
+        self, data: Union[torch.Tensor, list[torch.Tensor]]
+    ) -> Union[torch.Tensor, list[torch.Tensor]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         h = w = self.config.vision_config.image_size
         expected_dims = (3, h, w)
@@ -347,6 +427,7 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
         A legal video input should have the following dimensions:
         {
             "pixel_values_videos" : 
+<<<<<<< HEAD
                 List[b, Tensor(nb_frames, nb_channels, height, width)]
         }
         """
@@ -365,6 +446,23 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
         return LlavaNextVideoPixelInputs(
             type="pixel_values_videos",
             data=pixel_values,
+=======
+                list[b, Tensor(nb_frames, nb_channels, height, width)]
+        }
+        """
+        pixel_values_videos = kwargs.pop("pixel_values_videos", None)
+
+        if pixel_values_videos is None:
+            return None
+
+        if not isinstance(pixel_values_videos, (torch.Tensor, list)):
+            raise ValueError("Incorrect type of pixel_values_videos. "
+                             f"Got type: {type(pixel_values_videos)}")
+
+        return LlavaNextVideoPixelInputs(
+            type="pixel_values_videos",
+            data=pixel_values_videos,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
     def _select_image_features(self, image_features: torch.Tensor, *,
@@ -406,21 +504,40 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
                                                h, w)
             stacked_embeddings = self._video_pixels_to_features(
                 self.vision_tower, stacked_pixels)
+<<<<<<< HEAD
             return stacked_embeddings.view(b, num_frames,
                                            *stacked_embeddings.shape[1:])
+=======
+            embeds = stacked_embeddings.view(b, num_frames,
+                                             *stacked_embeddings.shape[1:])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         elif is_list_of(video_pixels, torch.Tensor):
             frames_per_videos = [v.shape[0] for v in video_pixels]
             stacked_pixels = torch.cat(video_pixels, dim=0)
             stacked_embeddings = self._video_pixels_to_features(
                 self.vision_tower, stacked_pixels)
+<<<<<<< HEAD
             return torch.split(stacked_embeddings, frames_per_videos, dim=0)
 
+=======
+            embeds = torch.split(stacked_embeddings, frames_per_videos, dim=0)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             raise ValueError(
                 f"Unsupported type of video input {type(video_pixels)}")
 
+<<<<<<< HEAD
     def get_multimodal_embeddings(self, **kwargs) -> Optional[NestedTensors]:
+=======
+        return [e.flatten(0, 1) for e in embeds]
+
+    def get_language_model(self) -> torch.nn.Module:
+        return self.language_model
+
+    def get_multimodal_embeddings(
+            self, **kwargs: object) -> Optional[MultiModalEmbeddings]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         video_input = self._parse_and_validate_video_input(**kwargs)
         if video_input is None:
             return None
@@ -430,7 +547,11 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
     def get_input_embeddings(
         self,
         input_ids: torch.Tensor,
+<<<<<<< HEAD
         multimodal_embeddings: Optional[NestedTensors] = None,
+=======
+        multimodal_embeddings: Optional[MultiModalEmbeddings] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         inputs_embeds = self.language_model.get_input_embeddings(input_ids)
         if multimodal_embeddings is not None:
@@ -443,8 +564,11 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors] = None,
         inputs_embeds: Optional[torch.Tensor] = None,
         **kwargs: object,
@@ -468,8 +592,11 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
 
         hidden_states = self.language_model.model(input_ids,
                                                   positions,
+<<<<<<< HEAD
                                                   kv_caches,
                                                   attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                   intermediate_tensors,
                                                   inputs_embeds=inputs_embeds)
 
@@ -483,6 +610,7 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
         return self.language_model.compute_logits(hidden_states,
                                                   sampling_metadata)
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: torch.Tensor,
@@ -492,6 +620,10 @@ class LlavaNextVideoForConditionalGeneration(nn.Module, SupportsMultiModal,
 
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         loader = AutoWeightsLoader(
             self,
             # This model doesn't support images for now

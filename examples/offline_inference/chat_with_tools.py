@@ -68,7 +68,11 @@ def get_current_weather(city: str, state: str, unit: 'str'):
             "partly cloudly, with highs in the 90's.")
 
 
+<<<<<<< HEAD
 tool_funtions = {"get_current_weather": get_current_weather}
+=======
+tool_functions = {"get_current_weather": get_current_weather}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 tools = [{
     "type": "function",
@@ -122,7 +126,11 @@ messages.append({
 # above defined function
 tool_calls = json.loads(output)
 tool_answers = [
+<<<<<<< HEAD
     tool_funtions[call['name']](**call['arguments']) for call in tool_calls
+=======
+    tool_functions[call['name']](**call['arguments']) for call in tool_calls
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ]
 
 # append the answer as a tool message and let the LLM give you an answer

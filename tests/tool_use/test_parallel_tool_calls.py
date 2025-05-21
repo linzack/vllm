@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import openai
 import pytest
@@ -54,7 +58,11 @@ async def test_parallel_tool_calls(client: openai.AsyncOpenAI,
         assert isinstance(tool_call.function.arguments, str)
 
         parsed_arguments = json.loads(tool_call.function.arguments)
+<<<<<<< HEAD
         assert isinstance(parsed_arguments, Dict)
+=======
+        assert isinstance(parsed_arguments, dict)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert isinstance(parsed_arguments.get("city"), str)
         assert isinstance(parsed_arguments.get("state"), str)
 
@@ -73,8 +81,13 @@ async def test_parallel_tool_calls(client: openai.AsyncOpenAI,
     role_name: Optional[str] = None
     finish_reason_count: int = 0
 
+<<<<<<< HEAD
     tool_call_names: List[str] = []
     tool_call_args: List[str] = []
+=======
+    tool_call_names: list[str] = []
+    tool_call_args: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     tool_call_idx: int = -1
     tool_call_id_count: int = 0
 
@@ -180,7 +193,11 @@ async def test_parallel_tool_calls_with_results(client: openai.AsyncOpenAI,
         logprobs=False,
         stream=True)
 
+<<<<<<< HEAD
     chunks: List[str] = []
+=======
+    chunks: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finish_reason_count = 0
     role_sent: bool = False
 

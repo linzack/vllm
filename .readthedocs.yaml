@@ -18,4 +18,8 @@ formats: []
 # Optionally declare the Python requirements required to build your docs
 python:
   install:
+<<<<<<< HEAD
     - requirements: docs/requirements-docs.txt
+=======
+    - requirements: requirements/docs.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

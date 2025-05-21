@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -18,7 +22,11 @@ class ipex_ops:
 
     @staticmethod
     def _reshape_activation_tensor(
+<<<<<<< HEAD
             x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+            x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num = x.size(0)
         d = x.size(1) // 2
         x = x.reshape(num, 2, d)
@@ -177,6 +185,10 @@ class ipex_ops:
         out: torch.Tensor,
         seqlen_q: torch.Tensor,
         seqlen_k: torch.Tensor,
+<<<<<<< HEAD
+=======
+        alibi_slopes: Optional[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         max_seqlen_q: int,
         max_seqlen_k: int,
         pdropout: float,
@@ -185,6 +197,7 @@ class ipex_ops:
         is_causal: bool,
         return_softmax: bool,
         gen_: torch.Generator,
+<<<<<<< HEAD
         logits_soft_cap: float,
     ) -> None:
         ipex.llm.functional.varlen_attention(query.contiguous(),
@@ -196,6 +209,33 @@ class ipex_ops:
                                              zero_tensors, is_causal,
                                              return_softmax, gen_,
                                              logits_soft_cap)
+=======
+        window_size_left: float,
+        window_size_right: float,
+        logits_soft_cap: float,
+    ) -> None:
+        if ipex.__version__.endswith("cpu"):
+            if logits_soft_cap != 0.0:
+                raise ValueError("IPEX CPU does not support logits_soft_cap")
+            assert alibi_slopes is None
+            assert window_size_left < 0 and window_size_right < 0
+            ipex.llm.functional.varlen_attention(query.contiguous(),
+                                                 key.contiguous(),
+                                                 value.contiguous(), out,
+                                                 seqlen_q.int(),
+                                                 seqlen_k.int(), max_seqlen_q,
+                                                 max_seqlen_k, pdropout,
+                                                 softmax_scale, zero_tensors,
+                                                 is_causal, return_softmax,
+                                                 gen_)
+        else:  # XPU build
+            ipex.llm.functional.varlen_attention(
+                query.contiguous(), key.contiguous(), value.contiguous(), out,
+                seqlen_q.int(), seqlen_k.int(), alibi_slopes, max_seqlen_q,
+                max_seqlen_k, pdropout, softmax_scale, zero_tensors, is_causal,
+                return_softmax, gen_, window_size_left, window_size_right,
+                logits_soft_cap)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def reshape_and_cache(
@@ -213,8 +253,13 @@ class ipex_ops:
             key, value, key_cache, value_cache, slot_mapping)
 
     @staticmethod
+<<<<<<< HEAD
     def copy_blocks(key_caches: List[torch.Tensor],
                     value_caches: List[torch.Tensor],
+=======
+    def copy_blocks(key_caches: list[torch.Tensor],
+                    value_caches: list[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     block_mapping: torch.Tensor) -> None:
         torch.xpu.copy_blocks(  # type: ignore
             key_caches,

@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """Minimal implementation of BlipVisionModel intended to be only used 
 within a vision language model."""
+<<<<<<< HEAD
 from typing import Iterable, Optional, Set, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -16,6 +21,11 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
 
+<<<<<<< HEAD
+=======
+from .interfaces import SupportsQuant
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 def get_blip_patch_grid_length(*, image_size: int, patch_size: int) -> int:
     assert image_size % patch_size == 0
@@ -243,9 +253,16 @@ class BlipEncoder(nn.Module):
         return hidden_states
 
 
+<<<<<<< HEAD
 class BlipVisionModel(nn.Module):
     config_class = BlipVisionConfig
     main_input_name = "pixel_values"
+=======
+class BlipVisionModel(nn.Module, SupportsQuant):
+    config_class = BlipVisionConfig
+    main_input_name = "pixel_values"
+    packed_modules_mapping = {"qkv_proj": ["q_proj", "k_proj", "v_proj"]}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(
         self,
@@ -293,8 +310,13 @@ class BlipVisionModel(nn.Module):
 
         return self.post_layernorm(hidden_states)
 
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             ("qkv_proj", "q_proj", "q"),
@@ -302,7 +324,11 @@ class BlipVisionModel(nn.Module):
             ("qkv_proj", "v_proj", "v"),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         layer_count = len(self.encoder.layers)
 
         for name, loaded_weight in weights:

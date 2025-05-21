@@ -7,6 +7,10 @@ from torch.nn.parameter import Parameter
 from vllm.attention.backends.abstract import AttentionMetadata
 from vllm.distributed.parallel_state import (
     get_tensor_model_parallel_rank, get_tensor_model_parallel_world_size)
+<<<<<<< HEAD
+=======
+from vllm.forward_context import get_forward_context
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.custom_op import CustomOp
 from vllm.model_executor.layers.layernorm import RMSNorm
 from vllm.model_executor.layers.linear import (ColumnParallelLinear,
@@ -130,14 +134,24 @@ class MambaMixer(CustomOp):
         ) if use_rms_norm else None
 
     def forward_native(self, hidden_states: torch.Tensor,
+<<<<<<< HEAD
                        attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        conv_state: torch.Tensor, ssm_state: torch.Tensor):
         pass
 
     def forward_cuda(self, hidden_states: torch.Tensor,
+<<<<<<< HEAD
                      attn_metadata: AttentionMetadata,
                      mamba_cache_params: MambaCacheParams):
 
+=======
+                     mamba_cache_params: MambaCacheParams):
+
+        attn_metadata: AttentionMetadata = get_forward_context().attn_metadata
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # 1. Gated MLP's linear projection
         projected_states = self.in_proj(hidden_states)[0].transpose(-2, -1)
         hidden_states, gate = projected_states.chunk(2, dim=-2)

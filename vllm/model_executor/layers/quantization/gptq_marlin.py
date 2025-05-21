@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional, Set, Union
+=======
+from typing import Any, Callable, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -11,16 +15,28 @@ from vllm.model_executor.layers.fused_moe.layer import (
     FusedMoE, FusedMoEMethodBase, FusedMoeWeightScaleSupported)
 from vllm.model_executor.layers.linear import (LinearMethodBase,
                                                set_weight_attrs)
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig, QuantizeMethodBase)
 from vllm.model_executor.layers.quantization.kernels.mixed_precision import (
     MPLinearLayerConfig, choose_mp_linear_kernel)
+<<<<<<< HEAD
 from vllm.model_executor.layers.quantization.moe_wna16 import MoeWNA16Config
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.utils import replace_parameter
 from vllm.model_executor.layers.quantization.utils.gptq_utils import (
     get_linear_quant_method)
 from vllm.model_executor.layers.quantization.utils.marlin_utils import (
+<<<<<<< HEAD
     check_marlin_supported, marlin_moe_permute_scales,
+=======
+    check_marlin_supported, check_moe_marlin_supports_layer,
+    marlin_make_workspace_new, marlin_moe_permute_scales,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     marlin_repeat_scales_on_all_ranks, verify_marlin_supported)
 from vllm.model_executor.parameter import (ChannelQuantScaleParameter,
                                            GroupQuantScaleParameter,
@@ -44,8 +60,13 @@ class GPTQMarlinConfig(QuantizationConfig):
 
     def __init__(self, weight_bits: int, group_size: int, desc_act: bool,
                  is_sym: bool, lm_head_quantized: bool,
+<<<<<<< HEAD
                  dynamic: Dict[str, Dict[str, Union[int, bool]]],
                  full_config: Dict[str, Any]) -> None:
+=======
+                 dynamic: dict[str, dict[str, Union[int, bool]]],
+                 full_config: dict[str, Any]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__()
         if desc_act and group_size == -1:
             # In this case, act_order == True is the same as act_order == False
@@ -54,7 +75,11 @@ class GPTQMarlinConfig(QuantizationConfig):
 
         # GPTQModel use `dynamic` config property to allow per module
         # quantization config so each module can be individually optimized.
+<<<<<<< HEAD
         # Format is Dict[str, Dict] where key is a regex string that can
+=======
+        # Format is dict[str, dict] where key is a regex string that can
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # perform both positive ("+:" prefixed) or negative ("-:" prefixed)
         # matching of a module.
         # Default to positive match, override base quant config mode, if no
@@ -100,11 +125,19 @@ class GPTQMarlinConfig(QuantizationConfig):
                 f"dynamic={self.dynamic}")
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "gptq_marlin"
 
     @classmethod
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "gptq_marlin"
+
+    @classmethod
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.half, torch.bfloat16]
 
     @classmethod
@@ -112,11 +145,19 @@ class GPTQMarlinConfig(QuantizationConfig):
         return 80
 
     @classmethod
+<<<<<<< HEAD
     def get_config_filenames(cls) -> List[str]:
         return ["quantize_config.json"]
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "GPTQMarlinConfig":
+=======
+    def get_config_filenames(cls) -> list[str]:
+        return ["quantize_config.json"]
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "GPTQMarlinConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         dynamic = cls.get_from_keys_or(config, ["dynamic"], default={})
         dynamic = {} if dynamic is None else dynamic
 
@@ -130,8 +171,13 @@ class GPTQMarlinConfig(QuantizationConfig):
                    lm_head_quantized, dynamic, config)
 
     @classmethod
+<<<<<<< HEAD
     def override_quantization_method(cls, hf_quant_cfg,
                                      user_quant) -> Optional[str]:
+=======
+    def override_quantization_method(
+            cls, hf_quant_cfg, user_quant) -> Optional[QuantizationMethods]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         can_convert = cls.is_gptq_marlin_compatible(hf_quant_cfg)
 
         is_valid_user_quant = (user_quant is None or user_quant == "marlin"
@@ -153,17 +199,33 @@ class GPTQMarlinConfig(QuantizationConfig):
     def get_quant_method(self, layer: torch.nn.Module,
                          prefix: str) -> Optional["QuantizeMethodBase"]:
         if isinstance(layer, FusedMoE):
+<<<<<<< HEAD
             if layer.num_experts > 32:
                 # For MoEs with many experts the moe_wna16 kernel is faster
                 return MoeWNA16Config.from_config(
                     self.full_config).get_quant_method(layer, prefix)
             else:
                 return GPTQMarlinMoEMethod(self)
+=======
+            from vllm.model_executor.layers.quantization.moe_wna16 import (
+                MoeWNA16Config)
+            if not check_moe_marlin_supports_layer(layer, self.group_size):
+                logger.warning_once(
+                    f"Layer '{prefix}' is not supported by GPTQMoeMarlin. "
+                    "Falling back to Moe WNA16 kernels.")
+                return MoeWNA16Config.from_config(
+                    self.full_config).get_quant_method(layer, prefix)
+            return GPTQMarlinMoEMethod(self)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return get_linear_quant_method(self, layer, prefix,
                                        GPTQMarlinLinearMethod)
 
     @classmethod
+<<<<<<< HEAD
     def is_gptq_marlin_compatible(cls, quant_config: Dict[str, Any]):
+=======
+    def is_gptq_marlin_compatible(cls, quant_config: dict[str, Any]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         quant_method = quant_config.get("quant_method", "").lower()
         num_bits = quant_config.get("bits")
         group_size = quant_config.get("group_size")
@@ -195,7 +257,11 @@ class GPTQMarlinLinearMethod(LinearMethodBase):
         quant_config: The GPTQ Marlin quantization config.
     """
 
+<<<<<<< HEAD
     _kernel_backends_being_used: Set[str] = set()
+=======
+    _kernel_backends_being_used: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self, quant_config: GPTQMarlinConfig) -> None:
         self.quant_config = quant_config
@@ -208,7 +274,11 @@ class GPTQMarlinLinearMethod(LinearMethodBase):
         self,
         layer: torch.nn.Module,
         input_size_per_partition: int,
+<<<<<<< HEAD
         output_partition_sizes: List[int],
+=======
+        output_partition_sizes: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         input_size: int,
         output_size: int,
         params_dtype: torch.dtype,
@@ -346,6 +416,16 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
 
     def __init__(self, quant_config: GPTQMarlinConfig) -> None:
         self.quant_config = quant_config
+<<<<<<< HEAD
+=======
+        if self.quant_config.quant_type.size_bits == 4:
+            self.quant_type = scalar_types.uint4b8
+        elif self.quant_config.quant_type.size_bits == 8:
+            self.quant_type = scalar_types.uint8b128
+        else:
+            raise ValueError(
+                "GPTQMarlinMoEMethod only supports int4 and int8 now.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def create_weights(
         self,
@@ -408,7 +488,11 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
             torch.empty(num_experts,
                         scales_size13,
                         2 * intermediate_size_per_partition,
+<<<<<<< HEAD
                         dtype=torch.half),
+=======
+                        dtype=params_dtype),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             requires_grad=False,
         )
         layer.register_parameter("w13_scales", w13_scales)
@@ -418,7 +502,11 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
             torch.empty(num_experts,
                         scales_size2,
                         hidden_size,
+<<<<<<< HEAD
                         dtype=torch.half),
+=======
+                        dtype=params_dtype),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             requires_grad=False,
         )
         layer.register_parameter("w2_scales", w2_scales)
@@ -493,6 +581,12 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
                                  w2_g_idx_sort_indices)
         set_weight_attrs(w2_g_idx_sort_indices, extra_weight_attrs)
 
+<<<<<<< HEAD
+=======
+        device = layer.w13_qweight.device
+        layer.workspace = marlin_make_workspace_new(device, 4)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def process_weights_after_loading(self, layer: torch.nn.Module) -> None:
 
         # Process act_order
@@ -569,7 +663,13 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
         replace_parameter(layer, "w13_scales", marlin_w13_scales)
         marlin_w2_scales = marlin_moe_permute_scales(
             s=layer.w2_scales,
+<<<<<<< HEAD
             size_k=layer.w2_scales.shape[1] * self.quant_config.pack_factor,
+=======
+            size_k=layer.w2_scales.shape[1] *
+            (self.quant_config.group_size if self.quant_config.group_size != -1
+             else self.quant_config.pack_factor),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             size_n=layer.w2_scales.shape[2],
             group_size=self.quant_config.group_size,
         )
@@ -585,6 +685,7 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
         use_grouped_topk: bool = False,
         topk_group: Optional[int] = None,
         num_expert_group: Optional[int] = None,
+<<<<<<< HEAD
         custom_routing_function: Optional[Callable] = None,
         scoring_func: str = "softmax",
         e_score_correction_bias: Optional[torch.Tensor] = None,
@@ -592,6 +693,21 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
         # The input must currently be float16
         orig_dtype = x.dtype
         x = x.half()
+=======
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+        custom_routing_function: Optional[Callable] = None,
+        scoring_func: str = "softmax",
+        e_score_correction_bias: Optional[torch.Tensor] = None,
+        apply_router_weight_on_input: bool = False,
+        activation: str = "silu",
+    ) -> torch.Tensor:
+        assert activation == "silu", "Only SiLU activation is supported."
+        if apply_router_weight_on_input:
+            raise NotImplementedError(
+                "Apply router weight on input is not supported for "
+                "fused Marlin MoE method.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         topk_weights, topk_ids = FusedMoE.select_experts(
             hidden_states=x,
@@ -614,9 +730,20 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
             router_logits,
             topk_weights,
             topk_ids,
+<<<<<<< HEAD
+=======
+            quant_type_id=self.quant_type.id,
+            global_num_experts=global_num_experts,
+            expert_map=expert_map,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             g_idx1=layer.w13_g_idx,
             g_idx2=layer.w2_g_idx,
             sort_indices1=layer.w13_g_idx_sort_indices,
             sort_indices2=layer.w2_g_idx_sort_indices,
+<<<<<<< HEAD
             num_bits=self.quant_config.quant_type.size_bits,
             is_k_full=self.is_k_full).to(orig_dtype)
+=======
+            workspace=layer.workspace,
+            is_k_full=self.is_k_full)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

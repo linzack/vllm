@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+<<<<<<< HEAD
 
 import functools
 from collections import UserDict
@@ -19,6 +20,18 @@ from vllm.utils import (ClassRegistry, get_allowed_kwarg_only_overrides,
 
 from .data import ProcessorInputs, SingletonInputs
 from .parse import is_encoder_decoder_inputs
+=======
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Union
+
+from transformers import BatchFeature, PretrainedConfig, ProcessorMixin
+from typing_extensions import TypeVar
+
+from vllm.transformers_utils.processor import cached_processor_from_config
+from vllm.transformers_utils.tokenizer import AnyTokenizer
+from vllm.utils import resolve_mm_processor_kwargs
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 if TYPE_CHECKING:
     from vllm.config import ModelConfig
@@ -26,8 +39,11 @@ if TYPE_CHECKING:
                                  MultiModalRegistry)
     from vllm.sequence import SequenceData
 
+<<<<<<< HEAD
 logger = init_logger(__name__)
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 _T = TypeVar("_T")
 _C = TypeVar("_C", bound=PretrainedConfig, default=PretrainedConfig)
 _P = TypeVar("_P", bound=ProcessorMixin, default=ProcessorMixin)
@@ -50,7 +66,11 @@ class InputContext:
     ) -> _C:
         """
         Get the HuggingFace configuration
+<<<<<<< HEAD
         (:class:`transformers.PretrainedConfig`) of the model,
+=======
+        ({class}`transformers.PretrainedConfig`) of the model,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         additionally checking its type.
 
         Raises:
@@ -91,7 +111,11 @@ class InputContext:
     ) -> _P:
         """
         Get the HuggingFace processor
+<<<<<<< HEAD
         (:class:`transformers.ProcessorMixin`) of the model,
+=======
+        ({class}`transformers.ProcessorMixin`) of the model,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         additionally checking its type.
 
         Raises:
@@ -113,7 +137,12 @@ class InputContext:
         Initialize a HuggingFace-like processor class, merging the
         keyword arguments with those in the model's configuration.
         """
+<<<<<<< HEAD
         base_kwargs = self.model_config.mm_processor_kwargs
+=======
+        mm_config = self.model_config.get_multimodal_config()
+        base_kwargs = mm_config.mm_processor_kwargs
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if base_kwargs is None:
             base_kwargs = {}
 
@@ -146,12 +175,22 @@ class InputProcessingContext(InputContext):
         kwargs: Mapping[str, object] = {},
     ) -> BatchFeature:
         """
+<<<<<<< HEAD
         Call :code:`hf_processor` on the prompt :code:`data`
         (text, image, audio...) with configurable options :code:`kwargs`.
         """
         assert callable(hf_processor)
 
         base_kwargs = self.model_config.mm_processor_kwargs
+=======
+        Call `hf_processor` on the prompt `data`
+        (text, image, audio...) with configurable options `kwargs`.
+        """
+        assert callable(hf_processor)
+
+        mm_config = self.model_config.get_multimodal_config()
+        base_kwargs = mm_config.mm_processor_kwargs
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if base_kwargs is None:
             base_kwargs = {}
 
@@ -169,6 +208,7 @@ class InputProcessingContext(InputContext):
             msg = (f"Failed to apply {type(hf_processor).__name__} "
                    f"on data={data} with kwargs={merged_kwargs}")
 
+<<<<<<< HEAD
             raise RuntimeError(msg) from exc
 
 
@@ -177,12 +217,24 @@ N = TypeVar("N", bound=type[nn.Module])
 
 class DummyData(NamedTuple):
     """Dummy data used for profiling."""
+=======
+            raise ValueError(msg) from exc
+
+
+class DummyData(NamedTuple):
+    """
+    Dummy data used for profiling.
+
+    Note: This is only used in V0.
+    """
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     seq_data: "SequenceData"
     multi_modal_data: Optional["MultiModalDataDict"] = None
     multi_modal_placeholders: Optional["MultiModalPlaceholderDict"] = None
 
 
+<<<<<<< HEAD
 class DummyDataFactory(Protocol):
 
     def __call__(
@@ -308,6 +360,13 @@ class InputRegistry:
         return self._dummy_encoder_factories_by_model_type \
             .get(model_cls, self._default_dummy_data_factory)
 
+=======
+class InputRegistry:
+    """
+    Note: This is only used in V0.
+    """
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def dummy_data_for_profiling(
         self,
         model_config: "ModelConfig",
@@ -319,6 +378,7 @@ class InputRegistry:
         Create dummy data for profiling the memory usage of a model.
 
         The model is identified by ``model_config``.
+<<<<<<< HEAD
 
         Note:
             This should be called after
@@ -466,3 +526,27 @@ class InputRegistry:
         specific model.
         """
         return functools.partial(self.process_input, model_config)
+=======
+        """
+        # Avoid circular import
+        from vllm.sequence import SequenceData
+
+        if not model_config.is_multimodal_model:
+            seq_data = SequenceData.from_prompt_token_counts((0, seq_len))
+            return DummyData(seq_data=seq_data)
+
+        # Encoder dummy data does not contain multi-modal data
+        if is_encoder_data:
+            enc_data = mm_registry.get_encoder_dummy_data(
+                model_config, seq_len)
+            seq_data = SequenceData.from_seqs(enc_data.prompt_token_ids)
+            return DummyData(seq_data=seq_data)
+
+        dec_data = mm_registry.get_decoder_dummy_data(model_config, seq_len)
+
+        return DummyData(
+            seq_data=SequenceData.from_seqs(dec_data.prompt_token_ids),
+            multi_modal_data=dec_data.multi_modal_data,
+            multi_modal_placeholders=dec_data.multi_modal_placeholders,
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """Utility functions used for tests and benchmarks"""
 
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import torch
@@ -64,9 +68,15 @@ def marlin_weights(q_w, size_k, size_n, num_bits, perm):
 
 
 def get_weight_perm(num_bits: int):
+<<<<<<< HEAD
     perm_list: List[int] = []
     for i in range(32):
         perm1: List[int] = []
+=======
+    perm_list: list[int] = []
+    for i in range(32):
+        perm1: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         col = i // 4
         for block in [0, 1]:
             for row in [

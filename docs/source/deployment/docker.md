@@ -19,6 +19,21 @@ $ docker run --runtime nvidia --gpus all \
     --model mistralai/Mistral-7B-v0.1
 ```
 
+<<<<<<< HEAD
+=======
+This image can also be used with other container engines such as [Podman](https://podman.io/).
+
+```console
+$ podman run --gpus all \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  --env "HUGGING_FACE_HUB_TOKEN=$HF_TOKEN" \
+  -p 8000:8000 \
+  --ipc=host \
+  vllm/vllm-openai:latest \
+  --model mistralai/Mistral-7B-v0.1
+```
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 You can add any other <project:#engine-args> you need after the image tag (`vllm/vllm-openai:latest`).
 
 :::{note}
@@ -34,11 +49,19 @@ If you need to use those dependencies (having accepted the license terms),
 create a custom Dockerfile on top of the base image with an extra layer that installs them:
 
 ```Dockerfile
+<<<<<<< HEAD
 FROM vllm/vllm-openai:v0.7.3
 
 # e.g. install the `audio` and `video` optional dependencies
 # NOTE: Make sure the version of vLLM matches the base image!
 RUN uv pip install --system vllm[audio,video]==0.7.3
+=======
+FROM vllm/vllm-openai:v0.8.3
+
+# e.g. install the `audio` optional dependencies
+# NOTE: Make sure the version of vLLM matches the base image!
+RUN uv pip install --system vllm[audio]==0.8.3
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 :::
@@ -61,11 +84,19 @@ RUN uv pip install --system git+https://github.com/huggingface/transformers.git
 
 ## Building vLLM's Docker Image from Source
 
+<<<<<<< HEAD
 You can build and run vLLM from source via the provided <gh-file:Dockerfile>. To build vLLM:
 
 ```console
 # optionally specifies: --build-arg max_jobs=8 --build-arg nvcc_threads=2
 DOCKER_BUILDKIT=1 docker build . --target vllm-openai --tag vllm/vllm-openai
+=======
+You can build and run vLLM from source via the provided <gh-file:docker/Dockerfile>. To build vLLM:
+
+```console
+# optionally specifies: --build-arg max_jobs=8 --build-arg nvcc_threads=2
+DOCKER_BUILDKIT=1 docker build . --target vllm-openai --tag vllm/vllm-openai --file docker/Dockerfile
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 :::{note}
@@ -92,6 +123,10 @@ Keep an eye on memory usage with parallel jobs as it can be substantial (see exa
 # Example of building on Nvidia GH200 server. (Memory usage: ~15GB, Build time: ~1475s / ~25 min, Image size: 6.93GB)
 $ python3 use_existing_torch.py
 $ DOCKER_BUILDKIT=1 docker build . \
+<<<<<<< HEAD
+=======
+  --file docker/Dockerfile \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   --target vllm-openai \
   --platform "linux/arm64" \
   -t vllm/vllm-gh200-openai:latest \

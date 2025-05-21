@@ -28,7 +28,10 @@ with tracer.start_as_current_span("client-span", kind=SpanKind.CLIENT) as span:
         "model": "facebook/opt-125m",
         "prompt": prompt,
         "max_tokens": 10,
+<<<<<<< HEAD
         "best_of": 20,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "n": 3,
         "use_beam_search": "true",
         "temperature": 0.0,

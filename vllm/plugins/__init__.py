@@ -2,7 +2,11 @@
 
 import logging
 import os
+<<<<<<< HEAD
 from typing import Callable, Dict
+=======
+from typing import Callable
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -14,7 +18,11 @@ logger = logging.getLogger(__name__)
 plugins_loaded = False
 
 
+<<<<<<< HEAD
 def load_plugins_by_group(group: str) -> Dict[str, Callable]:
+=======
+def load_plugins_by_group(group: str) -> dict[str, Callable]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     import sys
     if sys.version_info < (3, 10):
         from importlib_metadata import entry_points

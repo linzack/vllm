@@ -76,7 +76,11 @@ def repeat_prompts(prompts, repeat_count, mode: str):
             - 'random': Shuffle the prompts randomly after repetition.
             - 'tile': Repeat the entire prompt list in sequence.
               Example: [1, 2, 3] -> [1, 2, 3, 1, 2, 3].
+<<<<<<< HEAD
             - 'interleave': Repeat each prompt consecutively before moving to 
+=======
+            - 'interleave': Repeat each prompt consecutively before moving to
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               the next. Example: [1, 2, 3] -> [1, 1, 2, 2, 3, 3].
 
     Returns:
@@ -86,6 +90,7 @@ def repeat_prompts(prompts, repeat_count, mode: str):
         ValueError: If an invalid mode is provided.
     """
     print("Repeat mode: ", mode)
+<<<<<<< HEAD
     if mode == 'random':
         repeated_prompts = prompts * repeat_count
         random.shuffle(repeated_prompts)
@@ -93,13 +98,28 @@ def repeat_prompts(prompts, repeat_count, mode: str):
     elif mode == 'tile':
         return prompts * repeat_count
     elif mode == 'interleave':
+=======
+    if mode == "random":
+        repeated_prompts = prompts * repeat_count
+        random.shuffle(repeated_prompts)
+        return repeated_prompts
+    elif mode == "tile":
+        return prompts * repeat_count
+    elif mode == "interleave":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         repeated_prompts = []
         for prompt in prompts:
             repeated_prompts.extend([prompt] * repeat_count)
         return repeated_prompts
     else:
+<<<<<<< HEAD
         raise ValueError(f"Invalid mode: {mode}, only support "
                          "'random', 'tile', 'interleave'")
+=======
+        raise ValueError(
+            f"Invalid mode: {mode}, only support 'random', 'tile', 'interleave'"
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def main(args):
@@ -109,16 +129,26 @@ def main(args):
     # we append the document id at the beginning to avoid any of the document
     # being the prefix of other documents
     prompts = [
+<<<<<<< HEAD
         str(i) + ' '.join(['hi'] * args.document_length)
+=======
+        str(i) + " ".join(["hi"] * args.document_length)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for i in range(args.num_documents)
     ]
 
     prompts = repeat_prompts(prompts, args.repeat_count, mode=args.repeat_mode)
 
     warmup_prompts = [
+<<<<<<< HEAD
         "This is warm up request " + str(i) + \
                 ' '.join(['hi'] * args.document_length)
         for i in range(args.num_documents)]
+=======
+        "This is warm up request " + str(i) + " ".join(["hi"] * args.document_length)
+        for i in range(args.num_documents)
+    ]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Create the LLM engine
     engine_args = EngineArgs.from_cli_args(args)
@@ -142,15 +172,25 @@ def main(args):
 
 if __name__ == "__main__":
     parser = FlexibleArgumentParser(
+<<<<<<< HEAD
         description=
         'Benchmark the performance with or without automatic prefix caching.')
 
     parser.add_argument(
         '--document-length',
+=======
+        description="Benchmark the performance with or "
+        "without automatic prefix caching."
+    )
+
+    parser.add_argument(
+        "--document-length",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         type=int,
         # Roughly the number of tokens for a system paper,
         # excluding images
         default=20000,
+<<<<<<< HEAD
         help='Range of input lengths for sampling prompts,'
         'specified as "min:max" (e.g., "128:256").')
 
@@ -178,6 +218,44 @@ if __name__ == "__main__":
                         type=int,
                         default=0,
                         help='Random seed when the repeat mode is "random"')
+=======
+        help="Range of input lengths for sampling prompts, "
+        'specified as "min:max" (e.g., "128:256").',
+    )
+
+    parser.add_argument(
+        "--num-documents",
+        type=int,
+        default=8,
+        help="Range of input lengths for sampling prompts, "
+        'specified as "min:max" (e.g., "128:256").',
+    )
+
+    parser.add_argument("--output-len", type=int, default=10)
+
+    parser.add_argument(
+        "--repeat-count",
+        type=int,
+        default=2,
+        help="Number of times to repeat each prompt",
+    )
+
+    parser.add_argument(
+        "--repeat-mode",
+        type=str,
+        default="random",
+        help="The mode to repeat prompts. The supported "
+        'modes are "random", "tile", and "interleave". '
+        "See repeat_prompts() in the source code for details.",
+    )
+
+    parser.add_argument(
+        "--shuffle-seed",
+        type=int,
+        default=0,
+        help='Random seed when the repeat mode is "random"',
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     parser = EngineArgs.add_cli_args(parser)
     args = parser.parse_args()

@@ -1063,7 +1063,12 @@ static const __device__ int8_t kvalues_iq4nl[16] = {-127, -104, -83, -65, -49, -
 typedef half dfloat; // dequantize float
 typedef half2 dfloat2;
 typedef void (*dequantize_kernel_t)(const void * vx, const int ib, const int iqs, dfloat2 & v);
+<<<<<<< HEAD
 typedef void (*to_fp16_cuda_t)(const void * __restrict__ x, dfloat * __restrict__ y, int k, cudaStream_t stream);
+=======
+template<typename dst_t>
+using to_cuda_ggml_t = void (*)(const void * __restrict__ x, dst_t * __restrict__ y, int k, cudaStream_t stream);
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 typedef float (*vec_dot_q_cuda_t)(const void * __restrict__ vbq, const block_q8_1 * __restrict__ bq8_1, const int & iqs);
 typedef void (*allocate_tiles_cuda_t)(int ** x_ql, half2 ** x_dm, int ** x_qh, int ** x_sc);
 typedef void (*load_tiles_cuda_t)(
@@ -1075,6 +1080,28 @@ typedef float (*vec_dot_q_mul_mat_cuda_t)(
 
 // Utility function
 
+<<<<<<< HEAD
+=======
+template<typename dst_t>
+static __device__ __forceinline__ dst_t convert_from_half(half val) {
+    return val;
+}
+
+template<>
+__device__ __forceinline__ c10::BFloat16 convert_from_half<c10::BFloat16>(half val) {
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 800
+    return __float2bfloat16(__half2float(val));
+#else
+    return __half2float(val);
+#endif  // defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 800
+}
+
+template<>
+__device__ __forceinline__ float convert_from_half<float>(half val) {
+    return __half2float(val);
+}
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #if defined(USE_ROCM)
 
 #ifndef __has_builtin

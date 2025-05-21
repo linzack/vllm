@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
 
+<<<<<<< HEAD
+=======
+permissions:
+  contents: read
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 jobs:
   pre-commit:
     runs-on: ubuntu-latest

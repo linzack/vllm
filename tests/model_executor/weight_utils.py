@@ -20,11 +20,19 @@ def test_hf_transfer_auto_activation():
     try:
         # enable hf hub transfer if available
         import hf_transfer  # type: ignore # noqa
+<<<<<<< HEAD
         HF_TRANFER_ACTIVE = True
     except ImportError:
         HF_TRANFER_ACTIVE = False
     assert (huggingface_hub.constants.HF_HUB_ENABLE_HF_TRANSFER ==
             HF_TRANFER_ACTIVE)
+=======
+        HF_TRANSFER_ACTIVE = True
+    except ImportError:
+        HF_TRANSFER_ACTIVE = False
+    assert (huggingface_hub.constants.HF_HUB_ENABLE_HF_TRANSFER ==
+            HF_TRANSFER_ACTIVE)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def test_download_weights_from_hf():

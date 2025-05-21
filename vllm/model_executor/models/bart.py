@@ -19,30 +19,50 @@
 # limitations under the License.
 """PyTorch BART model."""
 import math
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Tuple
+=======
+from collections.abc import Iterable
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import BartConfig
 from transformers.utils import logging
 
+<<<<<<< HEAD
 from vllm.attention import Attention, AttentionMetadata, AttentionType
+=======
+from vllm.attention import Attention, AttentionType
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import CacheConfig, LoRAConfig, VllmConfig
 from vllm.distributed import get_tensor_model_parallel_world_size
 from vllm.model_executor.layers.activation import get_act_fn
 from vllm.model_executor.layers.linear import (ColumnParallelLinear,
+<<<<<<< HEAD
+=======
+                                               QKVCrossParallelLinear,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                QKVParallelLinear,
                                                RowParallelLinear)
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig)
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
 from vllm.model_executor.sampling_metadata import SamplingMetadata
 from vllm.sequence import IntermediateTensors
 
+<<<<<<< HEAD
+=======
+from .interfaces import SupportsQuant, SupportsV0Only
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .utils import maybe_prefix
 
 logger = logging.get_logger(__name__)
@@ -168,7 +188,11 @@ class BartEncoderAttention(nn.Module):
             # Number of KV heads is less than TP size, so we replicate
             # the KV heads across multiple tensor parallel GPUs.
             assert tp_world_size % self.total_num_kv_heads == 0
+<<<<<<< HEAD
         self.num_kv_heads = max(1, self.total_num_kv_heads // tp_world_size)
+=======
+        self.num_kv_heads = self.num_heads
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.q_size = self.num_heads * self.head_dim
         self.kv_size = self.num_kv_heads * self.head_dim
 
@@ -181,14 +205,22 @@ class BartEncoderAttention(nn.Module):
                               prefix=f"{prefix}.attn",
                               attn_type=AttentionType.ENCODER)
 
+<<<<<<< HEAD
     def forward(self, hidden_states: torch.Tensor, kv_cache: torch.Tensor,
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Input shape: Batch x Time x Channel"""
 
         qkv, _ = self.qkv_proj(hidden_states)
         q, k, v = qkv.split([self.q_size, self.kv_size, self.kv_size], dim=-1)
 
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         output, _ = self.out_proj(attn_output)
         return output
@@ -248,7 +280,11 @@ class BartDecoderSelfAttention(nn.Module):
             # Number of KV heads is less than TP size, so we replicate
             # the KV heads across multiple tensor parallel GPUs.
             assert tp_world_size % self.total_num_kv_heads == 0
+<<<<<<< HEAD
         self.num_kv_heads = max(1, self.total_num_kv_heads // tp_world_size)
+=======
+        self.num_kv_heads = self.num_heads
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.q_size = self.num_heads * self.head_dim
         self.kv_size = self.num_kv_heads * self.head_dim
 
@@ -261,14 +297,22 @@ class BartDecoderSelfAttention(nn.Module):
                               prefix=f"{prefix}.attn",
                               attn_type=AttentionType.DECODER)
 
+<<<<<<< HEAD
     def forward(self, hidden_states: torch.Tensor, kv_cache: torch.Tensor,
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Input shape: Batch x Time x Channel"""
 
         qkv, _ = self.qkv_proj(hidden_states)
         q, k, v = qkv.split([self.q_size, self.kv_size, self.kv_size], dim=-1)
 
+<<<<<<< HEAD
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         output, _ = self.out_proj(attn_output)
         return output
@@ -300,6 +344,7 @@ class BartCrossAttention(nn.Module):
                              f" and `num_heads`: {num_heads}).")
         self.scaling = self.head_dim**-0.5
 
+<<<<<<< HEAD
         self.qkv_proj = QKVParallelLinear(
             self.d_model,
             self.d_model // self.total_num_heads,
@@ -308,6 +353,16 @@ class BartCrossAttention(nn.Module):
             bias=bias,
             quant_config=quant_config,
         )
+=======
+        # TP sharding sizes is accounted for within "*Parallel" layers.
+        self.qkv_proj = QKVCrossParallelLinear(self.d_model,
+                                               self.d_model //
+                                               self.total_num_heads,
+                                               self.total_num_heads,
+                                               self.total_num_kv_heads,
+                                               bias,
+                                               quant_config=quant_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         self.out_proj = RowParallelLinear(
             embed_dim,
@@ -328,10 +383,14 @@ class BartCrossAttention(nn.Module):
             # Number of KV heads is less than TP size, so we replicate
             # the KV heads across multiple tensor parallel GPUs.
             assert tp_world_size % self.total_num_kv_heads == 0
+<<<<<<< HEAD
         self.num_kv_heads = max(1, self.total_num_kv_heads // tp_world_size)
         self.q_size = self.num_heads * self.head_dim
         self.kv_size = self.num_kv_heads * self.head_dim
 
+=======
+        self.num_kv_heads = self.num_heads  # No GQA in bart
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.attn = Attention(self.num_heads,
                               self.head_dim,
                               self.scaling,
@@ -344,12 +403,16 @@ class BartCrossAttention(nn.Module):
     def forward(
         self,
         decoder_hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         encoder_hidden_states: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """Input shape: Batch x Time x Channel"""
 
+<<<<<<< HEAD
         # (afeldman-nm 2024/07/22) TODO:
         # Need a more efficient solution for q/k/v
         qkv_dec, _ = self.qkv_proj(decoder_hidden_states)
@@ -364,6 +427,11 @@ class BartCrossAttention(nn.Module):
                                     dim=-1)
 
         attn_output = self.attn(q, k, v, kv_cache, attn_metadata)
+=======
+        q, k, v = self.qkv_proj(decoder_hidden_states, encoder_hidden_states)
+
+        attn_output = self.attn(q, k, v)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         output, _ = self.out_proj(attn_output)
         return output
@@ -411,23 +479,34 @@ class BartEncoderLayer(nn.Module):
 
         self.final_layer_norm = nn.LayerNorm(self.embed_dim)
 
+<<<<<<< HEAD
     def forward(self, hidden_states: torch.Tensor, kv_cache: torch.Tensor,
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         r"""
         Args:
             hidden_states
                 torch.Tensor of *encoder* input embeddings.
+<<<<<<< HEAD
             kv_cache:
                 Layer-wise list of KV cache tensors
             attn_metadata:
                 vLLM Attention metadata structure
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Returns:
             Encoder layer output torch.Tensor
         """
         residual = hidden_states
+<<<<<<< HEAD
         hidden_states = self.self_attn(hidden_states=hidden_states,
                                        kv_cache=kv_cache,
                                        attn_metadata=attn_metadata)
+=======
+        hidden_states = self.self_attn(hidden_states=hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         hidden_states = residual + hidden_states
         hidden_states = self.self_attn_layer_norm(hidden_states)
@@ -509,18 +588,24 @@ class BartDecoderLayer(nn.Module):
     def forward(
         self,
         decoder_hidden_states: torch.Tensor,
+<<<<<<< HEAD
         kv_cache: torch.Tensor,
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         encoder_hidden_states: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         r"""
         Args:
             decoder_hidden_states
                 torch.Tensor of *decoder* input embeddings.
+<<<<<<< HEAD
             kv_cache:
                 KV cache tensor
             attn_metadata:
                 vLLM Attention metadata structure
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             encoder_hidden_states
                 torch.Tensor of *encoder* input embeddings.
         Returns:
@@ -529,9 +614,13 @@ class BartDecoderLayer(nn.Module):
         residual = decoder_hidden_states
 
         # Self Attention
+<<<<<<< HEAD
         hidden_states = self.self_attn(hidden_states=decoder_hidden_states,
                                        kv_cache=kv_cache,
                                        attn_metadata=attn_metadata)
+=======
+        hidden_states = self.self_attn(hidden_states=decoder_hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         hidden_states = residual + hidden_states
         hidden_states = self.self_attn_layer_norm(hidden_states)
@@ -542,8 +631,11 @@ class BartDecoderLayer(nn.Module):
 
         hidden_states = self.encoder_attn(
             decoder_hidden_states=hidden_states,
+<<<<<<< HEAD
             kv_cache=kv_cache,
             attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             encoder_hidden_states=encoder_hidden_states,
         )
 
@@ -609,9 +701,18 @@ class BartEncoder(nn.Module):
 
         self.layernorm_embedding = nn.LayerNorm(embed_dim)
 
+<<<<<<< HEAD
     def forward(self, input_ids: torch.Tensor, positions: torch.Tensor,
                 kv_caches: List[torch.Tensor],
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        positions: torch.Tensor,
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         r"""
         Args:
             input_ids
@@ -620,15 +721,23 @@ class BartEncoder(nn.Module):
                 provide it.
             positions
                 Positions of *encoder* input sequence tokens.
+<<<<<<< HEAD
             kv_caches:
                 Layer-wise list of KV cache tensors
             attn_metadata:
                 vLLM Attention metadata structure
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Returns:
             Decoder output torch.Tensor
         """
         # retrieve input_ids and inputs_embeds
+<<<<<<< HEAD
         inputs_embeds = self.embed_tokens(input_ids)
+=======
+        if inputs_embeds is None:
+            inputs_embeds = self.embed_tokens(input_ids)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         embed_pos = self.embed_positions(positions)
         embed_pos = embed_pos.to(inputs_embeds.device)
@@ -636,12 +745,17 @@ class BartEncoder(nn.Module):
         hidden_states = inputs_embeds + embed_pos
         hidden_states = self.layernorm_embedding(hidden_states)
 
+<<<<<<< HEAD
         for idx, encoder_layer in enumerate(self.layers):
             hidden_states = encoder_layer(
                 hidden_states=hidden_states,
                 kv_cache=kv_caches[idx],
                 attn_metadata=attn_metadata,
             )
+=======
+        for encoder_layer in self.layers:
+            hidden_states = encoder_layer(hidden_states=hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return hidden_states
 
@@ -691,11 +805,21 @@ class BartDecoder(nn.Module):
 
         self.layernorm_embedding = nn.LayerNorm(config.d_model)
 
+<<<<<<< HEAD
     def forward(self, decoder_input_ids: torch.Tensor,
                 decoder_positions: torch.Tensor,
                 encoder_hidden_states: Optional[torch.Tensor],
                 kv_caches: List[torch.Tensor],
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+    def forward(
+        self,
+        decoder_input_ids: torch.Tensor,
+        decoder_positions: torch.Tensor,
+        encoder_hidden_states: Optional[torch.Tensor],
+        inputs_embeds: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         r"""
         Args:
             decoder_input_ids
@@ -706,6 +830,7 @@ class BartDecoder(nn.Module):
                 Positions of *decoder* input sequence tokens.
             encoder_hidden_states:
                 Tensor of encoder output embeddings
+<<<<<<< HEAD
             kv_caches:
                 Layer-wise list of KV cache tensors
             attn_metadata:
@@ -715,6 +840,15 @@ class BartDecoder(nn.Module):
         """
 
         inputs_embeds = self.embed_tokens(decoder_input_ids)
+=======
+        Returns:
+            Decoder output torch.Tensor
+        """
+        if inputs_embeds is None:
+            inputs_embeds = self.embed_tokens(decoder_input_ids)
+        else:
+            decoder_positions = inputs_embeds[:, -1]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # embed positions
         embed_pos = self.embed_positions(decoder_positions)
@@ -725,18 +859,28 @@ class BartDecoder(nn.Module):
 
         # decoder layers
 
+<<<<<<< HEAD
         for idx, decoder_layer in enumerate(self.layers):
             hidden_states = decoder_layer(
                 decoder_hidden_states=hidden_states,
                 kv_cache=kv_caches[idx],
                 attn_metadata=attn_metadata,
+=======
+        for decoder_layer in self.layers:
+            hidden_states = decoder_layer(
+                decoder_hidden_states=hidden_states,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 encoder_hidden_states=encoder_hidden_states,
             )
 
         return hidden_states
 
 
+<<<<<<< HEAD
 class BartModel(nn.Module):
+=======
+class BartModel(nn.Module, SupportsQuant):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     _tied_weights_keys = [
         "encoder.embed_tokens.weight", "decoder.embed_tokens.weight"
     ]
@@ -751,7 +895,10 @@ class BartModel(nn.Module):
 
         self.config = config
 
+<<<<<<< HEAD
         self.padding_idx = config.pad_token_id
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_vocab = (lora_config.lora_extra_vocab_size *
                       (lora_config.max_loras or 1)) if lora_config else 0
         self.vocab_size = config.vocab_size + lora_vocab
@@ -768,8 +915,12 @@ class BartModel(nn.Module):
 
     def forward(self, input_ids: torch.Tensor, positions: torch.Tensor,
                 encoder_input_ids: torch.Tensor,
+<<<<<<< HEAD
                 encoder_positions: torch.Tensor, kv_caches: List[torch.Tensor],
                 attn_metadata: AttentionMetadata) -> torch.Tensor:
+=======
+                encoder_positions: torch.Tensor) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         r"""
         Args:
             input_ids
@@ -782,10 +933,13 @@ class BartModel(nn.Module):
                 Indices of *encoder* input sequence tokens in the vocabulary.
             encoder_positions:
                 Positions of *encoder* input sequence tokens.
+<<<<<<< HEAD
             kv_caches:
                 Layer-wise list of KV cache tensors
             attn_metadata:
                 vLLM Attention metadata structure
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Returns:
             Model output torch.Tensor
         """
@@ -796,23 +950,36 @@ class BartModel(nn.Module):
             # Run encoder attention if a non-zero number of encoder tokens
             # are provided as input
             encoder_hidden_states = self.encoder(input_ids=encoder_input_ids,
+<<<<<<< HEAD
                                                  positions=encoder_positions,
                                                  kv_caches=kv_caches,
                                                  attn_metadata=attn_metadata)
+=======
+                                                 positions=encoder_positions)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # decoder outputs consists of
         # (dec_features, past_key_value, dec_hidden, dec_attn)
         decoder_outputs = self.decoder(
             decoder_input_ids=input_ids,
             decoder_positions=positions,
+<<<<<<< HEAD
             encoder_hidden_states=encoder_hidden_states,
             kv_caches=kv_caches,
             attn_metadata=attn_metadata)
+=======
+            encoder_hidden_states=encoder_hidden_states)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return decoder_outputs
 
 
+<<<<<<< HEAD
 class BartForConditionalGeneration(nn.Module):
+=======
+class BartForConditionalGeneration(nn.Module, SupportsV0Only, SupportsQuant):
+    packed_modules_mapping = {"qkv_proj": ["q_proj", "k_proj", "v_proj"]}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     base_model_prefix = "model"
 
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
@@ -839,14 +1006,20 @@ class BartForConditionalGeneration(nn.Module):
 
         self.logits_processor = LogitsProcessor(self.unpadded_vocab_size,
                                                 config.vocab_size)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def forward(
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         intermediate_tensors: Optional[IntermediateTensors] = None,
         *,
         encoder_input_ids: torch.Tensor,
@@ -863,15 +1036,22 @@ class BartForConditionalGeneration(nn.Module):
                 torch.Tensor of *encoder* input token ids.
             encoder_positions
                 torch.Tensor of *encoder* position indices
+<<<<<<< HEAD
             kv_caches:
                 Layer-wise list of KV cache tensors
             attn_metadata:
                 vLLM Attention metadata structure
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Returns:
             Output torch.Tensor
         """
         return self.model(input_ids, positions, encoder_input_ids,
+<<<<<<< HEAD
                           encoder_positions, kv_caches, attn_metadata)
+=======
+                          encoder_positions)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def compute_logits(
         self,
@@ -882,6 +1062,7 @@ class BartForConditionalGeneration(nn.Module):
                                        sampling_metadata)
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: Optional[torch.Tensor],
@@ -890,6 +1071,8 @@ class BartForConditionalGeneration(nn.Module):
         next_tokens = self.sampler(logits, sampling_metadata)
         return next_tokens
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     stacked_params_mapping = {
         "q_proj": {
             "param_name": "qkv_proj",
@@ -923,14 +1106,22 @@ class BartForConditionalGeneration(nn.Module):
     def _rename_stacked_param(
         self,
         name: str,
+<<<<<<< HEAD
     ) -> Tuple[str, Optional[str]]:
+=======
+    ) -> tuple[str, Optional[str]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for key, mapping in self.stacked_params_mapping.items():
             if key in name:
                 name = name.replace(key, mapping["param_name"])
                 return name, mapping["shard_id"]
         return name, None
 
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str, torch.Tensor]]):
+=======
+    def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         model_params_dict = dict(self.model.named_parameters())
         top_params_dict = dict(self.named_parameters())

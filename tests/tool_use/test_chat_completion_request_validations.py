@@ -43,7 +43,12 @@ def test_chat_completion_request_with_no_tools():
     assert request.tool_choice == 'none'
 
 
+<<<<<<< HEAD
 def test_chat_completion_request_with_tool_choice_but_no_tools():
+=======
+@pytest.mark.parametrize('tool_choice', ['auto', 'required'])
+def test_chat_completion_request_with_tool_choice_but_no_tools(tool_choice):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with pytest.raises(ValueError,
                        match="When using `tool_choice`, `tools` must be set."):
         ChatCompletionRequest.model_validate({
@@ -54,7 +59,11 @@ def test_chat_completion_request_with_tool_choice_but_no_tools():
             'model':
             'facebook/opt-125m',
             'tool_choice':
+<<<<<<< HEAD
             'auto'
+=======
+            tool_choice
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         })
 
     with pytest.raises(ValueError,
@@ -67,7 +76,11 @@ def test_chat_completion_request_with_tool_choice_but_no_tools():
             'model':
             'facebook/opt-125m',
             'tool_choice':
+<<<<<<< HEAD
             'auto',
+=======
+            tool_choice,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             'tools':
             None
         })

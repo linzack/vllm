@@ -11,8 +11,13 @@
 
 namespace vllm {
 
+<<<<<<< HEAD
 template <typename scalar_t>
 __global__ void scaled_fp8_quant_kernel(FP8_TYPE* __restrict__ out,
+=======
+template <typename scalar_t, typename fp8_type>
+__global__ void scaled_fp8_quant_kernel(fp8_type* __restrict__ out,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                         const scalar_t* __restrict__ input,
                                         const float* __restrict__ scale,
                                         int64_t num_elems) {
@@ -25,6 +30,7 @@ __global__ void scaled_fp8_quant_kernel(FP8_TYPE* __restrict__ out,
       out, input, inverted_scale, num_elems, tid, blockDim.x * gridDim.x);
 }
 
+<<<<<<< HEAD
 template <typename scalar_t>
 __global__ void dynamic_per_token_scaled_fp8_quant_kernel(
     FP8_TYPE* __restrict__ out, float* __restrict__ scale,
@@ -32,13 +38,24 @@ __global__ void dynamic_per_token_scaled_fp8_quant_kernel(
     const int hidden_size) {
   float const min_scaling_factor = 1.0f / (FP8_E4M3_MAX * 512.f);
 
+=======
+template <typename scalar_t, typename fp8_type>
+__global__ void dynamic_per_token_scaled_fp8_quant_kernel(
+    fp8_type* __restrict__ out, float* __restrict__ scale,
+    scalar_t const* __restrict__ input, float const* __restrict__ scale_ub,
+    const int hidden_size) {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   int const tid = threadIdx.x;
   int const token_idx = blockIdx.x;
 
   // Use int64 to avoid overflowing an int32 when calculating this offset
   int64_t offset = static_cast<int64_t>(token_idx) * hidden_size;
   scalar_t const* __restrict__ token_input = &input[offset];
+<<<<<<< HEAD
   FP8_TYPE* __restrict__ token_output = &out[offset];
+=======
+  fp8_type* __restrict__ token_output = &out[offset];
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
   // For vectorization, token_input and token_output pointers need to be
   // aligned at 8-byte and 4-byte addresses respectively.
@@ -66,7 +83,12 @@ __global__ void dynamic_per_token_scaled_fp8_quant_kernel(
       token_scale = block_absmax_val_maybe;
     }
     // token scale computation
+<<<<<<< HEAD
     token_scale = max(token_scale / FP8_E4M3_MAX, min_scaling_factor);
+=======
+    token_scale = max(token_scale / quant_type_max_v<fp8_type>,
+                      min_scaling_factor<fp8_type>::val());
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     scale[token_idx] = token_scale;
   }
   __syncthreads();
@@ -77,7 +99,11 @@ __global__ void dynamic_per_token_scaled_fp8_quant_kernel(
         token_output, token_input, token_scale, hidden_size, tid, blockDim.x);
   } else {
     for (int i = tid; i < hidden_size; i += blockDim.x) {
+<<<<<<< HEAD
       token_output[i] = scaled_fp8_conversion<false>(
+=======
+      token_output[i] = scaled_fp8_conversion<false, fp8_type>(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
           static_cast<float>(token_input[i]), token_scale);
     }
   }
@@ -96,10 +122,21 @@ void static_scaled_fp8_quant(torch::Tensor& out,          // [..., d]
   const at::cuda::OptionalCUDAGuard device_guard(device_of(input));
   const cudaStream_t stream = at::cuda::getCurrentCUDAStream();
   VLLM_DISPATCH_FLOATING_TYPES(
+<<<<<<< HEAD
       input.scalar_type(), "scaled_fp8_quant_kernel", [&] {
         vllm::scaled_fp8_quant_kernel<scalar_t><<<grid, block, 0, stream>>>(
             out.data_ptr<FP8_TYPE>(), input.data_ptr<scalar_t>(),
             scale.data_ptr<float>(), num_elems);
+=======
+      input.scalar_type(), "scaled_fp8_quant_kernel_scalar_type", [&] {
+        VLLM_DISPATCH_FP8_TYPES(
+            out.scalar_type(), "scaled_fp8_quant_kernel_fp8_type", [&] {
+              vllm::scaled_fp8_quant_kernel<scalar_t, fp8_t>
+                  <<<grid, block, 0, stream>>>(
+                      out.data_ptr<fp8_t>(), input.data_ptr<scalar_t>(),
+                      scale.data_ptr<float>(), num_elems);
+            });
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       });
 }
 
@@ -114,12 +151,27 @@ void dynamic_scaled_fp8_quant(torch::Tensor& out,          // [..., d]
   const at::cuda::OptionalCUDAGuard device_guard(device_of(input));
   const cudaStream_t stream = at::cuda::getCurrentCUDAStream();
   VLLM_DISPATCH_FLOATING_TYPES(
+<<<<<<< HEAD
       input.scalar_type(), "scaled_fp8_quant_kernel", [&] {
         vllm::segmented_max_reduction<scalar_t><<<grid, block, 0, stream>>>(
             scale.data_ptr<float>(), input.data_ptr<scalar_t>(), num_elems);
         vllm::scaled_fp8_quant_kernel<scalar_t><<<grid, block, 0, stream>>>(
             out.data_ptr<FP8_TYPE>(), input.data_ptr<scalar_t>(),
             scale.data_ptr<float>(), num_elems);
+=======
+      input.scalar_type(), "scaled_fp8_quant_kernel_scalar_type", [&] {
+        VLLM_DISPATCH_FP8_TYPES(
+            out.scalar_type(), "scaled_fp8_quant_kernel_fp8_type", [&] {
+              vllm::segmented_max_reduction<scalar_t, fp8_t>
+                  <<<grid, block, 0, stream>>>(scale.data_ptr<float>(),
+                                               input.data_ptr<scalar_t>(),
+                                               num_elems);
+              vllm::scaled_fp8_quant_kernel<scalar_t, fp8_t>
+                  <<<grid, block, 0, stream>>>(
+                      out.data_ptr<fp8_t>(), input.data_ptr<scalar_t>(),
+                      scale.data_ptr<float>(), num_elems);
+            });
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       });
 }
 
@@ -138,6 +190,7 @@ void dynamic_per_token_scaled_fp8_quant(
   const at::cuda::OptionalCUDAGuard device_guard(device_of(input));
   const cudaStream_t stream = at::cuda::getCurrentCUDAStream();
   VLLM_DISPATCH_FLOATING_TYPES(
+<<<<<<< HEAD
       input.scalar_type(), "dynamic_per_token_scaled_fp8_quant_kernel", [&] {
         vllm::dynamic_per_token_scaled_fp8_quant_kernel<scalar_t>
             <<<grid, block, 0, stream>>>(
@@ -145,5 +198,20 @@ void dynamic_per_token_scaled_fp8_quant(
                 input.data_ptr<scalar_t>(),
                 scale_ub.has_value() ? scale_ub->data_ptr<float>() : nullptr,
                 hidden_size);
+=======
+      input.scalar_type(),
+      "dynamic_per_token_scaled_fp8_quant_kernel_scalar_type", [&] {
+        VLLM_DISPATCH_FP8_TYPES(
+            out.scalar_type(),
+            "dynamic_per_token_scaled_fp8_quant_kernel_fp8_type", [&] {
+              vllm::dynamic_per_token_scaled_fp8_quant_kernel<scalar_t, fp8_t>
+                  <<<grid, block, 0, stream>>>(
+                      out.data_ptr<fp8_t>(), scales.data_ptr<float>(),
+                      input.data_ptr<scalar_t>(),
+                      scale_ub.has_value() ? scale_ub->data_ptr<float>()
+                                           : nullptr,
+                      hidden_size);
+            });
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       });
 }

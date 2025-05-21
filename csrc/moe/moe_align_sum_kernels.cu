@@ -326,7 +326,11 @@ void moe_align_block_size(torch::Tensor topk_ids, int64_t num_experts,
   }
 
   if (use_global_memory) {
+<<<<<<< HEAD
     VLLM_DISPATCH_INTEGRAL_TYPES(
+=======
+    VLLM_DISPATCH_INTEGRAL_AND_UNSIGNED_TYPES(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         topk_ids.scalar_type(), "moe_align_block_size_global_mem_kernel", [&] {
           // calc needed amount of shared mem for `tokens_cnts` and `cumsum`
           // tensors
@@ -351,7 +355,11 @@ void moe_align_block_size(torch::Tensor topk_ids, int64_t num_experts,
               cumsum_buffer.data_ptr<int32_t>());
         });
   } else if (use_i16) {
+<<<<<<< HEAD
     VLLM_DISPATCH_INTEGRAL_TYPES(
+=======
+    VLLM_DISPATCH_INTEGRAL_AND_UNSIGNED_TYPES(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         topk_ids.scalar_type(), "moe_align_block_size_kernel", [&] {
           // set dynamic shared mem
           auto kernel =
@@ -366,7 +374,11 @@ void moe_align_block_size(torch::Tensor topk_ids, int64_t num_experts,
               topk_ids.numel());
         });
   } else {
+<<<<<<< HEAD
     VLLM_DISPATCH_INTEGRAL_TYPES(
+=======
+    VLLM_DISPATCH_INTEGRAL_AND_UNSIGNED_TYPES(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         topk_ids.scalar_type(), "moe_align_block_size_kernel", [&] {
           auto kernel =
               vllm::moe::moe_align_block_size_kernel<scalar_t, int32_t>;
@@ -391,7 +403,11 @@ void sgl_moe_align_block_size(torch::Tensor topk_ids, int64_t num_experts,
   TORCH_CHECK(num_experts == 256,
               "sgl_moe_align_block_size kernel only supports deepseek v3.");
 
+<<<<<<< HEAD
   VLLM_DISPATCH_INTEGRAL_TYPES(
+=======
+  VLLM_DISPATCH_INTEGRAL_AND_UNSIGNED_TYPES(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       topk_ids.scalar_type(), "sgl_moe_align_block_size_kernel", [&] {
         // calc needed amount of shared mem for `cumsum` tensors
         auto options_int =

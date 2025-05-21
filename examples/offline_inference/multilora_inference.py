@@ -6,7 +6,11 @@ for offline inference.
 Requires HuggingFace credentials for access to Llama2.
 """
 
+<<<<<<< HEAD
 from typing import List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from huggingface_hub import snapshot_download
 
@@ -16,7 +20,11 @@ from vllm.lora.request import LoRARequest
 
 def create_test_prompts(
         lora_path: str
+<<<<<<< HEAD
 ) -> List[Tuple[str, SamplingParams, Optional[LoRARequest]]]:
+=======
+) -> list[tuple[str, SamplingParams, Optional[LoRARequest]]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Create a list of test prompts with their sampling parameters.
 
     2 requests for base model, 4 requests for the LoRA. We define 2
@@ -56,11 +64,19 @@ def create_test_prompts(
 
 
 def process_requests(engine: LLMEngine,
+<<<<<<< HEAD
                      test_prompts: List[Tuple[str, SamplingParams,
+=======
+                     test_prompts: list[tuple[str, SamplingParams,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                               Optional[LoRARequest]]]):
     """Continuously process a list of prompts and handle the outputs."""
     request_id = 0
 
+<<<<<<< HEAD
+=======
+    print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     while test_prompts or engine.has_unfinished_requests():
         if test_prompts:
             prompt, sampling_params, lora_request = test_prompts.pop(0)
@@ -70,11 +86,19 @@ def process_requests(engine: LLMEngine,
                                lora_request=lora_request)
             request_id += 1
 
+<<<<<<< HEAD
         request_outputs: List[RequestOutput] = engine.step()
+=======
+        request_outputs: list[RequestOutput] = engine.step()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for request_output in request_outputs:
             if request_output.finished:
                 print(request_output)
+<<<<<<< HEAD
+=======
+                print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def initialize_engine() -> LLMEngine:

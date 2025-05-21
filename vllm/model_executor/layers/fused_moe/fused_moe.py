@@ -3,6 +3,7 @@
 import functools
 import json
 import os
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
@@ -17,10 +18,49 @@ from vllm.model_executor.layers.quantization.utils.fp8_utils import (
 from vllm.platforms import current_platform
 from vllm.utils import direct_register_custom_op
 
+=======
+from typing import Any, Callable, Optional
+
+import torch
+
+import vllm.envs as envs
+import vllm.model_executor.layers.fused_moe.modular_kernel as mk
+from vllm import _custom_ops as ops
+from vllm.logger import init_logger
+from vllm.model_executor.layers.fused_moe.deep_gemm_moe import (
+    _valid_deep_gemm, deep_gemm_moe_fp8)
+from vllm.model_executor.layers.fused_moe.moe_align_block_size import (
+    moe_align_block_size)
+from vllm.model_executor.layers.fused_moe.prepare_finalize import (
+    MoEPrepareAndFinalizeNoEP)
+from vllm.model_executor.layers.fused_moe.utils import (
+    _resize_cache, moe_kernel_quantize_input)
+from vllm.platforms import current_platform
+from vllm.triton_utils import tl, triton
+from vllm.utils import direct_register_custom_op
+
+from .rocm_aiter_fused_moe import is_rocm_aiter_moe_enabled
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 logger = init_logger(__name__)
 
 
 @triton.jit
+<<<<<<< HEAD
+=======
+def write_zeros_to_output(c_ptr, stride_cm, stride_cn, pid_n, N, offs_token,
+                          token_mask, BLOCK_SIZE_M, BLOCK_SIZE_N,
+                          compute_type):
+    accumulator = tl.zeros((BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=compute_type)
+    offs_cn = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N)
+    c_ptrs = c_ptr + stride_cm * offs_token[:, None] + stride_cn * offs_cn[
+        None, :]
+    c_mask = token_mask[:, None] & (offs_cn[None, :] < N)
+    tl.store(c_ptrs, accumulator, mask=c_mask)
+
+
+@triton.jit
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def fused_moe_kernel_gptq_awq(
         # Pointers to matrices
         a_ptr,
@@ -120,17 +160,37 @@ def fused_moe_kernel_gptq_awq(
     offs_token = tl.load(sorted_token_ids_ptr + offs_token_id)
     token_mask = offs_token < num_valid_tokens
 
+<<<<<<< HEAD
+=======
+    off_experts = tl.load(expert_ids_ptr + pid_m).to(tl.int64)
+    if off_experts == -1:
+        # -----------------------------------------------------------
+        # Write back zeros to the output when the expert is not
+        # in the current expert parallel rank.
+        write_zeros_to_output(c_ptr, stride_cm, stride_cn, pid_n, N,
+                              offs_token, token_mask, BLOCK_SIZE_M,
+                              BLOCK_SIZE_N, compute_type)
+        return
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     offs_bn = (pid_n * BLOCK_SIZE_N +
                tl.arange(0, BLOCK_SIZE_N).to(tl.int64)) % N
     offs_k = tl.arange(0, BLOCK_SIZE_K)
     a_ptrs = a_ptr + (offs_token[:, None] // top_k * stride_am +
                       offs_k[None, :] * stride_ak)
 
+<<<<<<< HEAD
     off_experts = tl.load(expert_ids_ptr + pid_m).to(tl.int64)
 
     if use_int4_w4a16:
         b_ptrs = b_ptr + off_experts * stride_be + \
             (offs_k[:, None] // 2) * stride_bk + offs_bn[None, :] * stride_bn
+=======
+    if use_int4_w4a16:
+        b_ptrs = b_ptr + off_experts * stride_be + \
+            (offs_k[:, None] // 2) * stride_bk + offs_bn[None, :] * \
+                stride_bn
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         b_shifter = (offs_k[:, None] % 2) * 4
     elif use_int8_w8a16:
         b_ptrs = b_ptr + off_experts * stride_be + \
@@ -170,7 +230,12 @@ def fused_moe_kernel_gptq_awq(
 
         b_scale_ptrs = b_scale_ptr + off_experts * stride_bse + \
             offs_bn[None, :] * stride_bsn + \
+<<<<<<< HEAD
             ((offs_k[:, None] + BLOCK_SIZE_K * k) // group_size) * stride_bsk
+=======
+            ((offs_k[:, None] + BLOCK_SIZE_K * k) // group_size) * \
+                stride_bsk
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         b_scale = tl.load(b_scale_ptrs, mask=k_mask, other=k_other)
         b_scale = b_scale.to(tl.float32)
 
@@ -222,6 +287,7 @@ def fused_moe_kernel_gptq_awq(
 
 @triton.jit
 def fused_moe_kernel(
+<<<<<<< HEAD
         # Pointers to matrices
         a_ptr,
         b_ptr,
@@ -266,6 +332,55 @@ def fused_moe_kernel(
         compute_type: tl.constexpr,
         use_fp8_w8a8: tl.constexpr,
         use_int8_w8a16: tl.constexpr):
+=======
+    # Pointers to matrices
+    a_ptr,
+    b_ptr,
+    c_ptr,
+    a_scale_ptr,
+    b_scale_ptr,
+    topk_weights_ptr,
+    sorted_token_ids_ptr,
+    expert_ids_ptr,
+    num_tokens_post_padded_ptr,
+    # Matrix dimensions
+    N,
+    K,
+    EM,
+    num_valid_tokens,
+    # The stride variables represent how much to increase the ptr by when
+    # moving by 1 element in a particular dimension. E.g. `stride_am` is
+    # how much to increase `a_ptr` by to get the element one row down
+    # (A has M rows).
+    stride_am,
+    stride_ak,
+    stride_be,
+    stride_bk,
+    stride_bn,
+    stride_cm,
+    stride_cn,
+    stride_asm,
+    stride_ask,
+    stride_bse,
+    stride_bsk,
+    stride_bsn,
+    # Block size for block-wise quantization
+    group_n: tl.constexpr,
+    group_k: tl.constexpr,
+    # Meta-parameters
+    BLOCK_SIZE_M: tl.constexpr,
+    BLOCK_SIZE_N: tl.constexpr,
+    BLOCK_SIZE_K: tl.constexpr,
+    GROUP_SIZE_M: tl.constexpr,
+    MUL_ROUTED_WEIGHT: tl.constexpr,
+    top_k: tl.constexpr,
+    compute_type: tl.constexpr,
+    use_fp8_w8a8: tl.constexpr,
+    use_int8_w8a8: tl.constexpr,
+    use_int8_w8a16: tl.constexpr,
+    per_channel_quant: tl.constexpr,
+):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Implements the fused computation for a Mixture of Experts (MOE) using
     token and expert matrices.
@@ -319,13 +434,29 @@ def fused_moe_kernel(
     offs_token = tl.load(sorted_token_ids_ptr + offs_token_id)
     token_mask = offs_token < num_valid_tokens
 
+<<<<<<< HEAD
+=======
+    off_experts = tl.load(expert_ids_ptr + pid_m).to(tl.int64)
+    if off_experts == -1:
+        # -----------------------------------------------------------
+        # Write back zeros to the output when the expert is not
+        # in the current expert parallel rank.
+        write_zeros_to_output(c_ptr, stride_cm, stride_cn, pid_n, N,
+                              offs_token, token_mask, BLOCK_SIZE_M,
+                              BLOCK_SIZE_N, compute_type)
+        return
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     offs_bn = (pid_n * BLOCK_SIZE_N +
                tl.arange(0, BLOCK_SIZE_N).to(tl.int64)) % N
     offs_k = tl.arange(0, BLOCK_SIZE_K)
     a_ptrs = a_ptr + (offs_token[:, None] // top_k * stride_am +
                       offs_k[None, :] * stride_ak)
 
+<<<<<<< HEAD
     off_experts = tl.load(expert_ids_ptr + pid_m).to(tl.int64)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     b_ptrs = b_ptr + off_experts * stride_be + (offs_k[:, None] * stride_bk +
                                                 offs_bn[None, :] * stride_bn)
     if use_int8_w8a16:
@@ -333,12 +464,30 @@ def fused_moe_kernel(
             None, :] * stride_bsn
         b_scale = tl.load(b_scale_ptrs)
 
+<<<<<<< HEAD
     if use_fp8_w8a8:
+=======
+    if use_fp8_w8a8 or use_int8_w8a8:
+        # block-wise
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if group_k > 0 and group_n > 0:
             a_scale_ptrs = a_scale_ptr + (offs_token // top_k) * stride_asm
             offs_bsn = offs_bn // group_n
             b_scale_ptrs = (b_scale_ptr + off_experts * stride_bse +
                             offs_bsn * stride_bsn)
+<<<<<<< HEAD
+=======
+        # channel-wise
+        elif per_channel_quant:
+            b_scale_ptrs = b_scale_ptr + off_experts * stride_bse + offs_bn[
+                None, :] * stride_bsn
+            b_scale = tl.load(b_scale_ptrs)
+            # Load per-token scale for activations
+            a_scale_ptrs = a_scale_ptr + (offs_token // top_k) * stride_asm
+            a_scale = tl.load(a_scale_ptrs, mask=token_mask, other=0.0)[:,
+                                                                        None]
+        # tensor-wise
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             a_scale = tl.load(a_scale_ptr)
             b_scale = tl.load(b_scale_ptr + off_experts)
@@ -349,7 +498,10 @@ def fused_moe_kernel(
     # of fp32 values for higher accuracy.
     # `accumulator` will be converted back to fp16 after the loop.
     accumulator = tl.zeros((BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=tl.float32)
+<<<<<<< HEAD
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for k in range(0, tl.cdiv(K, BLOCK_SIZE_K)):
         # Load the next block of A and B, generate a mask by checking the
         # K dimension.
@@ -363,7 +515,11 @@ def fused_moe_kernel(
         # We accumulate along the K dimension.
         if use_int8_w8a16:
             accumulator = tl.dot(a, b.to(compute_type), acc=accumulator)
+<<<<<<< HEAD
         elif use_fp8_w8a8:
+=======
+        elif use_fp8_w8a8 or use_int8_w8a8:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if group_k > 0 and group_n > 0:
                 k_start = k * BLOCK_SIZE_K
                 offs_ks = k_start // group_k
@@ -375,7 +531,15 @@ def fused_moe_kernel(
                 accumulator += tl.dot(a, b) * a_scale[:,
                                                       None] * b_scale[None, :]
             else:
+<<<<<<< HEAD
                 accumulator = tl.dot(a, b, acc=accumulator)
+=======
+                if use_fp8_w8a8:
+                    # acc used to enable fp8_fast_accum
+                    accumulator = tl.dot(a, b, acc=accumulator)
+                else:
+                    accumulator += tl.dot(a, b)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             accumulator += tl.dot(a, b)
         # Advance the ptrs to the next K block.
@@ -389,7 +553,11 @@ def fused_moe_kernel(
         accumulator = accumulator * moe_weight[:, None]
     if use_int8_w8a16:
         accumulator = (accumulator * b_scale).to(compute_type)
+<<<<<<< HEAD
     elif use_fp8_w8a8:
+=======
+    elif use_fp8_w8a8 or use_int8_w8a8:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if group_k > 0 and group_n > 0:
             accumulator = accumulator.to(compute_type)
         else:
@@ -405,6 +573,7 @@ def fused_moe_kernel(
     tl.store(c_ptrs, accumulator, mask=c_mask)
 
 
+<<<<<<< HEAD
 def ceil_div(a, b):
     return (a + b - 1) // b
 
@@ -621,19 +790,26 @@ def moe_align_block_size(
     return sorted_ids, expert_ids, num_tokens_post_pad
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def invoke_fused_moe_kernel(A: torch.Tensor,
                             B: torch.Tensor,
                             C: torch.Tensor,
                             A_scale: Optional[torch.Tensor],
                             B_scale: Optional[torch.Tensor],
                             B_zp: Optional[torch.Tensor],
+<<<<<<< HEAD
                             topk_weights: torch.Tensor,
                             topk_ids: torch.Tensor,
+=======
+                            topk_weights: Optional[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                             sorted_token_ids: torch.Tensor,
                             expert_ids: torch.Tensor,
                             num_tokens_post_padded: torch.Tensor,
                             mul_routed_weight: bool,
                             top_k: int,
+<<<<<<< HEAD
                             config: Dict[str, Any],
                             compute_type: tl.dtype,
                             use_fp8_w8a8: bool,
@@ -654,6 +830,27 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
             assert triton.cdiv(A.shape[-1], block_k) == A_scale.shape[-1]
             assert triton.cdiv(B.shape[-2], block_n) == B_scale.shape[-2]
             assert triton.cdiv(B.shape[-1], block_k) == B_scale.shape[-1]
+=======
+                            config: dict[str, Any],
+                            compute_type: tl.dtype,
+                            use_fp8_w8a8: bool,
+                            use_int8_w8a8: bool,
+                            use_int8_w8a16: bool,
+                            use_int4_w4a16: bool,
+                            per_channel_quant: bool,
+                            block_shape: Optional[list[int]] = None) -> None:
+    assert topk_weights is not None or not mul_routed_weight
+    assert topk_weights is None or topk_weights.stride(1) == 1
+    assert sorted_token_ids.stride(0) == 1
+
+    if use_fp8_w8a8 or use_int8_w8a8:
+        assert B_scale is not None
+        assert (block_shape is None or triton.cdiv(B.shape[-2], block_shape[0])
+                == B_scale.shape[-2])
+        assert (block_shape is None or triton.cdiv(B.shape[-1], block_shape[1])
+                == B_scale.shape[-1])
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     elif use_int8_w8a16 or use_int4_w4a16:
         assert B_scale is not None
         assert block_shape is None or block_shape[0] == 0
@@ -661,6 +858,12 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
         assert A_scale is None
         assert B_scale is None
 
+<<<<<<< HEAD
+=======
+    M = A.shape[0]
+    num_tokens = M * top_k
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     EM = sorted_token_ids.shape[0]
     if A.shape[0] < config["BLOCK_SIZE_M"]:
         # optimize for small batch_size.
@@ -677,6 +880,36 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
         assert B_scale is not None and B_scale.ndim == 3
         assert B_zp is None or B_zp.ndim == 3
 
+<<<<<<< HEAD
+=======
+        use_moe_wna16_cuda = should_moe_wna16_use_cuda(
+            num_valid_tokens=num_tokens,
+            group_size=block_shape[1],
+            num_experts=B.shape[0],
+            bit=4 if use_int4_w4a16 else 8)
+        config = config.copy()
+        config.update(
+            get_moe_wna16_block_config(config=config,
+                                       use_moe_wna16_cuda=use_moe_wna16_cuda,
+                                       num_valid_tokens=num_tokens,
+                                       size_k=A.shape[1],
+                                       size_n=B.shape[1],
+                                       num_experts=B.shape[1],
+                                       group_size=block_shape[1],
+                                       real_top_k=top_k,
+                                       block_size_m=config["BLOCK_SIZE_M"]))
+
+        if use_moe_wna16_cuda:
+            bit = 4 if use_int4_w4a16 else 8
+            ops.moe_wna16_gemm(A, C, B, B_scale, B_zp,
+                               topk_weights if mul_routed_weight else None,
+                               sorted_token_ids, expert_ids,
+                               num_tokens_post_padded, top_k,
+                               config["BLOCK_SIZE_M"], config["BLOCK_SIZE_N"],
+                               config["BLOCK_SIZE_K"], bit)
+            return
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         fused_moe_kernel_gptq_awq[grid](
             A,
             B,
@@ -690,7 +923,11 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
             B.shape[1],
             A.shape[1],
             EM,
+<<<<<<< HEAD
             topk_ids.numel(),
+=======
+            num_tokens,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             A.stride(0),
             A.stride(1),
             B.stride(0),
@@ -714,8 +951,17 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
             use_int8_w8a16=use_int8_w8a16,
             **config,
         )
+<<<<<<< HEAD
 
     else:
+=======
+    else:
+        config = config.copy()
+        BLOCK_SIZE_K = config.pop("BLOCK_SIZE_K")
+        if block_shape is not None:
+            BLOCK_SIZE_K = min(BLOCK_SIZE_K, min(block_shape[0],
+                                                 block_shape[1]))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         fused_moe_kernel[grid](
             A,
             B,
@@ -727,9 +973,15 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
             expert_ids,
             num_tokens_post_padded,
             B.shape[1],
+<<<<<<< HEAD
             A.shape[1],
             EM,
             topk_ids.numel(),
+=======
+            B.shape[2],
+            EM,
+            num_tokens,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             A.stride(0),
             A.stride(1),
             B.stride(0),
@@ -753,7 +1005,14 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
             top_k=top_k,
             compute_type=compute_type,
             use_fp8_w8a8=use_fp8_w8a8,
+<<<<<<< HEAD
             use_int8_w8a16=use_int8_w8a16,
+=======
+            use_int8_w8a8=use_int8_w8a8,
+            use_int8_w8a16=use_int8_w8a16,
+            per_channel_quant=per_channel_quant,
+            BLOCK_SIZE_K=BLOCK_SIZE_K,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             **config,
         )
 
@@ -762,7 +1021,11 @@ def invoke_fused_moe_kernel(A: torch.Tensor,
 def get_config_file_name(E: int,
                          N: int,
                          dtype: Optional[str],
+<<<<<<< HEAD
                          block_shape: Optional[List[int]] = None) -> str:
+=======
+                         block_shape: Optional[list[int]] = None) -> str:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     device_name = current_platform.get_device_name().replace(" ", "_")
     dtype_selector = "" if not dtype else f",dtype={dtype}"
     block_shape_selector = ("" if not block_shape or not all(block_shape) else
@@ -778,7 +1041,11 @@ def get_moe_configs(
     dtype: Optional[str],
     block_n: Optional[int] = None,
     block_k: Optional[int] = None,
+<<<<<<< HEAD
 ) -> Optional[Dict[int, Any]]:
+=======
+) -> Optional[dict[int, Any]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Return optimized configurations for the fused MoE kernel.
 
@@ -810,6 +1077,73 @@ def get_moe_configs(
     return None
 
 
+<<<<<<< HEAD
+=======
+def get_moe_wna16_block_config(config: dict[str,
+                                            int], use_moe_wna16_cuda: bool,
+                               num_valid_tokens: int, size_k: int, size_n: int,
+                               num_experts: int, group_size: int,
+                               real_top_k: int, block_size_m: int):
+    if "BLOCK_SIZE_N" in config and "BLOCK_SIZE_K" in config:
+        # optimal block config is set
+        return {}
+    if not use_moe_wna16_cuda:
+        # triton moe wna16 kernel
+        if num_valid_tokens // real_top_k == 1:
+            # if bs=1, use a smaller BLOCK_SIZE_N
+            return {"BLOCK_SIZE_N": 32, "BLOCK_SIZE_K": 64}
+        else:
+            return {"BLOCK_SIZE_N": 64, "BLOCK_SIZE_K": 32}
+    else:
+        # cuda moe wna16 kernel
+        # set default block_size 128, and increase them when num_blocks
+        # is too large.
+        block_size_n = 128
+        block_size_k = 128
+        if block_size_k <= group_size:
+            block_size_k = group_size
+
+        num_n_blocks = size_k // block_size_k
+        num_k_blocks = size_n // block_size_k
+        num_m_blocks = (num_valid_tokens + block_size_m - 1) / block_size_m + \
+            num_experts
+        if num_valid_tokens // real_top_k <= block_size_m:
+            num_m_blocks = min(num_m_blocks, num_valid_tokens)
+        num_blocks = num_m_blocks * num_n_blocks * num_k_blocks
+
+        if size_k % 256 == 0 and num_blocks >= 256 and \
+                block_size_k < 256:
+            block_size_k = 256
+            num_blocks = num_blocks // (256 // block_size_k)
+
+        if num_m_blocks <= 16 and size_k % (block_size_k * 2) == 0 and \
+                size_k % (block_size_k * 2) == 0 and block_size_k <= 512 and \
+                num_blocks >= 512:
+            block_size_k = block_size_k * 2
+            num_blocks = num_blocks // 2
+
+        if num_blocks > 1024:
+            block_size_n = 256
+            num_n_blocks = num_n_blocks // 2
+            num_blocks = num_blocks // 2
+
+        if size_n <= 1024 and num_blocks >= 1024:
+            # The kernel performance got much better with BLOCK_SIZE_N=1024
+            # when num_blocks is large, event when N is small.
+            # Not sure why, maybe it force the CUDA SM process only one block
+            # at the same time.
+            block_size_n = 1024
+
+        return {"BLOCK_SIZE_N": block_size_n, "BLOCK_SIZE_K": block_size_k}
+
+
+def should_moe_wna16_use_cuda(num_valid_tokens: int, group_size: int,
+                              num_experts: int, bit: int):
+    return bit == 4 and group_size in [32, 64, 128] and \
+        num_valid_tokens / num_experts <= 6
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def get_default_config(
     M: int,
     E: int,
@@ -818,18 +1152,59 @@ def get_default_config(
     topk: int,
     dtype: Optional[str],
     is_marlin: bool,
+<<<<<<< HEAD
     block_shape: Optional[List[int]] = None,
 ) -> Dict[str, int]:
     if dtype == "fp8_w8a8" and block_shape is not None:
         # Block-wise quant: BLOCK_SIZE_N must be divisible by block_shape[0]
         # BLOCK_SIZE_K must be divisible by block_shape[1]
+=======
+    block_shape: Optional[list[int]] = None,
+) -> dict[str, int]:
+    if dtype == "fp8_w8a8" and block_shape is not None:
+        # Block-wise quant: BLOCK_SIZE_N must be divisible by block_shape[0]
+        # BLOCK_SIZE_K must be divisible by block_shape[1]
+        # num_stages=3 can cause triton.runtime.errors.OutOfResources
+        # on ROCm, set it to 2 instead.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         config = {
             "BLOCK_SIZE_M": 64,
             "BLOCK_SIZE_N": block_shape[0],
             "BLOCK_SIZE_K": block_shape[1],
             "GROUP_SIZE_M": 32,
             "num_warps": 4,
+<<<<<<< HEAD
             "num_stages": 3,
+=======
+            "num_stages": 3 if not current_platform.is_rocm() else 2,
+        }
+    elif dtype in ["int4_w4a16", "int8_w8a16"] and block_shape is not None:
+        # moe wna16 kernels
+        # only set BLOCK_SIZE_M
+        # BLOCK_SIZE_N and BLOCK_SIZE_K would be set later
+        bit = 4 if dtype == "int4_w4a16" else 8
+        use_moe_wna16_cuda = should_moe_wna16_use_cuda(M * topk,
+                                                       block_shape[1], E, bit)
+        if use_moe_wna16_cuda:
+            config = {"BLOCK_SIZE_M": min(16, M)}
+        elif M <= 20:
+            config = {"BLOCK_SIZE_M": 16, "GROUP_SIZE_M": 1}
+        elif M <= 40:
+            config = {"BLOCK_SIZE_M": 32, "GROUP_SIZE_M": 1}
+        else:
+            config = {"BLOCK_SIZE_M": 64, "GROUP_SIZE_M": 1}
+    elif is_marlin:
+        for block_size_m in [8, 16, 32, 48, 64]:
+            if M * topk / E / block_size_m < 0.9:
+                break
+        return {"BLOCK_SIZE_M": block_size_m}
+    elif M <= E:
+        config = {
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "BLOCK_SIZE_K": 64,
+            "GROUP_SIZE_M": 1,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         }
     else:
         config = {
@@ -838,6 +1213,7 @@ def get_default_config(
             "BLOCK_SIZE_K": 32,
             "GROUP_SIZE_M": 8,
         }
+<<<<<<< HEAD
         # A heuristic: fused marlin works faster with this config for small M
         if M <= E or (is_marlin and M <= 32):
             config = {
@@ -846,17 +1222,28 @@ def get_default_config(
                 "BLOCK_SIZE_K": 64,
                 "GROUP_SIZE_M": 1,
             }
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return config
 
 
 def try_get_optimal_moe_config(
+<<<<<<< HEAD
     w1_shape: Tuple[int, ...],
     w2_shape: Tuple[int, ...],
+=======
+    w1_shape: tuple[int, ...],
+    w2_shape: tuple[int, ...],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     top_k: int,
     dtype: Optional[str],
     M: int,
     is_marlin: bool = False,
+<<<<<<< HEAD
     block_shape: Optional[List[int]] = None,
+=======
+    block_shape: Optional[list[int]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ):
     from vllm.model_executor.layers.fused_moe import get_config
     override_config = get_config()
@@ -865,6 +1252,11 @@ def try_get_optimal_moe_config(
     else:
         # First try to load optimal config from the file
         E, _, N = w2_shape
+<<<<<<< HEAD
+=======
+        if dtype == "int4_w4a16":
+            N = N * 2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         block_n = block_shape[0] if block_shape else 0
         block_k = block_shape[1] if block_shape else 0
         configs = get_moe_configs(E, N, dtype, block_n, block_k)
@@ -880,12 +1272,43 @@ def try_get_optimal_moe_config(
     return config
 
 
+<<<<<<< HEAD
+=======
+def vllm_topk_softmax(topk_weights: torch.Tensor, topk_indices: torch.Tensor,
+                      token_expert_indices: torch.Tensor,
+                      gating_output: torch.Tensor,
+                      renormalize: bool) -> tuple[torch.Tensor, ...]:
+    ops.topk_softmax(
+        topk_weights,
+        topk_indices,
+        token_expert_indices,
+        gating_output,
+    )
+    if renormalize:
+        topk_weights = topk_weights / topk_weights.sum(dim=-1, keepdim=True)
+
+    return topk_weights, topk_indices
+
+
+def dispatch_topk_func() -> Callable[..., tuple[torch.Tensor, ...]]:
+    if is_rocm_aiter_moe_enabled():
+        from .rocm_aiter_fused_moe import rocm_aiter_topk_softmax
+        return rocm_aiter_topk_softmax
+    return vllm_topk_softmax
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def fused_topk(
     hidden_states: torch.Tensor,
     gating_output: torch.Tensor,
     topk: int,
     renormalize: bool,
+<<<<<<< HEAD
 ):
+=======
+    indices_type: Optional[torch.dtype] = None,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert hidden_states.shape[0] == gating_output.shape[0], (
         "Number of tokens mismatch")
 
@@ -895,6 +1318,7 @@ def fused_topk(
                                topk,
                                dtype=torch.float32,
                                device=hidden_states.device)
+<<<<<<< HEAD
     topk_ids = torch.empty(M,
                            topk,
                            dtype=torch.int32,
@@ -916,10 +1340,31 @@ def fused_topk(
         topk_weights = topk_weights / topk_weights.sum(dim=-1, keepdim=True)
 
     return topk_weights, topk_ids
+=======
+    topk_ids = torch.empty(
+        M,
+        topk,
+        dtype=torch.int32 if indices_type is None else indices_type,
+        device=hidden_states.device)
+    token_expert_indices = torch.empty(M,
+                                       topk,
+                                       dtype=torch.int32,
+                                       device=hidden_states.device)
+
+    gating_output_float = gating_output.float()  # TODO(woosuk): Optimize this.
+
+    topk_func = dispatch_topk_func()
+    topk_weights, topk_ids = topk_func(topk_weights, topk_ids,
+                                       token_expert_indices,
+                                       gating_output_float, renormalize)
+
+    return topk_weights, topk_ids, token_expert_indices
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 # This is used by the Deepseek-V2 and Deepseek-V3 model
 @torch.compile(dynamic=True, backend=current_platform.simple_compile_backend)
+<<<<<<< HEAD
 def grouped_topk(hidden_states: torch.Tensor,
                  gating_output: torch.Tensor,
                  topk: int,
@@ -928,6 +1373,18 @@ def grouped_topk(hidden_states: torch.Tensor,
                  topk_group: int = 0,
                  scoring_func: str = "softmax",
                  e_score_correction_bias: Optional[torch.Tensor] = None):
+=======
+def grouped_topk(
+    hidden_states: torch.Tensor,
+    gating_output: torch.Tensor,
+    topk: int,
+    renormalize: bool,
+    num_expert_group: int = 0,
+    topk_group: int = 0,
+    scoring_func: str = "softmax",
+    e_score_correction_bias: Optional[torch.Tensor] = None
+) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     assert hidden_states.shape[0] == gating_output.shape[0], (
         "Number of tokens mismatch")
@@ -976,16 +1433,28 @@ def grouped_topk(hidden_states: torch.Tensor,
     return topk_weights.to(torch.float32), topk_ids.to(torch.int32)
 
 
+<<<<<<< HEAD
 def get_config_dtype_str(dtype: torch.dtype,
                          use_int4_w4a16: Optional[bool] = False,
                          use_int8_w8a16: Optional[bool] = False,
                          use_fp8_w8a8: Optional[bool] = False):
+=======
+def get_config_dtype_str(
+        dtype: torch.dtype,
+        use_int4_w4a16: Optional[bool] = False,
+        use_int8_w8a16: Optional[bool] = False,
+        use_fp8_w8a8: Optional[bool] = False) -> Optional[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if use_fp8_w8a8:
         return "fp8_w8a8"
     elif use_int8_w8a16:
         return "int8_w8a16"
     elif use_int4_w4a16:
+<<<<<<< HEAD
         return "int4_w8a16"
+=======
+        return "int4_w4a16"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     elif dtype == torch.float:
         # avoiding cases where kernel fails when float32 MoE
         # use fp16/bfloat16 configs
@@ -993,24 +1462,63 @@ def get_config_dtype_str(dtype: torch.dtype,
     return None
 
 
+<<<<<<< HEAD
+=======
+# TODO (bnell): use scalar_type instead of bools?
+def get_config_qtype(
+    use_fp8_w8a8: bool,
+    use_int8_w8a8: bool,
+    use_int8_w8a16: bool,
+    use_int4_w4a16: bool,
+) -> Optional[torch.dtype]:
+    if use_fp8_w8a8:
+        return torch.float8_e4m3fn
+    elif use_int8_w8a8:
+        return torch.int8
+    return None
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def inplace_fused_experts(hidden_states: torch.Tensor,
                           w1: torch.Tensor,
                           w2: torch.Tensor,
                           topk_weights: torch.Tensor,
                           topk_ids: torch.Tensor,
+<<<<<<< HEAD
                           use_fp8_w8a8: bool = False,
                           use_int8_w8a16: bool = False,
                           use_int4_w4a16: bool = False,
+=======
+                          activation: str = "silu",
+                          apply_router_weight_on_input: bool = False,
+                          use_fp8_w8a8: bool = False,
+                          use_int8_w8a8: bool = False,
+                          use_int8_w8a16: bool = False,
+                          use_int4_w4a16: bool = False,
+                          per_channel_quant: bool = False,
+                          global_num_experts: int = -1,
+                          expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                           w1_scale: Optional[torch.Tensor] = None,
                           w2_scale: Optional[torch.Tensor] = None,
                           w1_zp: Optional[torch.Tensor] = None,
                           w2_zp: Optional[torch.Tensor] = None,
                           a1_scale: Optional[torch.Tensor] = None,
                           a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
                           block_shape: Optional[List[int]] = None) -> None:
     fused_experts_impl(hidden_states, w1, w2, topk_weights, topk_ids, True,
                        use_fp8_w8a8, use_int8_w8a16, use_int4_w4a16, w1_scale,
                        w2_scale, w1_zp, w2_zp, a1_scale, a2_scale, block_shape)
+=======
+                          block_shape: Optional[list[int]] = None) -> None:
+    fused_experts_impl(hidden_states, w1, w2, topk_weights, topk_ids, True,
+                       activation, apply_router_weight_on_input, use_fp8_w8a8,
+                       use_int8_w8a8, use_int8_w8a16, use_int4_w4a16,
+                       per_channel_quant, global_num_experts, expert_map,
+                       w1_scale, w2_scale, w1_zp, w2_zp, a1_scale, a2_scale,
+                       block_shape)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def inplace_fused_experts_fake(
@@ -1019,16 +1527,32 @@ def inplace_fused_experts_fake(
         w2: torch.Tensor,
         topk_weights: torch.Tensor,
         topk_ids: torch.Tensor,
+<<<<<<< HEAD
         use_fp8_w8a8: bool = False,
         use_int8_w8a16: bool = False,
         use_int4_w4a16: bool = False,
+=======
+        activation: str = "silu",
+        apply_router_weight_on_input: bool = False,
+        use_fp8_w8a8: bool = False,
+        use_int8_w8a8: bool = False,
+        use_int8_w8a16: bool = False,
+        use_int4_w4a16: bool = False,
+        per_channel_quant: bool = False,
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         w1_scale: Optional[torch.Tensor] = None,
         w2_scale: Optional[torch.Tensor] = None,
         w1_zp: Optional[torch.Tensor] = None,
         w2_zp: Optional[torch.Tensor] = None,
         a1_scale: Optional[torch.Tensor] = None,
         a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
         block_shape: Optional[List[int]] = None) -> None:
+=======
+        block_shape: Optional[list[int]] = None) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     pass
 
 
@@ -1037,6 +1561,10 @@ direct_register_custom_op(
     op_func=inplace_fused_experts,
     mutates_args=["hidden_states"],
     fake_impl=inplace_fused_experts_fake,
+<<<<<<< HEAD
+=======
+    tags=(torch.Tag.needs_fixed_stride_order, ),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 )
 
 
@@ -1046,20 +1574,43 @@ def outplace_fused_experts(
         w2: torch.Tensor,
         topk_weights: torch.Tensor,
         topk_ids: torch.Tensor,
+<<<<<<< HEAD
         use_fp8_w8a8: bool = False,
         use_int8_w8a16: bool = False,
         use_int4_w4a16: bool = False,
+=======
+        activation: str = "silu",
+        apply_router_weight_on_input: bool = False,
+        use_fp8_w8a8: bool = False,
+        use_int8_w8a8: bool = False,
+        use_int8_w8a16: bool = False,
+        use_int4_w4a16: bool = False,
+        per_channel_quant: bool = False,
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         w1_scale: Optional[torch.Tensor] = None,
         w2_scale: Optional[torch.Tensor] = None,
         w1_zp: Optional[torch.Tensor] = None,
         w2_zp: Optional[torch.Tensor] = None,
         a1_scale: Optional[torch.Tensor] = None,
         a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
         block_shape: Optional[List[int]] = None) -> torch.Tensor:
     return fused_experts_impl(hidden_states, w1, w2, topk_weights, topk_ids,
                               False, use_fp8_w8a8, use_int8_w8a16,
                               use_int4_w4a16, w1_scale, w2_scale, w1_zp, w2_zp,
                               a1_scale, a2_scale, block_shape)
+=======
+        block_shape: Optional[list[int]] = None) -> torch.Tensor:
+    return fused_experts_impl(hidden_states, w1, w2, topk_weights, topk_ids,
+                              False, activation, apply_router_weight_on_input,
+                              use_fp8_w8a8, use_int8_w8a8, use_int8_w8a16,
+                              use_int4_w4a16, per_channel_quant,
+                              global_num_experts, expert_map, w1_scale,
+                              w2_scale, w1_zp, w2_zp, a1_scale, a2_scale,
+                              block_shape)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def outplace_fused_experts_fake(
@@ -1068,16 +1619,31 @@ def outplace_fused_experts_fake(
         w2: torch.Tensor,
         topk_weights: torch.Tensor,
         topk_ids: torch.Tensor,
+<<<<<<< HEAD
         use_fp8_w8a8: bool = False,
         use_int8_w8a16: bool = False,
         use_int4_w4a16: bool = False,
+=======
+        activation: str = "silu",
+        use_fp8_w8a8: bool = False,
+        use_int8_w8a8: bool = False,
+        use_int8_w8a16: bool = False,
+        use_int4_w4a16: bool = False,
+        per_channel_quant: bool = False,
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         w1_scale: Optional[torch.Tensor] = None,
         w2_scale: Optional[torch.Tensor] = None,
         w1_zp: Optional[torch.Tensor] = None,
         w2_zp: Optional[torch.Tensor] = None,
         a1_scale: Optional[torch.Tensor] = None,
         a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
         block_shape: Optional[List[int]] = None) -> torch.Tensor:
+=======
+        block_shape: Optional[list[int]] = None) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return torch.empty_like(hidden_states)
 
 
@@ -1086,24 +1652,60 @@ direct_register_custom_op(
     op_func=outplace_fused_experts,
     mutates_args=[],
     fake_impl=outplace_fused_experts_fake,
+<<<<<<< HEAD
 )
 
 
+=======
+    tags=(torch.Tag.needs_fixed_stride_order, ),
+)
+
+
+def torch_vllm_inplace_fused_experts(**kwargs) -> torch.Tensor:
+    torch.ops.vllm.inplace_fused_experts(**kwargs)
+    hidden_states = kwargs['hidden_states']
+    return hidden_states
+
+
+def torch_vllm_outplace_fused_experts(**kwargs) -> torch.Tensor:
+    return torch.ops.vllm.outplace_fused_experts(**kwargs)
+
+
+def dispatch_fused_experts_func(inplace: bool) -> Callable[..., torch.Tensor]:
+    if inplace:
+        return torch_vllm_inplace_fused_experts
+    return torch_vllm_outplace_fused_experts
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def fused_experts(hidden_states: torch.Tensor,
                   w1: torch.Tensor,
                   w2: torch.Tensor,
                   topk_weights: torch.Tensor,
                   topk_ids: torch.Tensor,
                   inplace: bool = False,
+<<<<<<< HEAD
                   use_fp8_w8a8: bool = False,
                   use_int8_w8a16: bool = False,
                   use_int4_w4a16: bool = False,
+=======
+                  activation: str = "silu",
+                  apply_router_weight_on_input: bool = False,
+                  use_fp8_w8a8: bool = False,
+                  use_int8_w8a8: bool = False,
+                  use_int8_w8a16: bool = False,
+                  use_int4_w4a16: bool = False,
+                  per_channel_quant: bool = False,
+                  global_num_experts: int = -1,
+                  expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                   w1_scale: Optional[torch.Tensor] = None,
                   w2_scale: Optional[torch.Tensor] = None,
                   w1_zp: Optional[torch.Tensor] = None,
                   w2_zp: Optional[torch.Tensor] = None,
                   a1_scale: Optional[torch.Tensor] = None,
                   a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
                   block_shape: Optional[List[int]] = None):
     if inplace:
         torch.ops.vllm.inplace_fused_experts(hidden_states, w1, w2,
@@ -1136,23 +1738,117 @@ def fused_experts_impl(hidden_states: torch.Tensor,
                        a1_scale: Optional[torch.Tensor] = None,
                        a2_scale: Optional[torch.Tensor] = None,
                        block_shape: Optional[List[int]] = None):
+=======
+                  block_shape: Optional[list[int]] = None,
+                  allow_deep_gemm: bool = False) -> torch.Tensor:
+    # For now, disable DeepGemm for small N (<= 512) until better
+    # permute/unpermute ops are available.
+    N = w1.shape[1]
+    if (allow_deep_gemm and use_fp8_w8a8 and N > 512
+            and _valid_deep_gemm(hidden_states, w1, w2, expert_map)):
+        assert apply_router_weight_on_input is False
+        return deep_gemm_moe_fp8(
+            hidden_states=hidden_states,
+            w1=w1,
+            w2=w2,
+            topk_weights=topk_weights,
+            topk_ids=topk_ids,
+            inplace=inplace,
+            activation=activation,
+            global_num_experts=global_num_experts,
+            expert_map=expert_map,
+            w1_scale=w1_scale,
+            w2_scale=w2_scale,
+            a1_scale=a1_scale,
+            a2_scale=a2_scale,
+            apply_router_weight_on_input=apply_router_weight_on_input,
+        )
+    else:
+        return dispatch_fused_experts_func(inplace)(
+            hidden_states=hidden_states,
+            w1=w1,
+            w2=w2,
+            topk_weights=topk_weights,
+            topk_ids=topk_ids,
+            activation=activation,
+            apply_router_weight_on_input=apply_router_weight_on_input,
+            use_fp8_w8a8=use_fp8_w8a8,
+            use_int8_w8a8=use_int8_w8a8,
+            use_int8_w8a16=use_int8_w8a16,
+            use_int4_w4a16=use_int4_w4a16,
+            per_channel_quant=per_channel_quant,
+            global_num_experts=global_num_experts,
+            expert_map=expert_map,
+            w1_scale=w1_scale,
+            w2_scale=w2_scale,
+            w1_zp=w1_zp,
+            w2_zp=w2_zp,
+            a1_scale=a1_scale,
+            a2_scale=a2_scale,
+            block_shape=block_shape)
+
+
+def fused_experts_impl(
+    hidden_states: torch.Tensor,
+    w1: torch.Tensor,
+    w2: torch.Tensor,
+    topk_weights: torch.Tensor,
+    topk_ids: torch.Tensor,
+    inplace: bool = False,
+    activation: str = "silu",
+    apply_router_weight_on_input: bool = False,
+    use_fp8_w8a8: bool = False,
+    use_int8_w8a8: bool = False,
+    use_int8_w8a16: bool = False,
+    use_int4_w4a16: bool = False,
+    per_channel_quant: bool = False,
+    global_num_experts: int = -1,
+    expert_map: Optional[torch.Tensor] = None,
+    w1_scale: Optional[torch.Tensor] = None,
+    w2_scale: Optional[torch.Tensor] = None,
+    w1_zp: Optional[torch.Tensor] = None,
+    w2_zp: Optional[torch.Tensor] = None,
+    a1_scale: Optional[torch.Tensor] = None,
+    a2_scale: Optional[torch.Tensor] = None,
+    block_shape: Optional[list[int]] = None,
+) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Check constraints.
     if use_int4_w4a16:
         assert hidden_states.shape[1] // 2 == w1.shape[
             2], "Hidden size mismatch"
     else:
+<<<<<<< HEAD
         assert hidden_states.shape[1] == w1.shape[2], "Hidden size mismatch"
 
     assert topk_weights.shape == topk_ids.shape, "topk shape mismatch"
     assert hidden_states.is_contiguous(), "Hidden_states must be contiguous"
     assert w1.is_contiguous(), "Expert weights1 must be contiguous"
     assert w2.is_contiguous(), "Expert weights2 must be contiguous"
+=======
+        assert hidden_states.shape[1] == w1.shape[2], (
+            f"Hidden size mismatch {hidden_states.shape[1]} != {w1.shape[2]}")
+
+    assert topk_weights.shape == topk_ids.shape, "topk shape mismatch"
+    assert hidden_states.is_contiguous(), "Hidden_states must be contiguous"
+    assert w1.stride(-1) == 1, "Stride of last dimension must be 1"
+    assert w2.stride(-1) == 1, "Stride of last dimension must be 1"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert hidden_states.dtype in [
         torch.float32, torch.float16, torch.bfloat16
     ]
 
+<<<<<<< HEAD
     num_tokens, _ = hidden_states.shape
     E, N, _ = w1.shape
+=======
+    num_tokens = hidden_states.shape[0]
+    E, N, _ = w1.shape
+    K = w2.shape[1]
+    if global_num_experts == -1:
+        global_num_experts = E
+    top_k_num = topk_ids.shape[1]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # We execute the fused_moe kernel in chunks to circumvent this issue:
     # https://github.com/vllm-project/vllm/issues/5938
     CHUNK_SIZE = envs.VLLM_FUSED_MOE_CHUNK_SIZE
@@ -1162,17 +1858,30 @@ def fused_experts_impl(hidden_states: torch.Tensor,
                                         use_int4_w4a16=use_int4_w4a16,
                                         dtype=hidden_states.dtype)
 
+<<<<<<< HEAD
+=======
+    qtype = get_config_qtype(use_fp8_w8a8=use_fp8_w8a8,
+                             use_int8_w8a8=use_int8_w8a8,
+                             use_int8_w8a16=use_int8_w8a16,
+                             use_int4_w4a16=use_int4_w4a16)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     get_config_func = functools.partial(
         try_get_optimal_moe_config,
         w1.shape,
         w2.shape,
+<<<<<<< HEAD
         topk_ids.shape[1],
+=======
+        top_k_num,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         config_dtype,
         block_shape=block_shape,
     )
 
     config = get_config_func(M)
 
+<<<<<<< HEAD
     intermediate_cache1 = torch.empty((M, topk_ids.shape[1], N),
                                       device=hidden_states.device,
                                       dtype=hidden_states.dtype)
@@ -1180,6 +1889,18 @@ def fused_experts_impl(hidden_states: torch.Tensor,
                                       device=hidden_states.device,
                                       dtype=hidden_states.dtype)
     intermediate_cache3 = torch.empty((M, topk_ids.shape[1], w2.shape[1]),
+=======
+    # We can reuse the memory between these because by the time we need
+    # cache3, we're done with cache1
+    cache13 = torch.empty(M * top_k_num * max(N, K),
+                          device=hidden_states.device,
+                          dtype=hidden_states.dtype)
+    intermediate_cache1 = cache13[:M * top_k_num * N].view(M, top_k_num, N)
+    intermediate_cache3 = cache13[:M * top_k_num * K].view(M, top_k_num, K)
+
+    # This needs separate memory since it's used concurrently with cache1
+    intermediate_cache2 = torch.empty((M * top_k_num, N // 2),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                       device=hidden_states.device,
                                       dtype=hidden_states.dtype)
 
@@ -1213,13 +1934,19 @@ def fused_experts_impl(hidden_states: torch.Tensor,
             # so the cache size and config are already set correctly and
             # do not need to be adjusted.
             intermediate_cache1 = intermediate_cache1[:tokens_in_chunk]
+<<<<<<< HEAD
             intermediate_cache2 = intermediate_cache2[:tokens_in_chunk]
+=======
+            intermediate_cache2 = intermediate_cache2[:tokens_in_chunk *
+                                                      topk_ids.shape[1]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             intermediate_cache3 = intermediate_cache3[:tokens_in_chunk]
             config = get_config_func(tokens_in_chunk)
 
         curr_topk_ids = topk_ids[begin_chunk_idx:end_chunk_idx]
         curr_topk_weights = topk_weights[begin_chunk_idx:end_chunk_idx]
 
+<<<<<<< HEAD
         sorted_token_ids, expert_ids, num_tokens_post_padded = (
             moe_align_block_size(curr_topk_ids, config['BLOCK_SIZE_M'], E))
 
@@ -1258,16 +1985,88 @@ def fused_experts_impl(hidden_states: torch.Tensor,
                                 expert_ids,
                                 num_tokens_post_padded,
                                 True,
+=======
+        qcurr_hidden_states, a1q_scale = moe_kernel_quantize_input(
+            A=curr_hidden_states,
+            A_scale=a1_scale,
+            qtype=qtype,
+            per_channel_quant=per_channel_quant,
+            block_shape=block_shape)
+
+        sorted_token_ids, expert_ids, num_tokens_post_padded = (
+            moe_align_block_size(curr_topk_ids, config['BLOCK_SIZE_M'],
+                                 global_num_experts, expert_map))
+
+        invoke_fused_moe_kernel(qcurr_hidden_states,
+                                w1,
+                                intermediate_cache1,
+                                a1q_scale,
+                                w1_scale,
+                                w1_zp,
+                                curr_topk_weights,
+                                sorted_token_ids,
+                                expert_ids,
+                                num_tokens_post_padded,
+                                apply_router_weight_on_input,
+                                top_k_num,
+                                config,
+                                compute_type=compute_type,
+                                use_fp8_w8a8=use_fp8_w8a8,
+                                use_int8_w8a8=use_int8_w8a8,
+                                use_int8_w8a16=use_int8_w8a16,
+                                use_int4_w4a16=use_int4_w4a16,
+                                per_channel_quant=per_channel_quant,
+                                block_shape=block_shape)
+
+        if activation == "silu":
+            torch.ops._C.silu_and_mul(intermediate_cache2,
+                                      intermediate_cache1.view(-1, N))
+        elif activation == "gelu":
+            torch.ops._C.gelu_and_mul(intermediate_cache2,
+                                      intermediate_cache1.view(-1, N))
+        else:
+            raise ValueError(f"Unsupported FusedMoe activation: {activation}")
+
+        qintermediate_cache2, a2q_scale = moe_kernel_quantize_input(
+            A=intermediate_cache2,
+            A_scale=a2_scale,
+            qtype=qtype,
+            per_channel_quant=per_channel_quant,
+            block_shape=block_shape)
+
+        invoke_fused_moe_kernel(qintermediate_cache2,
+                                w2,
+                                intermediate_cache3,
+                                a2q_scale,
+                                w2_scale,
+                                w2_zp,
+                                curr_topk_weights,
+                                sorted_token_ids,
+                                expert_ids,
+                                num_tokens_post_padded,
+                                not apply_router_weight_on_input,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                 1,
                                 config,
                                 compute_type=compute_type,
                                 use_fp8_w8a8=use_fp8_w8a8,
+<<<<<<< HEAD
                                 use_int8_w8a16=use_int8_w8a16,
                                 use_int4_w4a16=use_int4_w4a16,
+=======
+                                use_int8_w8a8=use_int8_w8a8,
+                                use_int8_w8a16=use_int8_w8a16,
+                                use_int4_w4a16=use_int4_w4a16,
+                                per_channel_quant=per_channel_quant,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                 block_shape=block_shape)
 
         ops.moe_sum(intermediate_cache3.view(*intermediate_cache3.shape),
                     out_hidden_states[begin_chunk_idx:end_chunk_idx])
+<<<<<<< HEAD
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return out_hidden_states
 
 
@@ -1279,20 +2078,37 @@ def fused_moe(
     topk: int,
     renormalize: bool,
     inplace: bool = False,
+<<<<<<< HEAD
+=======
+    activation: str = "silu",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     use_grouped_topk: bool = False,
     num_expert_group: Optional[int] = None,
     topk_group: Optional[int] = None,
     custom_routing_function: Optional[Callable] = None,
     use_fp8_w8a8: bool = False,
+<<<<<<< HEAD
     use_int8_w8a16: bool = False,
     use_int4_w4a16: bool = False,
+=======
+    use_int8_w8a8: bool = False,
+    use_int8_w8a16: bool = False,
+    use_int4_w4a16: bool = False,
+    per_channel_quant: bool = False,
+    global_num_experts: int = -1,
+    expert_map: Optional[torch.Tensor] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     w1_scale: Optional[torch.Tensor] = None,
     w2_scale: Optional[torch.Tensor] = None,
     w1_zp: Optional[torch.Tensor] = None,
     w2_zp: Optional[torch.Tensor] = None,
     a1_scale: Optional[torch.Tensor] = None,
     a2_scale: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
     block_shape: Optional[List[int]] = None,
+=======
+    block_shape: Optional[list[int]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> torch.Tensor:
     """
     This function computes a Mixture of Experts (MoE) layer using two sets of
@@ -1308,18 +2124,36 @@ def fused_moe(
     - renormalize (bool): If True, renormalize the top-k weights to sum to 1.
     - inplace (bool): If True, perform the operation in-place.
         Defaults to False.
+<<<<<<< HEAD
+=======
+    - activation (str): The activation function to apply after the first
+        MoE layer.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     - num_expert_group: Optional[int]: additional parameter for grouped_topk
     - topk_group: Optional[int]: additional parameter for grouped_topk
     - use_grouped_topk: If True, use grouped_topk instead of fused_topk
         note: Deepseekv2 model uses grouped_topk
     - use_fp8_w8a8 (bool): If True, use fp8 arithmetic to compute the inner
         products for w1 and w2. Defaults to False.
+<<<<<<< HEAD
+=======
+    - use_int8_w8a8 (bool): If True, use int8 arithmetic to compute the inner
+        products for w1 and w2. Defaults to False.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     - use_int8_w8a16 (bool): If True, use matmul of int8 weight and bf16/fp16
         activation to compute the inner products for w1 and w2.
         Defaults to False.
     - use_int4_w4a16 (bool): If True, use matmul of int4 weight and bf16/fp16
         activation to compute the inner products for w1 and w2.
         Defaults to False.
+<<<<<<< HEAD
+=======
+    - global_num_experts (int): The total number of experts in the global
+        expert space.
+    - expert_map (Optional[torch.Tensor]):  A tensor mapping expert indices 
+        from the global expert space to the local expert space of the expert 
+        parallel shard.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     - w1_scale (Optional[torch.Tensor]): Optional scale to be used for
         w1.
     - w2_scale (Optional[torch.Tensor]): Optional scale to be used for
@@ -1328,14 +2162,21 @@ def fused_moe(
         a1.
     - a2_scale (Optional[torch.Tensor]): Optional scale to be used for
         a2.
+<<<<<<< HEAD
     - block_shape: (Optional[List[int]]): Optional block size for block-wise
+=======
+    - block_shape: (Optional[list[int]]): Optional block size for block-wise
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         quantization.
 
     Returns:
     - torch.Tensor: The output tensor after applying the MoE layer.
     """
+<<<<<<< HEAD
     # Check constraints.
     assert gating_output.shape[1] == w1.shape[0], "Number of experts mismatch"
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     if use_grouped_topk:
         assert num_expert_group is not None and topk_group is not None
@@ -1343,8 +2184,13 @@ def fused_moe(
                                               topk, renormalize,
                                               num_expert_group, topk_group)
     elif custom_routing_function is None:
+<<<<<<< HEAD
         topk_weights, topk_ids = fused_topk(hidden_states, gating_output, topk,
                                             renormalize)
+=======
+        topk_weights, topk_ids, token_expert_indices = fused_topk(
+            hidden_states, gating_output, topk, renormalize)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     else:
         topk_weights, topk_ids = custom_routing_function(
             hidden_states, gating_output, topk, renormalize)
@@ -1355,9 +2201,20 @@ def fused_moe(
                          topk_weights,
                          topk_ids,
                          inplace=inplace,
+<<<<<<< HEAD
                          use_fp8_w8a8=use_fp8_w8a8,
                          use_int8_w8a16=use_int8_w8a16,
                          use_int4_w4a16=use_int4_w4a16,
+=======
+                         activation=activation,
+                         use_fp8_w8a8=use_fp8_w8a8,
+                         use_int8_w8a8=use_int8_w8a8,
+                         use_int8_w8a16=use_int8_w8a16,
+                         use_int4_w4a16=use_int4_w4a16,
+                         per_channel_quant=per_channel_quant,
+                         global_num_experts=global_num_experts,
+                         expert_map=expert_map,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                          w1_scale=w1_scale,
                          w2_scale=w2_scale,
                          w1_zp=w1_zp,
@@ -1365,3 +2222,212 @@ def fused_moe(
                          a1_scale=a1_scale,
                          a2_scale=a2_scale,
                          block_shape=block_shape)
+<<<<<<< HEAD
+=======
+
+
+class TritonExperts(mk.FusedMoEPermuteExpertsUnpermute):
+
+    def __init__(
+        self,
+        use_fp8_w8a8: bool,
+        use_int8_w8a8: bool,
+        use_int8_w8a16: bool,
+        use_int4_w4a16: bool,
+        per_channel_quant: bool,
+        block_shape: Optional[list[int]] = None,
+        block_m: Optional[int] = None,
+    ):
+        super().__init__()
+        self.use_fp8_w8a8 = use_fp8_w8a8
+        self.use_int4_w4a16 = use_int4_w4a16
+        self.use_int8_w8a8 = use_int8_w8a8
+        self.use_int8_w8a16 = use_int8_w8a16
+        self.block_shape = block_shape
+        self.block_m = block_m
+        self.qtype = get_config_qtype(use_fp8_w8a8=use_fp8_w8a8,
+                                      use_int8_w8a8=use_int8_w8a8,
+                                      use_int8_w8a16=use_int8_w8a16,
+                                      use_int4_w4a16=use_int4_w4a16)
+        self.per_channel_quant = per_channel_quant
+
+    def workspace_shapes(
+        self,
+        a: torch.Tensor,
+        M: int,
+        N: int,
+        K: int,
+        topk: int,
+        num_experts: int,
+    ) -> tuple[int, int, torch.dtype]:
+        factor = num_experts if a.dim() == 3 else 1
+        workspace1 = M * topk * max(N * 2, K) * factor
+        workspace2 = M * topk * N * factor
+        return (workspace1, workspace2, a.dtype)
+
+    def apply(
+        self,
+        hidden_states: torch.Tensor,
+        w1: torch.Tensor,
+        w2: torch.Tensor,
+        topk_ids: torch.Tensor,
+        activation: str,
+        global_num_experts: int,
+        expert_map: Optional[torch.Tensor],
+        w1_scale: Optional[torch.Tensor],
+        w2_scale: Optional[torch.Tensor],
+        w1_zp: Optional[torch.Tensor],
+        w2_zp: Optional[torch.Tensor],
+        a1q_scale: Optional[torch.Tensor],
+        a2_scale: Optional[torch.Tensor],
+        workspace13: torch.Tensor,
+        workspace2: torch.Tensor,
+        expert_num_tokens: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        # Check constraints.
+        if self.use_int4_w4a16:
+            assert hidden_states.size(-1) // 2 == w1.size(2), (
+                "Hidden size mismatch")
+        else:
+            assert hidden_states.size(-1) == w1.size(2), \
+                (f"Hidden size mismatch {hidden_states.size(-1)} "
+                 f"!= {w1.size(2)}")
+
+        assert hidden_states.is_contiguous(
+        ), "Hidden_states must be contiguous"
+        assert hidden_states.dim() == 2
+        assert w1.stride(-1) == 1, "Stride of last dimension must be 1"
+        assert w2.stride(-1) == 1, "Stride of last dimension must be 1"
+        assert hidden_states.dtype in [
+            torch.float32, torch.float16, torch.bfloat16, torch.float8_e4m3fn
+        ]
+
+        E, num_tokens, N, K, top_k_num = mk._moe_problem_size(
+            hidden_states, w1, w2, topk_ids)
+
+        if global_num_experts == -1:
+            global_num_experts = E
+
+        config_dtype = get_config_dtype_str(use_fp8_w8a8=self.use_fp8_w8a8,
+                                            use_int8_w8a16=self.use_int8_w8a16,
+                                            use_int4_w4a16=self.use_int4_w4a16,
+                                            dtype=hidden_states.dtype)
+
+        config = try_get_optimal_moe_config(
+            w1.shape,
+            w2.shape,
+            top_k_num,
+            config_dtype,
+            num_tokens,
+            block_shape=self.block_shape,
+        )
+
+        if hidden_states.dtype == torch.bfloat16:
+            compute_type = tl.bfloat16
+        elif hidden_states.dtype == torch.float16:
+            compute_type = tl.float16
+        elif hidden_states.dtype == torch.float32:
+            compute_type = tl.float32
+        elif hidden_states.dtype == torch.float8_e4m3fn:
+            compute_type = tl.bfloat16
+        else:
+            raise ValueError(
+                f"Unsupported compute_type: {hidden_states.dtype}")
+
+        # We can reuse the memory between these because by the time we need
+        # cache3, we're done with cache1
+        intermediate_cache1 = _resize_cache(workspace13,
+                                            (num_tokens, top_k_num, N))
+        intermediate_cache2 = _resize_cache(workspace2,
+                                            (num_tokens * top_k_num, N // 2))
+        intermediate_cache3 = _resize_cache(workspace13,
+                                            (num_tokens, top_k_num, K))
+
+        sorted_token_ids, expert_ids, num_tokens_post_padded = (
+            moe_align_block_size(topk_ids, config['BLOCK_SIZE_M'],
+                                 global_num_experts, expert_map))
+
+        invoke_fused_moe_kernel(hidden_states,
+                                w1,
+                                intermediate_cache1,
+                                a1q_scale,
+                                w1_scale,
+                                w1_zp,
+                                None,
+                                sorted_token_ids,
+                                expert_ids,
+                                num_tokens_post_padded,
+                                False,
+                                top_k_num,
+                                config,
+                                compute_type=compute_type,
+                                use_fp8_w8a8=self.use_fp8_w8a8,
+                                use_int8_w8a8=self.use_int8_w8a8,
+                                use_int8_w8a16=self.use_int8_w8a16,
+                                use_int4_w4a16=self.use_int4_w4a16,
+                                per_channel_quant=self.per_channel_quant,
+                                block_shape=self.block_shape)
+
+        self.activation(activation, intermediate_cache2,
+                        intermediate_cache1.view(-1, N))
+
+        a2q_scale: Optional[torch.Tensor] = None
+
+        qintermediate_cache2, a2q_scale = moe_kernel_quantize_input(
+            intermediate_cache2, a2_scale, self.qtype, self.per_channel_quant,
+            self.block_shape)
+
+        invoke_fused_moe_kernel(qintermediate_cache2,
+                                w2,
+                                intermediate_cache3,
+                                a2q_scale,
+                                w2_scale,
+                                w2_zp,
+                                None,
+                                sorted_token_ids,
+                                expert_ids,
+                                num_tokens_post_padded,
+                                False,
+                                1,
+                                config,
+                                compute_type=compute_type,
+                                use_fp8_w8a8=self.use_fp8_w8a8,
+                                use_int8_w8a8=self.use_int8_w8a8,
+                                use_int8_w8a16=self.use_int8_w8a16,
+                                use_int4_w4a16=self.use_int4_w4a16,
+                                per_channel_quant=self.per_channel_quant,
+                                block_shape=self.block_shape)
+
+        return intermediate_cache3
+
+
+def modular_triton_fused_moe(
+    use_fp8_w8a8: bool,
+    use_int8_w8a8: bool,
+    use_int8_w8a16: bool,
+    use_int4_w4a16: bool,
+    per_channel_quant: bool,
+    block_shape: Optional[list[int]] = None,
+) -> mk.FusedMoEModularKernel:
+    qtype = get_config_qtype(
+        use_fp8_w8a8=use_fp8_w8a8,
+        use_int8_w8a8=use_int8_w8a8,
+        use_int8_w8a16=use_int8_w8a16,
+        use_int4_w4a16=use_int4_w4a16,
+    )
+    return mk.FusedMoEModularKernel(
+        MoEPrepareAndFinalizeNoEP(
+            quant_dtype=qtype,
+            per_channel_quant=per_channel_quant,
+            block_shape=block_shape,
+        ),
+        TritonExperts(
+            use_fp8_w8a8=use_fp8_w8a8,
+            use_int8_w8a8=use_int8_w8a8,
+            use_int8_w8a16=use_int8_w8a16,
+            use_int4_w4a16=use_int4_w4a16,
+            per_channel_quant=per_channel_quant,
+            block_shape=block_shape,
+        ),
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -8,7 +8,13 @@ import os
 import tempfile
 import time
 from collections import defaultdict
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
+=======
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any, Callable, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import filelock
 import gguf
@@ -37,6 +43,17 @@ except (ImportError, OSError):
     SafetensorsStreamer = runai_model_streamer.placeholder_attr(
         "SafetensorsStreamer")
 
+<<<<<<< HEAD
+=======
+try:
+    from fastsafetensors import SafeTensorsFileLoader, SingleGroup
+except ImportError:
+    fastsafetensors = PlaceholderModule("fastsafetensors")
+    SafeTensorsFileLoader = fastsafetensors.placeholder_attr(
+        "SafeTensorsFileLoader")
+    SingleGroup = fastsafetensors.placeholder_attr("SingleGroup")
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 logger = init_logger(__name__)
 
 # use system-level temp directory for file locks, so that multiple users
@@ -67,8 +84,15 @@ class DisabledTqdm(tqdm):
         super().__init__(*args, **kwargs, disable=True)
 
 
+<<<<<<< HEAD
 def get_lock(model_name_or_path: str, cache_dir: Optional[str] = None):
     lock_dir = cache_dir or temp_dir
+=======
+def get_lock(model_name_or_path: Union[str, Path],
+             cache_dir: Optional[str] = None):
+    lock_dir = cache_dir or temp_dir
+    model_name_or_path = str(model_name_or_path)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     os.makedirs(os.path.dirname(lock_dir), exist_ok=True)
     model_name = model_name_or_path.replace("/", "-")
     hash_name = hashlib.sha256(model_name.encode()).hexdigest()
@@ -151,6 +175,7 @@ def get_quant_config(model_config: ModelConfig,
                                   None)
     if hf_quant_config is not None:
         return quant_cls.from_config(hf_quant_config)
+<<<<<<< HEAD
     # In case of bitsandbytes/QLoRA, get quant config from the adapter model.
     if model_config.quantization == "bitsandbytes":
         if (not load_config.model_loader_extra_config
@@ -168,6 +193,17 @@ def get_quant_config(model_config: ModelConfig,
         with get_lock(model_name_or_path, load_config.download_dir):
             hf_folder = snapshot_download(
                 model_name_or_path,
+=======
+    # Inflight BNB quantization
+    if model_config.quantization == "bitsandbytes":
+        return quant_cls.from_config({})
+    is_local = os.path.isdir(model_config.model)
+    if not is_local:
+        # Download the config files.
+        with get_lock(model_config.model, load_config.download_dir):
+            hf_folder = snapshot_download(
+                model_config.model,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 revision=model_config.revision,
                 allow_patterns="*.json",
                 cache_dir=load_config.download_dir,
@@ -175,7 +211,11 @@ def get_quant_config(model_config: ModelConfig,
                 tqdm_class=DisabledTqdm,
             )
     else:
+<<<<<<< HEAD
         hf_folder = model_name_or_path
+=======
+        hf_folder = model_config.model
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     possible_config_filenames = quant_cls.get_config_filenames()
 
@@ -202,7 +242,11 @@ def get_quant_config(model_config: ModelConfig,
         config = json.load(f)
 
         if model_config.quantization == "bitsandbytes":
+<<<<<<< HEAD
             config["adapter_name_or_path"] = model_name_or_path
+=======
+            config["adapter_name_or_path"] = model_config.model
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         elif model_config.quantization == "modelopt":
             if config["producer"]["name"] == "modelopt":
                 return quant_cls.from_config(config)
@@ -214,12 +258,54 @@ def get_quant_config(model_config: ModelConfig,
     return quant_cls.from_config(config)
 
 
+<<<<<<< HEAD
 def download_weights_from_hf(
     model_name_or_path: str,
     cache_dir: Optional[str],
     allow_patterns: List[str],
     revision: Optional[str] = None,
     ignore_patterns: Optional[Union[str, List[str]]] = None,
+=======
+def get_sparse_attention_config(
+    model_config: ModelConfig,
+    load_config: LoadConfig,
+    sparse_attention_config_filename: str = "sparse_attention_config.json",
+) -> dict[str, Any]:
+    model_name_or_path = model_config.model
+    is_local = os.path.isdir(model_name_or_path)
+    if not is_local:
+        # Download the config files.
+        with get_lock(model_name_or_path, load_config.download_dir):
+            hf_folder = snapshot_download(
+                model_name_or_path,
+                revision=model_config.revision,
+                allow_patterns="*.json",
+                cache_dir=load_config.download_dir,
+                local_files_only=huggingface_hub.constants.HF_HUB_OFFLINE,
+                tqdm_class=DisabledTqdm,
+            )
+    else:
+        hf_folder = model_name_or_path
+
+    config_file = os.path.join(hf_folder, sparse_attention_config_filename)
+    if not os.path.exists(config_file):
+        return {}
+
+    # Load the sparse attention config.
+    with open(config_file) as f:
+        config = json.load(f)
+    logger.info("Loaded sparse attention config from %s", config_file)
+
+    return config
+
+
+def download_weights_from_hf(
+    model_name_or_path: str,
+    cache_dir: Optional[str],
+    allow_patterns: list[str],
+    revision: Optional[str] = None,
+    ignore_patterns: Optional[Union[str, list[str]]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> str:
     """Download model weights from Hugging Face Hub.
 
@@ -227,11 +313,19 @@ def download_weights_from_hf(
         model_name_or_path (str): The model name or path.
         cache_dir (Optional[str]): The cache directory to store the model
             weights. If None, will use HF defaults.
+<<<<<<< HEAD
         allow_patterns (List[str]): The allowed patterns for the
             weight files. Files matched by any of the patterns will be
             downloaded.
         revision (Optional[str]): The revision of the model.
         ignore_patterns (Optional[Union[str, List[str]]]): The patterns to
+=======
+        allow_patterns (list[str]): The allowed patterns for the
+            weight files. Files matched by any of the patterns will be
+            downloaded.
+        revision (Optional[str]): The revision of the model.
+        ignore_patterns (Optional[Union[str, list[str]]]): The patterns to
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             filter out the weight files. Files matched by any of the patterns
             will be ignored.
 
@@ -311,9 +405,15 @@ def download_safetensors_index_file_from_hf(
 # Passing both of these to the weight loader functionality breaks.
 # So, we use the index_file to
 # look up which safetensors files should be used.
+<<<<<<< HEAD
 def filter_duplicate_safetensors_files(hf_weights_files: List[str],
                                        hf_folder: str,
                                        index_file: str) -> List[str]:
+=======
+def filter_duplicate_safetensors_files(hf_weights_files: list[str],
+                                       hf_folder: str,
+                                       index_file: str) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # model.safetensors.index.json is a mapping from keys in the
     # torch state_dict to safetensors file holding that weight.
     index_file_name = os.path.join(hf_folder, index_file)
@@ -336,7 +436,11 @@ def filter_duplicate_safetensors_files(hf_weights_files: List[str],
 
 
 def filter_files_not_needed_for_inference(
+<<<<<<< HEAD
         hf_weights_files: List[str]) -> List[str]:
+=======
+        hf_weights_files: list[str]) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Exclude files that are not needed for inference.
 
@@ -363,16 +467,34 @@ def filter_files_not_needed_for_inference(
 _BAR_FORMAT = "{desc}: {percentage:3.0f}% Completed | {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]\n"  # noqa: E501
 
 
+<<<<<<< HEAD
 def np_cache_weights_iterator(
     model_name_or_path: str, cache_dir: Optional[str], hf_folder: str,
     hf_weights_files: List[str]
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
+=======
+def enable_tqdm(use_tqdm_on_load: bool):
+    return use_tqdm_on_load and (not torch.distributed.is_initialized()
+                                 or torch.distributed.get_rank() == 0)
+
+
+def np_cache_weights_iterator(
+    model_name_or_path: str,
+    cache_dir: Optional[str],
+    hf_folder: str,
+    hf_weights_files: list[str],
+    use_tqdm_on_load: bool,
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Iterate over the weights in the model np files.
 
     Will dump the model weights to numpy files if they are not already dumped.
     """
+<<<<<<< HEAD
     enable_tqdm = not torch.distributed.is_initialized(
     ) or torch.distributed.get_rank() == 0
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Convert the model weights from torch tensors to numpy arrays for
     # faster loading.
     np_folder = os.path.join(hf_folder, "np")
@@ -382,11 +504,19 @@ def np_cache_weights_iterator(
     # dumping the same model weights to numpy at the same time.
     with get_lock(model_name_or_path, cache_dir):
         if not os.path.exists(weight_names_file):
+<<<<<<< HEAD
             weight_names: List[str] = []
             for bin_file in tqdm(
                     hf_weights_files,
                     desc="Loading np_cache checkpoint shards",
                     disable=not enable_tqdm,
+=======
+            weight_names: list[str] = []
+            for bin_file in tqdm(
+                    hf_weights_files,
+                    desc="Loading np_cache checkpoint shards",
+                    disable=not enable_tqdm(use_tqdm_on_load),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     bar_format=_BAR_FORMAT,
             ):
                 state = torch.load(bin_file,
@@ -411,6 +541,7 @@ def np_cache_weights_iterator(
 
 
 def safetensors_weights_iterator(
+<<<<<<< HEAD
     hf_weights_files: List[str]
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
     """Iterate over the weights in the model safetensor files."""
@@ -420,6 +551,16 @@ def safetensors_weights_iterator(
             hf_weights_files,
             desc="Loading safetensors checkpoint shards",
             disable=not enable_tqdm,
+=======
+    hf_weights_files: list[str],
+    use_tqdm_on_load: bool,
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+    """Iterate over the weights in the model safetensor files."""
+    for st_file in tqdm(
+            hf_weights_files,
+            desc="Loading safetensors checkpoint shards",
+            disable=not enable_tqdm(use_tqdm_on_load),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             bar_format=_BAR_FORMAT,
     ):
         with safe_open(st_file, framework="pt") as f:
@@ -429,22 +570,34 @@ def safetensors_weights_iterator(
 
 
 def runai_safetensors_weights_iterator(
+<<<<<<< HEAD
     hf_weights_files: List[str]
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
     """Iterate over the weights in the model safetensor files."""
     enable_tqdm = not torch.distributed.is_initialized(
     ) or torch.distributed.get_rank() == 0
+=======
+    hf_weights_files: list[str],
+    use_tqdm_on_load: bool,
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+    """Iterate over the weights in the model safetensor files."""
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with SafetensorsStreamer() as streamer:
         for st_file in tqdm(
                 hf_weights_files,
                 desc="Loading safetensors using Runai Model Streamer",
+<<<<<<< HEAD
                 disable=not enable_tqdm,
+=======
+                disable=not enable_tqdm(use_tqdm_on_load),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 bar_format=_BAR_FORMAT,
         ):
             streamer.stream_file(st_file)
             yield from streamer.get_tensors()
 
 
+<<<<<<< HEAD
 def pt_weights_iterator(
     hf_weights_files: List[str]
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
@@ -458,12 +611,72 @@ def pt_weights_iterator(
             bar_format=_BAR_FORMAT,
     ):
         state = torch.load(bin_file, map_location="cpu", weights_only=True)
+=======
+def fastsafetensors_weights_iterator(
+    hf_weights_files: list[str],
+    use_tqdm_on_load: bool,
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+    """Iterate over the weights in the model safetensor files
+    using fastsafetensor library."""
+    if torch.distributed.is_initialized():
+        pg = torch.distributed.group.WORLD
+    else:
+        pg = SingleGroup()
+
+    device = torch.device(f'cuda:{pg.rank()}')
+    weight_files_sub_lists = [
+        hf_weights_files[i:i + pg.size()]
+        for i in range(0, len(hf_weights_files), pg.size())
+    ]
+
+    for f_list in tqdm(
+            weight_files_sub_lists,
+            desc="Loading safetensors using Fastsafetensor loader",
+            disable=not enable_tqdm(use_tqdm_on_load),
+            bar_format=_BAR_FORMAT,
+    ):
+        loader = SafeTensorsFileLoader(pg, device)
+        rank_file_map = {i: [f] for i, f in enumerate(f_list)}
+        loader.add_filenames(rank_file_map)
+        try:
+            fb = loader.copy_files_to_device()
+            try:
+                keys = list(fb.key_to_rank_lidx.keys())
+                for k in keys:
+                    t = fb.get_tensor(k)
+                    yield k, t
+            finally:
+                fb.close()
+        finally:
+            loader.close()
+
+
+def pt_weights_iterator(
+    hf_weights_files: list[str],
+    use_tqdm_on_load: bool,
+    pt_load_map_location: Union[str, dict[str, str]] = "cpu",
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+    """Iterate over the weights in the model bin/pt files."""
+    for bin_file in tqdm(
+            hf_weights_files,
+            desc="Loading pt checkpoint shards",
+            disable=not enable_tqdm(use_tqdm_on_load),
+            bar_format=_BAR_FORMAT,
+    ):
+        state = torch.load(bin_file,
+                           map_location=pt_load_map_location,
+                           weights_only=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         yield from state.items()
         del state
 
 
 def get_gguf_extra_tensor_names(
+<<<<<<< HEAD
         gguf_file: str, gguf_to_hf_name_map: Dict[str, str]) -> List[str]:
+=======
+        gguf_file: str, gguf_to_hf_name_map: dict[str, str]) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     reader = gguf.GGUFReader(gguf_file)
     expected_gguf_keys = set(gguf_to_hf_name_map.keys())
     exact_gguf_keys = set([tensor.name for tensor in reader.tensors])
@@ -472,8 +685,13 @@ def get_gguf_extra_tensor_names(
 
 
 def gguf_quant_weights_iterator(
+<<<<<<< HEAD
     gguf_file: str, gguf_to_hf_name_map: Dict[str, str]
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
+=======
+    gguf_file: str, gguf_to_hf_name_map: dict[str, str]
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Iterate over the quant weights in the model gguf files and convert
     them to torch tensors
@@ -496,7 +714,10 @@ def gguf_quant_weights_iterator(
             weight = tensor.data
             weight_type = tensor.tensor_type
             name = gguf_to_hf_name_map[tensor.name]
+<<<<<<< HEAD
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if weight_type.name != "F32":
                 name = name.replace("weight", "qweight")
             param = torch.tensor(weight)
@@ -606,8 +827,26 @@ def initialize_dummy_weights(
     for param in model.state_dict().values():
         if torch.is_floating_point(param):
             if current_platform.is_tpu():
+<<<<<<< HEAD
                 # XLA device does not support torch.Generator()
                 param.uniform_(low, high)
+=======
+                generator = torch.Generator(device="cpu")
+                generator.manual_seed(seed)
+                # Note: The param.uniform_ function cannot be used in this
+                # context because it demands more TPU HBM than directly copying
+                # from a CPU tensor.
+                # Note: We avoid using torch.rank_like as it doesn't currently
+                # support the generator argument.
+                param.copy_((high - low) *
+                            torch.rand(*param.shape,
+                                       generator=generator,
+                                       dtype=param.dtype,
+                                       layout=param.layout,
+                                       requires_grad=param.requires_grad,
+                                       device="cpu") + low)
+                torch._sync(param)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 continue
 
             generator = torch.Generator(device=param.data.device)
@@ -651,10 +890,17 @@ def maybe_remap_kv_scale_name(name: str, params_dict: dict) -> Optional[str]:
         remapped_name = name.replace(".kv_scale", ".attn.k_scale")
         if remapped_name not in params_dict:
             logger.warning_once(
+<<<<<<< HEAD
                 f"Found kv_scale in the checkpoint (e.g. {name}), "
                 "but not found the expected name in the model "
                 f"(e.g. {remapped_name}). kv_scale is "
                 "not loaded.")
+=======
+                "Found kv_scale in the checkpoint (e.g. %s), but not found the expected name in the model (e.g. %s). kv_scale is not loaded.",  #  noqa: E501
+                name,
+                remapped_name,
+            )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return None
         return remapped_name
 
@@ -673,10 +919,19 @@ def maybe_remap_kv_scale_name(name: str, params_dict: dict) -> Optional[str]:
                 remapped_name = name.replace(scale_name, f".attn{scale_name}")
             if remapped_name not in params_dict:
                 logger.warning_once(
+<<<<<<< HEAD
                     f"Found {scale_name} in the checkpoint (e.g. {name}), "
                     "but not found the expected name in the model "
                     f"(e.g. {remapped_name}). {scale_name} is "
                     "not loaded.")
+=======
+                    "Found %s in the checkpoint (e.g. %s), but not found the expected name in the model (e.g. %s). %s is not loaded.",  # noqa: E501
+                    scale_name,
+                    name,
+                    remapped_name,
+                    scale_name,
+                )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 return None
             return remapped_name
 

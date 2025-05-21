@@ -14,15 +14,29 @@ EXAMPLE_DOC_DIR = ROOT_DIR / "docs/source/getting_started/examples"
 def fix_case(text: str) -> str:
     subs = {
         "api": "API",
+<<<<<<< HEAD
         "Cli": "CLI",
         "cpu": "CPU",
         "llm": "LLM",
+=======
+        "cli": "CLI",
+        "cpu": "CPU",
+        "llm": "LLM",
+        "mae": "MAE",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "tpu": "TPU",
         "aqlm": "AQLM",
         "gguf": "GGUF",
         "lora": "LoRA",
+<<<<<<< HEAD
         "vllm": "vLLM",
         "openai": "OpenAI",
+=======
+        "rlhf": "RLHF",
+        "vllm": "vLLM",
+        "openai": "OpenAI",
+        "lmcache": "LMCache",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         "multilora": "MultiLoRA",
         "mlpspeculator": "MLPSpeculator",
         r"fp\d+": lambda x: x.group(0).upper(),  # e.g. fp16, fp32
@@ -74,7 +88,11 @@ class Example:
         path (Path): The path to the main directory or file.
         category (str): The category of the document.
         main_file (Path): The main file in the directory.
+<<<<<<< HEAD
         other_files (list[Path]): List of other files in the directory.
+=======
+        other_files (list[Path]): list of other files in the directory.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         title (str): The title of the document.
 
     Methods:

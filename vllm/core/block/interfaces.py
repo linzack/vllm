@@ -305,7 +305,11 @@ class DeviceAwareBlockAllocator(ABC):
         pass
 
     @abstractmethod
+<<<<<<< HEAD
     def reset_prefix_cache(self) -> bool:
+=======
+    def reset_prefix_cache(self, device: Optional[Device] = None) -> bool:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Reset prefix cache."""
         pass
 

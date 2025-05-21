@@ -10,8 +10,13 @@ document.addEventListener("DOMContentLoaded", function () {
     script.setAttribute("runllm-keyboard-shortcut", "Mod+j"); // cmd-j or ctrl-j to open the widget.
     script.setAttribute("runllm-name", "vLLM");
     script.setAttribute("runllm-position", "BOTTOM_RIGHT");
+<<<<<<< HEAD
     script.setAttribute("runllm-position-y", "20%");
     script.setAttribute("runllm-position-x", "3%");
+=======
+    script.setAttribute("runllm-position-y", "120px");
+    script.setAttribute("runllm-position-x", "20px");
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     script.setAttribute("runllm-assistant-id", "207");
   
     script.async = true;

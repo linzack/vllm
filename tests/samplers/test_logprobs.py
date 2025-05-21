@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 import torch
 
@@ -12,6 +15,18 @@ from ..conftest import VllmRunner
 MODELS = ["distilbert/distilgpt2"]
 
 
+<<<<<<< HEAD
+=======
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch):
+    """
+    This module is V0 only since it uses dtype=float, so
+    set VLLM_USE_V1=0 for all tests in the module.
+    """
+    monkeypatch.setenv('VLLM_USE_V1', '0')
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest.mark.parametrize("model", MODELS)
 @pytest.mark.parametrize("dtype",
                          ["float"])  # needed for comparing logprobs with HF
@@ -70,7 +85,11 @@ def test_get_prompt_logprobs(
             assert (len(logprobs) == num_top_logprobs
                     or len(logprobs) == num_top_logprobs + 1)
         output_text = result.outputs[0].text
+<<<<<<< HEAD
         output_string_from_most_likely_tokens_lst: List[str] = []
+=======
+        output_string_from_most_likely_tokens_lst: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for top_logprobs in result.outputs[0].logprobs:
             top_logprob = next(iter(top_logprobs.values()))
             output_string_from_most_likely_tokens_lst.append(

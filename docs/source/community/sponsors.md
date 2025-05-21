@@ -22,6 +22,10 @@ Compute Resources:
 - Databricks
 - DeepInfra
 - Google Cloud
+<<<<<<< HEAD
+=======
+- Intel
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 - Lambda Lab
 - Nebius
 - Novita AI

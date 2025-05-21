@@ -5,7 +5,11 @@
 ###############################################################################
 
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Dict, List, Optional, Tuple
+=======
+from typing import List, Optional, Tuple
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from vllm_hpu_extension import cache_ops, ops
@@ -22,7 +26,10 @@ class HPUPagedAttentionMetadata:
     block_usage: Optional[torch.Tensor]
     block_indices: Optional[torch.Tensor]
     block_offsets: Optional[torch.Tensor]
+<<<<<<< HEAD
     block_scales: Optional[torch.Tensor]
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     block_groups: Optional[torch.Tensor]
 
 
@@ -65,6 +72,7 @@ class HPUPagedAttention:
         return ops.flat_pa(**kwargs)
 
     @staticmethod
+<<<<<<< HEAD
     def forward_prefix(
         query: torch.Tensor,
         key: torch.Tensor,
@@ -104,3 +112,26 @@ class HPUPagedAttention:
         key_caches = [kv_cache[0] for kv_cache in kv_caches]
         value_caches = [kv_cache[1] for kv_cache in kv_caches]
         cache_ops.copy_blocks(key_caches, value_caches, src_to_dists)
+=======
+    def swap_blocks(
+        src_kv_cache: Tuple[torch.Tensor, torch.Tensor],
+        dst_kv_cache: Tuple[torch.Tensor, torch.Tensor],
+        src_to_dsts: torch.Tensor,
+    ) -> None:
+        src_key_cache = src_kv_cache[0]
+        dst_key_cache = dst_kv_cache[0]
+        cache_ops.swap_blocks(src_key_cache, dst_key_cache, src_to_dsts)
+
+        src_value_cache = src_kv_cache[1]
+        dst_value_cache = dst_kv_cache[1]
+        cache_ops.swap_blocks(src_value_cache, dst_value_cache, src_to_dsts)
+
+    @staticmethod
+    def copy_blocks(
+        kv_caches: List[Tuple[torch.Tensor, torch.Tensor]],
+        src_to_dsts: torch.Tensor,
+    ) -> None:
+        key_caches = [kv_cache[0] for kv_cache in kv_caches]
+        value_caches = [kv_cache[1] for kv_cache in kv_caches]
+        cache_ops.copy_blocks(key_caches, value_caches, src_to_dsts)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -8,7 +8,11 @@ if the config `tractable_init` is set to True. Otherwise, the weights are
 initialized randomly with a fixed seed.
 """
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Any, List, Optional, Tuple
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
@@ -56,14 +60,23 @@ class LlamaConfig:
     random_seed: int = 0
 
     def compute_hash(self) -> str:
+<<<<<<< HEAD
         factors: List[Any] = []
+=======
+        factors: list[Any] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for k, v in self.__dict__.items():
             if k == "random_seed":
                 continue
             factors.append((k, v))
         factors.sort()
         import hashlib
+<<<<<<< HEAD
         return hashlib.md5(str(factors).encode()).hexdigest()
+=======
+        return hashlib.md5(str(factors).encode(),
+                           usedforsecurity=False).hexdigest()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __post_init__(self):
         assert self.mlp_size >= self.hidden_size
@@ -174,7 +187,11 @@ class LlamaDecoderLayer(nn.Module):
         positions: torch.Tensor,
         hidden_states: torch.Tensor,
         residual: Optional[torch.Tensor],
+<<<<<<< HEAD
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         For tractable computation:
         - if residual is None, the outputs are:

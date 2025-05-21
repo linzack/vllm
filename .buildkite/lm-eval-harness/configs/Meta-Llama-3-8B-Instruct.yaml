@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 # bash .buildkite/lm-eval-harness/run-lm-eval-gsm-hf-baseline.sh -m meta-llama/Meta-Llama-3-8B-Instruct -b 32 -l 250 -f 5 -t 1
+=======
+# For hf script, without -t option (tensor parallel size).
+# bash .buildkite/lm-eval-harness/run-lm-eval-gsm-hf-baseline.sh -m meta-llama/Meta-Llama-3-8B-Instruct -b 32 -l 250 -f 5
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 model_name: "meta-llama/Meta-Llama-3-8B-Instruct"
 tasks:
 - name: "gsm8k"

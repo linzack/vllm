@@ -17,7 +17,11 @@ def post_http_request(prompt: dict, api_url: str) -> requests.Response:
     return response
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
+=======
+def parse_args():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost")
     parser.add_argument("--port", type=int, default=8000)
@@ -25,15 +29,29 @@ if __name__ == "__main__":
                         type=str,
                         default="jason9693/Qwen2.5-1.5B-apeach")
 
+<<<<<<< HEAD
     args = parser.parse_args()
+=======
+    return parser.parse_args()
+
+
+def main(args):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     api_url = f"http://{args.host}:{args.port}/pooling"
     model_name = args.model
 
     # Input like Completions API
     prompt = {"model": model_name, "input": "vLLM is great!"}
     pooling_response = post_http_request(prompt=prompt, api_url=api_url)
+<<<<<<< HEAD
     print("Pooling Response:")
     pprint.pprint(pooling_response.json())
+=======
+    print("-" * 50)
+    print("Pooling Response:")
+    pprint.pprint(pooling_response.json())
+    print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Input like Chat API
     prompt = {
@@ -50,3 +68,12 @@ if __name__ == "__main__":
     pooling_response = post_http_request(prompt=prompt, api_url=api_url)
     print("Pooling Response:")
     pprint.pprint(pooling_response.json())
+<<<<<<< HEAD
+=======
+    print("-" * 50)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

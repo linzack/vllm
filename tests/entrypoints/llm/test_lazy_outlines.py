@@ -3,6 +3,7 @@
 import sys
 from contextlib import nullcontext
 
+<<<<<<< HEAD
 from vllm_test_utils import BlameResult, blame
 
 from vllm import LLM, SamplingParams
@@ -10,6 +11,23 @@ from vllm.config import LoadFormat
 from vllm.distributed import cleanup_dist_env_and_memory
 
 
+=======
+import pytest
+from vllm_test_utils import BlameResult, blame
+
+from vllm import LLM, SamplingParams
+from vllm.distributed import cleanup_dist_env_and_memory
+
+
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch):
+    """
+    V1 only supports xgrammar so this is irrelevant.
+    """
+    monkeypatch.setenv('VLLM_USE_V1', '0')
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def run_normal_opt125m():
     prompts = [
         "Hello, my name is",
@@ -44,8 +62,12 @@ def run_normal():
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
     # Create an LLM without guided decoding as a baseline.
+<<<<<<< HEAD
     llm = LLM(model="s3://vllm-ci-model-weights/distilgpt2",
               load_format=LoadFormat.RUNAI_STREAMER,
+=======
+    llm = LLM(model="distilbert/distilgpt2",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               enforce_eager=True,
               gpu_memory_utilization=0.3)
     outputs = llm.generate(prompts, sampling_params)
@@ -61,8 +83,12 @@ def run_normal():
 
 def run_lmfe(sample_regex):
     # Create an LLM with guided decoding enabled.
+<<<<<<< HEAD
     llm = LLM(model="s3://vllm-ci-model-weights/distilgpt2",
               load_format=LoadFormat.RUNAI_STREAMER,
+=======
+    llm = LLM(model="distilbert/distilgpt2",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               enforce_eager=True,
               guided_decoding_backend="lm-format-enforcer",
               gpu_memory_utilization=0.3)

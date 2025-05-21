@@ -52,8 +52,13 @@ for output in outputs:
     print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
 ```
 
+<<<<<<< HEAD
 More API details can be found in the {doc}`Offline Inference
 </api/offline_inference/index>` section of the API docs.
+=======
+More API details can be found in the [Offline Inference]
+(#offline-inference-api) section of the API docs.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 The code for the `LLM` class can be found in <gh-file:vllm/entrypoints/llm.py>.
 

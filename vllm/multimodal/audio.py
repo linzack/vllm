@@ -1,17 +1,30 @@
 # SPDX-License-Identifier: Apache-2.0
+<<<<<<< HEAD
 
 import base64
 from io import BytesIO
 from pathlib import Path
+=======
+import base64
+from io import BytesIO
+from pathlib import Path
+from typing import Literal, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import numpy.typing as npt
 
+<<<<<<< HEAD
 from vllm.inputs.registry import InputContext
 from vllm.utils import PlaceholderModule
 
 from .base import MediaIO, MultiModalPlugin
 from .inputs import AudioItem, ModalityData, MultiModalKwargs
+=======
+from vllm.utils import PlaceholderModule
+
+from .base import MediaIO
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 try:
     import librosa
@@ -24,6 +37,7 @@ except ImportError:
     soundfile = PlaceholderModule("soundfile")  # type: ignore[assignment]
 
 
+<<<<<<< HEAD
 class AudioPlugin(MultiModalPlugin):
     """Plugin for audio data."""
 
@@ -44,6 +58,9 @@ class AudioPlugin(MultiModalPlugin):
 
 
 def resample_audio(
+=======
+def resample_audio_librosa(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     audio: npt.NDArray[np.floating],
     *,
     orig_sr: float,
@@ -52,6 +69,58 @@ def resample_audio(
     return librosa.resample(audio, orig_sr=orig_sr, target_sr=target_sr)
 
 
+<<<<<<< HEAD
+=======
+def resample_audio_scipy(
+    audio: npt.NDArray[np.floating],
+    *,
+    orig_sr: float,
+    target_sr: float,
+):
+    # lazy import scipy.signal, otherwise it will crash doc build.
+    import scipy.signal
+
+    if orig_sr > target_sr:
+        return scipy.signal.resample_poly(audio, 1, orig_sr // target_sr)
+    elif orig_sr < target_sr:
+        return scipy.signal.resample_poly(audio, target_sr // orig_sr, 1)
+    return audio
+
+
+class AudioResampler:
+    """Resample audio data to a target sample rate."""
+
+    def __init__(
+        self,
+        target_sr: Optional[float] = None,
+        method: Literal["librosa", "scipy"] = "librosa",
+    ):
+        self.target_sr = target_sr
+        self.method = method
+
+    def resample(
+        self,
+        audio: npt.NDArray[np.floating],
+        *,
+        orig_sr: float,
+    ) -> npt.NDArray[np.floating]:
+        if self.target_sr is None:
+            raise RuntimeError("Audio resampling is not supported when "
+                               "`target_sr` is not provided")
+        if self.method == "librosa":
+            return resample_audio_librosa(audio,
+                                          orig_sr=orig_sr,
+                                          target_sr=self.target_sr)
+        elif self.method == "scipy":
+            return resample_audio_scipy(audio,
+                                        orig_sr=orig_sr,
+                                        target_sr=self.target_sr)
+        else:
+            raise ValueError(f"Invalid resampling method: {self.method}. "
+                             "Supported methods are 'librosa' and 'scipy'.")
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 class AudioMediaIO(MediaIO[tuple[npt.NDArray, float]]):
 
     def load_bytes(self, data: bytes) -> tuple[npt.NDArray, float]:

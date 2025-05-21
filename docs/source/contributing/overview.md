@@ -11,6 +11,18 @@ We also believe in the power of community support; thus, answering queries, offe
 
 Finally, one of the most impactful ways to support us is by raising awareness about vLLM. Talk about it in your blog posts and highlight how it's driving your incredible projects. Express your support on social media if you're using vLLM, or simply offer your appreciation by starring our repository!
 
+<<<<<<< HEAD
+=======
+## Job Board
+
+Unsure on where to start? Check out the following links for tasks to work on:
+
+- [Good first issues](https://github.com/vllm-project/vllm/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
+  - [Selected onboarding tasks](gh-project:6)
+- [New model requests](https://github.com/vllm-project/vllm/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22new-model%22)
+  - [Models with multi-modal capabilities](gh-project:10)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ## License
 
 See <gh-file:LICENSE>.
@@ -23,7 +35,11 @@ Check out the [building from source](#build-from-source) documentation for detai
 ## Testing
 
 ```bash
+<<<<<<< HEAD
 pip install -r requirements-dev.txt
+=======
+pip install -r requirements/dev.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # Linting, formatting and static type checking
 pre-commit install --hook-type pre-commit --hook-type commit-msg
@@ -31,14 +47,39 @@ pre-commit install --hook-type pre-commit --hook-type commit-msg
 # You can manually run pre-commit with
 pre-commit run --all-files
 
+<<<<<<< HEAD
+=======
+# To manually run something from CI that does not run
+# locally by default, you can run:
+pre-commit run mypy-3.9 --hook-stage manual --all-files
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Unit tests
 pytest tests/
 ```
 
+<<<<<<< HEAD
+=======
+:::{tip}
+Since the <gh-file:docker/Dockerfile> ships with Python 3.12, all tests in CI (except `mypy`) are run with Python 3.12.
+
+Therefore, we recommend developing with Python 3.12 to minimise the chance of your local environment clashing with our CI environment.
+:::
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :::{note}
 Currently, the repository is not fully checked by `mypy`.
 :::
 
+<<<<<<< HEAD
+=======
+:::{note}
+Currently, not all unit tests pass when run on CPU platforms. If you don't have access to a GPU
+platform to run unit tests locally, rely on the continuous integration system to run the tests for
+now.
+:::
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ## Issues
 
 If you encounter a bug or have a feature request, please [search existing issues](https://github.com/vllm-project/vllm/issues?q=is%3Aissue) first to see if it has already been reported. If not, please [file a new issue](https://github.com/vllm-project/vllm/issues/new/choose), providing as much relevant information as possible.

@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 
 import vllm
@@ -12,7 +15,19 @@ MODEL_PATH = "microsoft/phi-2"
 PROMPT_TEMPLATE = "### Instruct: {sql_prompt}\n\n### Context: {context}\n\n### Output:"  # noqa: E501
 
 
+<<<<<<< HEAD
 def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
+=======
+@pytest.fixture(autouse=True)
+def v1(run_with_both_engines_lora):
+    # Simple autouse wrapper to run both engines for each test
+    # This can be promoted up to conftest.py to run for every
+    # test in a package
+    pass
+
+
+def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     prompts = [
         PROMPT_TEMPLATE.format(
             sql_prompt=
@@ -41,7 +56,11 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
         if lora_id else None,
     )
     # Print the outputs.
+<<<<<<< HEAD
     generated_texts: List[str] = []
+=======
+    generated_texts: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text.strip()
@@ -50,6 +69,7 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
     return generated_texts
 
 
+<<<<<<< HEAD
 @pytest.fixture(autouse=True)
 def v1(run_with_both_engines_lora):
     # Simple autouse wrapper to run both engines for each test
@@ -58,6 +78,8 @@ def v1(run_with_both_engines_lora):
     pass
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Skipping for V1 for now as we are hitting,
 # "Head size 80 is not supported by FlashAttention." error.
 @pytest.mark.skip_v1

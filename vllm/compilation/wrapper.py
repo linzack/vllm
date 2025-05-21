@@ -5,7 +5,11 @@ import sys
 from abc import abstractmethod
 from contextlib import contextmanager
 from types import CodeType
+<<<<<<< HEAD
 from typing import Callable, List, Optional
+=======
+from typing import Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -48,7 +52,11 @@ class TorchCompileWrapperWithCustomDispatcher:
 
         self.compiled_callable = compiled_callable
         self.original_code_object = self.__class__.forward.__code__
+<<<<<<< HEAD
         self.compiled_codes: List[CodeType] = []
+=======
+        self.compiled_codes: list[CodeType] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         torch._dynamo.convert_frame.register_bytecode_hook(self.bytecode_hook)
 
         # read the env var to determine whether to use the custom dispatcher

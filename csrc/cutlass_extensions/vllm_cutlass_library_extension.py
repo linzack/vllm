@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import enum
+<<<<<<< HEAD
 from typing import Dict, Union
+=======
+from typing import Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from cutlass_library import *
 
@@ -21,7 +25,11 @@ class MixedInputKernelScheduleType(enum.Enum):
     TmaWarpSpecializedCooperative = enum_auto()
 
 
+<<<<<<< HEAD
 VLLMDataTypeNames: Dict[Union[VLLMDataType, DataType], str] = {
+=======
+VLLMDataTypeNames: dict[Union[VLLMDataType, DataType], str] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     **DataTypeNames,  # type: ignore
     **{
         VLLMDataType.u4b8: "u4b8",
@@ -29,7 +37,11 @@ VLLMDataTypeNames: Dict[Union[VLLMDataType, DataType], str] = {
     }
 }
 
+<<<<<<< HEAD
 VLLMDataTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
+=======
+VLLMDataTypeTag: dict[Union[VLLMDataType, DataType], str] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     **DataTypeTag,  # type: ignore
     **{
         VLLMDataType.u4b8: "cutlass::vllm_uint4b8_t",
@@ -37,7 +49,11 @@ VLLMDataTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
     }
 }
 
+<<<<<<< HEAD
 VLLMDataTypeSize: Dict[Union[VLLMDataType, DataType], int] = {
+=======
+VLLMDataTypeSize: dict[Union[VLLMDataType, DataType], int] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     **DataTypeSize,  # type: ignore
     **{
         VLLMDataType.u4b8: 4,
@@ -45,7 +61,11 @@ VLLMDataTypeSize: Dict[Union[VLLMDataType, DataType], int] = {
     }
 }
 
+<<<<<<< HEAD
 VLLMDataTypeVLLMScalarTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
+=======
+VLLMDataTypeVLLMScalarTypeTag: dict[Union[VLLMDataType, DataType], str] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     VLLMDataType.u4b8: "vllm::kU4B8",
     VLLMDataType.u8b128: "vllm::kU8B128",
     DataType.u4: "vllm::kU4",
@@ -56,7 +76,11 @@ VLLMDataTypeVLLMScalarTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
     DataType.bf16: "vllm::kBfloat16",
 }
 
+<<<<<<< HEAD
 VLLMDataTypeTorchDataTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
+=======
+VLLMDataTypeTorchDataTypeTag: dict[Union[VLLMDataType, DataType], str] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     DataType.u8: "at::ScalarType::Byte",
     DataType.s8: "at::ScalarType::Char",
     DataType.e4m3: "at::ScalarType::Float8_e4m3fn",
@@ -66,7 +90,11 @@ VLLMDataTypeTorchDataTypeTag: Dict[Union[VLLMDataType, DataType], str] = {
     DataType.f32: "at::ScalarType::Float",
 }
 
+<<<<<<< HEAD
 VLLMKernelScheduleTag: Dict[Union[
+=======
+VLLMKernelScheduleTag: dict[Union[
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     MixedInputKernelScheduleType, KernelScheduleType], str] = {
         **KernelScheduleTag,  # type: ignore
         **{

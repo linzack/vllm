@@ -4,15 +4,22 @@
 import functools
 import json
 import os
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 import triton
 import triton.language as tl
+=======
+from typing import Any, Callable, Optional, Union
+
+import torch
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm import _custom_ops as ops
 from vllm.logger import init_logger
 from vllm.model_executor.layers.quantization.utils.quant_utils import (
+<<<<<<< HEAD
     _normalize_quant_group_shape, scaled_dequantize)
 from vllm.model_executor.layers.quantization.utils.w8a8_utils import (
     CUTLASS_BLOCK_FP8_SUPPORTED, CUTLASS_FP8_SUPPORTED, apply_fp8_linear)
@@ -24,6 +31,17 @@ current_platform_fp8_dtype = (torch.float8_e4m3fnuz
                               if current_platform.is_rocm() else
                               torch.float8_e4m3fn)
 
+=======
+    scaled_dequantize)
+from vllm.model_executor.layers.quantization.utils.w8a8_utils import (
+    CUTLASS_BLOCK_FP8_SUPPORTED)
+from vllm.platforms import current_platform
+from vllm.triton_utils import tl, triton
+from vllm.utils import direct_register_custom_op
+
+logger = init_logger(__name__)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 def is_fp8(x: Union[torch.dtype, torch.Tensor]) -> bool:
     if isinstance(x, torch.Tensor):
@@ -31,20 +49,104 @@ def is_fp8(x: Union[torch.dtype, torch.Tensor]) -> bool:
     return x == torch.float8_e4m3fn or x == torch.float8_e4m3fnuz
 
 
+<<<<<<< HEAD
 def apply_w8a8_block_fp8_linear(
     input: torch.Tensor,
     weight: torch.Tensor,
     block_size: List[int],
+=======
+def cutlass_scaled_mm(
+    A: torch.Tensor,
+    B: torch.Tensor,
+    As: torch.Tensor,
+    Bs: torch.Tensor,
+    block_size: list[int],
+    output_dtype: torch.dtype = torch.float16,
+) -> torch.Tensor:
+    return ops.cutlass_scaled_mm(A,
+                                 B.T,
+                                 out_dtype=output_dtype,
+                                 scale_a=As,
+                                 scale_b=Bs.T)
+
+
+def rocm_aiter_gemm_w8a8_blockscale_impl(
+    A: torch.Tensor,
+    B: torch.Tensor,
+    As: torch.Tensor,
+    Bs: torch.Tensor,
+    block_size: list[int],
+    output_dtype: torch.dtype = torch.float16,
+) -> torch.Tensor:
+    import aiter as rocm_aiter
+
+    return rocm_aiter.gemm_a8w8_blockscale_CK(A, B, As, Bs, dtype=output_dtype)
+
+
+def rocm_aiter_gemm_w8a8_blockscale_fake(
+    A: torch.Tensor,
+    B: torch.Tensor,
+    As: torch.Tensor,
+    Bs: torch.Tensor,
+    block_size: list[int],
+    output_dtype: torch.dtype = torch.float16,
+) -> torch.Tensor:
+
+    m = A.shape[0]
+    n = B.shape[0]
+    Y = torch.empty(m, n, dtype=output_dtype, device=A.device)
+    return Y
+
+
+if current_platform.is_rocm():
+    direct_register_custom_op(
+        op_name="rocm_aiter_gemm_w8a8_blockscale",
+        op_func=rocm_aiter_gemm_w8a8_blockscale_impl,
+        mutates_args=[],
+        fake_impl=rocm_aiter_gemm_w8a8_blockscale_fake,
+        dispatch_key=current_platform.dispatch_key,
+    )
+
+
+def dispatch_w8a8_blockscale_func(
+    use_cutlass: bool, use_aiter_and_is_supported: bool
+) -> Callable[[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        list[int],
+        torch.dtype,
+], torch.Tensor]:
+    if use_cutlass:
+        return cutlass_scaled_mm
+    if (use_aiter_and_is_supported):
+        return torch.ops.vllm.rocm_aiter_gemm_w8a8_blockscale
+    return w8a8_block_fp8_matmul
+
+
+# TODO fix ROCm->Triton custom path:
+#  https://github.com/vllm-project/vllm/issues/14397
+def apply_w8a8_block_fp8_linear(
+    input: torch.Tensor,
+    weight: torch.Tensor,
+    block_size: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     weight_scale: torch.Tensor,
     input_scale: Optional[torch.Tensor] = None,
     bias: Optional[torch.Tensor] = None,
     cutlass_block_fp8_supported: bool = CUTLASS_BLOCK_FP8_SUPPORTED,
+<<<<<<< HEAD
+=======
+    use_aiter_and_is_supported: bool = False,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> torch.Tensor:
     assert input_scale is None
     # View input as 2D matrix for fp8 methods
     input_2d = input.view(-1, input.shape[-1])
     output_shape = [*input.shape[:-1], weight.shape[0]]
 
+<<<<<<< HEAD
     shape_supported_by_cutlass = (weight.shape[0] % 128 == 0
                                   and weight.shape[1] % 128 == 0)
     if current_platform.is_rocm():
@@ -76,11 +178,61 @@ def apply_w8a8_block_fp8_linear(
                                        weight_scale,
                                        block_size,
                                        output_dtype=input.dtype)
+=======
+    if current_platform.is_cuda():
+        if current_platform.has_device_capability(100):
+
+            def ceil_div(x: int, y: int) -> int:
+                return (x + y - 1) // y
+
+            use_cutlass = cutlass_block_fp8_supported and (
+                ceil_div(weight.shape[0], 128) == weight_scale.shape[0]
+                and ceil_div(weight.shape[1], 128) == weight_scale.shape[1])
+        else:
+            # TODO: update this after switching to public sm90 block scale gemm
+            # as it also supports weight.shape % 128 != 0
+            use_cutlass = cutlass_block_fp8_supported and (
+                weight.shape[0] % 128 == 0 and weight.shape[1] % 128 == 0)
+    else:
+        use_cutlass = False
+
+    w8a8_blockscale_func = dispatch_w8a8_blockscale_func(
+        use_cutlass, use_aiter_and_is_supported)
+
+    if use_cutlass:
+        rows, cols = input_2d.shape
+        # Blackwell GPUs (SM100) require row dimensions to be multiple of 4 for
+        # optimal tensor core usage. Can be removed when targeting platforms
+        # without this constraint.
+        should_pad = current_platform.has_device_capability(
+            100) and rows % 4 != 0
+        if should_pad:
+            input_2d = torch.nn.functional.pad(input_2d,
+                                               (0, 0, 0, 4 - (rows % 4)),
+                                               value=0).contiguous()
+
+        q_input, x_scale = per_token_group_quant_fp8(
+            input_2d, block_size[1], column_major_scales=use_cutlass)
+
+        output = w8a8_blockscale_func(q_input, weight, x_scale, weight_scale,
+                                      block_size, input.dtype)
+        if should_pad:
+            output = output[:rows, :]
+
+    else:
+        q_input, x_scale = per_token_group_quant_fp8(
+            input_2d, block_size[1], column_major_scales=use_cutlass)
+
+        output = w8a8_blockscale_func(q_input, weight, x_scale, weight_scale,
+                                      block_size, input.dtype)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if bias is not None:
         output = output + bias
     return output.to(dtype=input.dtype).view(*output_shape)
 
 
+<<<<<<< HEAD
 # Unify the interface between `apply_w8a8_block_fp8_linear` and
 # `apply_fp8_linear`
 # NOTE(lucas): this is quite messy, we should think through this more formally
@@ -121,17 +273,46 @@ def apply_fp8_linear_generic(
                     cutlass_fp8_supported=cutlass_fp8_supported,
                          use_per_token_if_dynamic=\
                              (input_group_shape == (1, input.shape[1])))
+=======
+def apply_w8a8_block_fp8_linear_fake(
+    input: torch.Tensor,
+    weight: torch.Tensor,
+    block_size: list[int],
+    weight_scale: torch.Tensor,
+    input_scale: Optional[torch.Tensor] = None,
+    bias: Optional[torch.Tensor] = None,
+    cutlass_block_fp8_supported: bool = CUTLASS_BLOCK_FP8_SUPPORTED,
+    use_aiter_and_is_supported: bool = False,
+) -> torch.Tensor:
+    output_shape = [*input.shape[:-1], weight.shape[0]]
+    return torch.empty(output_shape, dtype=input.dtype, device=input.device)
+
+
+direct_register_custom_op(
+    op_name="apply_w8a8_block_fp8_linear",
+    op_func=apply_w8a8_block_fp8_linear,
+    mutates_args=[],
+    fake_impl=apply_w8a8_block_fp8_linear_fake,
+)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def input_to_float8(
         x: torch.Tensor,
         dtype: Optional[torch.dtype] = None
+<<<<<<< HEAD
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """This function quantizes input values to float8 values "
     "with tensor-wise quantization."""
     if dtype is None:
         dtype = (torch.float8_e4m3fnuz
                  if current_platform.is_rocm() else torch.float8_e4m3fn)
+=======
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """This function quantizes input values to float8 values "
+    "with tensor-wise quantization."""
+    dtype = current_platform.fp8_dtype() if dtype is None else dtype
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finfo = torch.finfo(dtype)
     min_val, max_val = x.aminmax()
     amax = torch.maximum(min_val.abs(), max_val.abs()).clamp(min=1e-12)
@@ -143,7 +324,11 @@ def input_to_float8(
 def block_quant_to_tensor_quant(
     x_q_block: torch.Tensor,
     x_s: torch.Tensor,
+<<<<<<< HEAD
 ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """This function converts block-wise quantization to tensor-wise
     quantization. The inputs are block-wise quantization tensor `x_q_block`,
     block-wise quantization scale and the block size.
@@ -261,7 +446,11 @@ def per_token_group_quant_fp8(
     eps: float = 1e-10,
     dtype: Optional[torch.dtype] = None,
     column_major_scales: bool = False,
+<<<<<<< HEAD
 ) -> Tuple[torch.Tensor, torch.Tensor]:
+=======
+) -> tuple[torch.Tensor, torch.Tensor]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Function to perform per-token-group quantization on an input tensor `x`.
     It converts the tensor values into signed float8 values and returns the
     quantized tensor along with the scaling factor used for quantization.
@@ -272,12 +461,19 @@ def per_token_group_quant_fp8(
         dtype: The dype of output tensor. Note that only `torch.float8_e4m3fn`
         is supported for now.
     Returns:
+<<<<<<< HEAD
         Tuple[torch.Tensor, torch.Tensor]: The quantized tensor and the
         scaling factor for quantization.
     """
     if dtype is None:
         dtype = (torch.float8_e4m3fnuz
                  if current_platform.is_rocm() else torch.float8_e4m3fn)
+=======
+        tuple[torch.Tensor, torch.Tensor]: The quantized tensor and the
+        scaling factor for quantization.
+    """
+    dtype = current_platform.fp8_dtype() if dtype is None else dtype
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert (x.shape[-1] % group_size == 0), (
         f"the last dimension of `x` {x.shape[-1]} must be divisible "
         f"by `group_size` {group_size}")
@@ -428,7 +624,11 @@ def _w8a8_block_fp8_matmul(
 
 @functools.lru_cache
 def get_w8a8_block_fp8_configs(N: int, K: int, block_n: int,
+<<<<<<< HEAD
                                block_k: int) -> Optional[Dict[int, Any]]:
+=======
+                               block_k: int) -> Optional[dict[int, Any]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Return optimized configurations for the w8a8 block fp8 kernel.
     The return value will be a dictionary that maps an irregular grid of
@@ -468,7 +668,11 @@ def w8a8_block_fp8_matmul(
     B: torch.Tensor,
     As: torch.Tensor,
     Bs: torch.Tensor,
+<<<<<<< HEAD
     block_size: List[int],
+=======
+    block_size: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     output_dtype: torch.dtype = torch.float16,
 ) -> torch.Tensor:
     """This function performs matrix multiplication with block-wise

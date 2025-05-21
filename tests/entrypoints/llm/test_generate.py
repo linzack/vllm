@@ -1,15 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import weakref
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 
 from vllm import LLM, RequestOutput, SamplingParams
+<<<<<<< HEAD
 from vllm.config import LoadFormat
 from vllm.distributed import cleanup_dist_env_and_memory
 
 MODEL_NAME = "s3://vllm-ci-model-weights/distilgpt2"
+=======
+from vllm.distributed import cleanup_dist_env_and_memory
+
+MODEL_NAME = "distilbert/distilgpt2"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 PROMPTS = [
     "Hello, my name is",
@@ -31,7 +40,10 @@ def llm():
     # pytest caches the fixture so we use weakref.proxy to
     # enable garbage collection
     llm = LLM(model=MODEL_NAME,
+<<<<<<< HEAD
               load_format=LoadFormat.RUNAI_STREAMER,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               max_num_batched_tokens=4096,
               tensor_parallel_size=1,
               gpu_memory_utilization=0.10,
@@ -45,7 +57,11 @@ def llm():
     cleanup_dist_env_and_memory()
 
 
+<<<<<<< HEAD
 def assert_outputs_equal(o1: List[RequestOutput], o2: List[RequestOutput]):
+=======
+def assert_outputs_equal(o1: list[RequestOutput], o2: list[RequestOutput]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert [o.outputs for o in o1] == [o.outputs for o in o2]
 
 

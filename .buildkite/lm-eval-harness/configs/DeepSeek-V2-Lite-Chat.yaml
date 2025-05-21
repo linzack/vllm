@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# For vllm script, with -t option (tensor parallel size).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # bash ./run-lm-eval-gsm-vllm-baseline.sh -m deepseek-ai/DeepSeek-V2-Lite-Chat -b "auto" -l 1000 -f 5 -t 2
 model_name: "deepseek-ai/DeepSeek-V2-Lite-Chat"
 tasks:

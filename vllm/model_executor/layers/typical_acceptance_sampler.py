@@ -107,6 +107,7 @@ class TypicalAcceptanceSampler(SpecDecodeDeterministicBaseSampler):
         A draft token_id x_{n+k} is accepted if it satisfies the
         following condition
     
+<<<<<<< HEAD
         .. math::
             p_{\text{original}}(x_{n+k} | x_1, x_2, \dots, x_{n+k-1}) > 
             \min \left( \epsilon, \delta * \exp \left(
@@ -115,6 +116,17 @@ class TypicalAcceptanceSampler(SpecDecodeDeterministicBaseSampler):
         
         where :math:`p_{\text{original}}` corresponds to target_probs 
         and :math:`\epsilon` and :math:`\delta` correspond to hyperparameters
+=======
+        :::{math}
+        p_{\text{original}}(x_{n+k} | x_1, x_2, \dots, x_{n+k-1}) > 
+        \min \left( \epsilon, \delta * \exp \left(
+            -H(p_{\text{original}}(
+                \cdot | x_1, x_2, \ldots, x_{n+k-1})) \right) \right)
+        :::
+        
+        where {math}`p_{\text{original}}` corresponds to target_probs 
+        and {math}`\epsilon` and {math}`\delta` correspond to hyperparameters
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         specified using self._posterior_threshold and self._posterior_alpha
 
         This method computes the posterior probabilities for the given

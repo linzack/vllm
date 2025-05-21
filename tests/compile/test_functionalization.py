@@ -5,19 +5,31 @@ import torch
 
 import vllm.envs as envs
 from vllm import LLM, SamplingParams
+<<<<<<< HEAD
+=======
+from vllm.compilation.activation_quant_fusion import ActivationQuantFusionPass
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.compilation.fix_functionalization import FixFunctionalizationPass
 from vllm.compilation.fusion import (FUSED_OPS, FusionPass, QuantKey,
                                      kFp8DynamicTokenSym, kFp8StaticTensorSym)
 from vllm.compilation.fx_utils import find_auto_fn, find_auto_fn_maybe, is_func
+<<<<<<< HEAD
 from vllm.compilation.reshapes import RedundantReshapesPass
 from vllm.config import CompilationConfig
+=======
+from vllm.compilation.noop_elimination import NoOpEliminationPass
+from vllm.config import CompilationConfig, PassConfig, VllmConfig
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .backend import TestBackend
 
 OPS_IN_MODEL = [
     torch.ops._C.rotary_embedding.default,
     torch.ops._C.fused_add_rms_norm.default,
+<<<<<<< HEAD
     torch.ops._C.silu_and_mul.default,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ]
 
 RMS_OP = torch.ops._C.rms_norm.default
@@ -29,6 +41,12 @@ RMS_QUANT_OPS = {
     ],
 }
 
+<<<<<<< HEAD
+=======
+SILU_MUL_OP = torch.ops._C.silu_and_mul.default
+
+SILU_MUL_QUANT_OP = torch.ops._C.silu_and_mul_quant.default
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 prompts = [
     "Hello, my name is",
     "The president of the United States is",
@@ -49,6 +67,7 @@ def test_fix_functionalization(model: str, quant_key: QuantKey,
                                do_fusion: bool):
     torch.set_default_device("cuda")
 
+<<<<<<< HEAD
     config = CompilationConfig.PassConfig(enable_fusion=do_fusion,
                                           enable_reshape=True)
     reshape_pass = RedundantReshapesPass(config)
@@ -56,6 +75,18 @@ def test_fix_functionalization(model: str, quant_key: QuantKey,
 
     passes = [reshape_pass, fusion_pass] if do_fusion else [reshape_pass]
     func_pass = FixFunctionalizationPass(config)
+=======
+    vllm_config = VllmConfig()
+    vllm_config.compilation_config = CompilationConfig(
+        pass_config=PassConfig(enable_fusion=do_fusion, enable_noop=True))
+    noop_pass = NoOpEliminationPass(vllm_config)
+    fusion_pass = FusionPass.instance(vllm_config)
+    act_quant_fusion_pass = ActivationQuantFusionPass(vllm_config)
+
+    passes = [noop_pass, fusion_pass, act_quant_fusion_pass
+              ] if do_fusion else [noop_pass]
+    func_pass = FixFunctionalizationPass(vllm_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     backend_func = TestBackend(*passes, func_pass)
     backend_no_func = TestBackend(*passes)
 
@@ -77,6 +108,10 @@ def test_fix_functionalization(model: str, quant_key: QuantKey,
     model_runner.model = torch.compile(orig_model,
                                        fullgraph=True,
                                        backend=backend_no_func)
+<<<<<<< HEAD
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     gen_no_func = llm.generate(prompts, sampling_params)
 
     for output_func, output_no_func in zip(gen_func, gen_no_func):
@@ -86,7 +121,16 @@ def test_fix_functionalization(model: str, quant_key: QuantKey,
     # and replaced by fused quantized ops in RMS_QUANT_OPS.
     rms_ops = [FUSED_OPS[(quant_key, True)], FUSED_OPS[(quant_key, False)]
                ] if do_fusion else [RMS_OP]
+<<<<<<< HEAD
     ops = OPS_IN_MODEL + rms_ops
+=======
+    silu_mul_ops = [SILU_MUL_QUANT_OP] if do_fusion and \
+        quant_key == kFp8StaticTensorSym else [
+        SILU_MUL_OP
+    ]
+
+    ops = OPS_IN_MODEL + rms_ops + silu_mul_ops
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for op in ops:
         find_auto_fn(backend_no_func.graph_post_pass.nodes, op)

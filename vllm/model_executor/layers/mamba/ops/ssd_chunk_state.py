@@ -8,8 +8,13 @@
 import math
 
 import torch
+<<<<<<< HEAD
 import triton
 import triton.language as tl
+=======
+
+from vllm.triton_utils import tl, triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .mamba_ssm import softplus
 

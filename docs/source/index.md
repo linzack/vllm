@@ -43,7 +43,11 @@ vLLM is flexible and easy to use with:
 - Tensor parallelism and pipeline parallelism support for distributed inference
 - Streaming outputs
 - OpenAI-compatible API server
+<<<<<<< HEAD
 - Support NVIDIA GPUs, AMD CPUs and GPUs, Intel CPUs, Gaudi® accelerators and GPUs, PowerPC CPUs, TPU, and AWS Trainium and Inferentia Accelerators.
+=======
+- Support NVIDIA GPUs, AMD CPUs and GPUs, Intel CPUs, Gaudi® accelerators and GPUs, IBM Power CPUs, TPU, and AWS Trainium and Inferentia Accelerators.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 - Prefix caching support
 - Multi-lora support
 
@@ -62,11 +66,20 @@ For more information, check out the following:
 :caption: Getting Started
 :maxdepth: 1
 
+<<<<<<< HEAD
 getting_started/installation/index
+=======
+getting_started/installation
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 getting_started/quickstart
 getting_started/examples/examples_index
 getting_started/troubleshooting
 getting_started/faq
+<<<<<<< HEAD
+=======
+getting_started/v1_user_guide
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :::
 
 % What does vLLM support?
@@ -75,9 +88,15 @@ getting_started/faq
 :caption: Models
 :maxdepth: 1
 
+<<<<<<< HEAD
 models/generative_models
 models/pooling_models
 models/supported_models
+=======
+models/supported_models
+models/generative_models
+models/pooling_models
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 models/extensions/index
 :::
 
@@ -88,6 +107,11 @@ models/extensions/index
 :maxdepth: 1
 
 features/quantization/index
+<<<<<<< HEAD
+=======
+features/multimodal_inputs
+features/prompt_embeds
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 features/lora
 features/tool_calling
 features/reasoning_outputs
@@ -101,12 +125,28 @@ features/compatibility_matrix
 % Details about running vLLM
 
 :::{toctree}
+<<<<<<< HEAD
+=======
+:caption: Training
+:maxdepth: 1
+
+training/trl.md
+training/rlhf.md
+
+:::
+
+:::{toctree}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :caption: Inference and Serving
 :maxdepth: 1
 
 serving/offline_inference
 serving/openai_compatible_server
+<<<<<<< HEAD
 serving/multimodal_inputs
+=======
+serving/serve_args
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 serving/distributed_serving
 serving/metrics
 serving/engine_args
@@ -121,6 +161,10 @@ serving/integrations/index
 :caption: Deployment
 :maxdepth: 1
 
+<<<<<<< HEAD
+=======
+deployment/security
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 deployment/docker
 deployment/k8s
 deployment/nginx
@@ -157,7 +201,13 @@ design/multiprocessing
 :caption: V1 Design Documents
 :maxdepth: 2
 
+<<<<<<< HEAD
 design/v1/prefix_caching
+=======
+design/v1/torch_compile
+design/v1/prefix_caching
+design/v1/metrics
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :::
 
 % How to contribute to the vLLM project
@@ -167,6 +217,10 @@ design/v1/prefix_caching
 :maxdepth: 2
 
 contributing/overview
+<<<<<<< HEAD
+=======
+contributing/deprecation_policy
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 contributing/profiling/profiling_index
 contributing/dockerfile/dockerfile
 contributing/model/index
@@ -179,11 +233,16 @@ contributing/vulnerability_management
 :caption: API Reference
 :maxdepth: 2
 
+<<<<<<< HEAD
 api/offline_inference/index
 api/engine/index
 api/inference_params
 api/multimodal/index
 api/model/index
+=======
+api/summary
+api/vllm/vllm
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 :::
 
 % Latest news and acknowledgements

@@ -419,7 +419,11 @@ List of `v_vec` for one thread
   which is also `V_VEC_SIZE` elements from `logits`. Overall, with
   multiple inner iterations, each warp will process one block of value
   tokens. And with multiple outer iterations, the whole context value
+<<<<<<< HEAD
   tokens are processd
+=======
+  tokens are processed
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
   ```cpp
   float accs[NUM_ROWS_PER_THREAD];

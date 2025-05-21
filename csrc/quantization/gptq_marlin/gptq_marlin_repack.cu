@@ -15,7 +15,11 @@ __global__ void gptq_marlin_repack_kernel(
   int n_tiles = size_n / tile_n_size;
   int block_k_tiles = div_ceil(k_tiles, gridDim.x);
 
+<<<<<<< HEAD
   int start_k_tile = blockIdx.x * block_k_tiles;
+=======
+  auto start_k_tile = blockIdx.x * block_k_tiles;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   if (start_k_tile >= k_tiles) {
     return;
   }
@@ -71,8 +75,13 @@ __global__ void gptq_marlin_repack_kernel(
 
     if constexpr (has_perm) {
       if (threadIdx.x < stage_size) {
+<<<<<<< HEAD
         int k_id = threadIdx.x / stage_n_threads;
         int n_id = threadIdx.x % stage_n_threads;
+=======
+        auto k_id = threadIdx.x / stage_n_threads;
+        auto n_id = threadIdx.x % stage_n_threads;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         uint32_t const* sh_perm_int_ptr =
             reinterpret_cast<uint32_t const*>(sh_perm_ptr);
@@ -88,8 +97,13 @@ __global__ void gptq_marlin_repack_kernel(
 
     } else {
       if (threadIdx.x < stage_size) {
+<<<<<<< HEAD
         int k_id = threadIdx.x / stage_n_threads;
         int n_id = threadIdx.x % stage_n_threads;
+=======
+        auto k_id = threadIdx.x / stage_n_threads;
+        auto n_id = threadIdx.x % stage_n_threads;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         int first_k = k_tile_id * tile_k_size;
         int first_k_packed = first_k / pack_factor;
@@ -109,8 +123,13 @@ __global__ void gptq_marlin_repack_kernel(
       return;
     }
 
+<<<<<<< HEAD
     int warp_id = threadIdx.x / 32;
     int th_id = threadIdx.x % 32;
+=======
+    auto warp_id = threadIdx.x / 32;
+    auto th_id = threadIdx.x % 32;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     if (warp_id >= 4) {
       return;
@@ -339,4 +358,8 @@ TORCH_LIBRARY_IMPL_EXPAND(TORCH_EXTENSION_NAME, CUDA, m) {
 
 TORCH_LIBRARY_IMPL_EXPAND(TORCH_EXTENSION_NAME, Meta, m) {
   m.impl("gptq_marlin_repack", &gptq_marlin_repack_meta);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

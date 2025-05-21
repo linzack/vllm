@@ -28,7 +28,10 @@ from vllm.model_executor.model_loader.tensorizer import (TensorizerConfig,
 from vllm.utils import PlaceholderModule, import_from_path
 
 from ..utils import VLLM_PATH, RemoteOpenAIServer
+<<<<<<< HEAD
 from .conftest import retry_until_skip
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 try:
     from tensorizer import EncryptionParams
@@ -166,7 +169,11 @@ def test_vllm_model_can_load_with_lora(vllm_runner, tmp_path):
     test_prompts = multilora_inference.create_test_prompts(lora_path)
 
     # Serialize model before deserializing and binding LoRA adapters
+<<<<<<< HEAD
     with vllm_runner(model_ref, ) as vllm_model:
+=======
+    with vllm_runner(model_ref) as vllm_model:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_path = tmp_path / (model_ref + ".tensors")
 
         vllm_model.apply_model(
@@ -208,7 +215,11 @@ def test_load_without_tensorizer_load_format(vllm_runner):
 @pytest.mark.skipif(not is_curl_installed(), reason="cURL is not installed")
 def test_openai_apiserver_with_tensorizer(vllm_runner, tmp_path):
     ## Serialize model
+<<<<<<< HEAD
     with vllm_runner(model_ref, ) as vllm_model:
+=======
+    with vllm_runner(model_ref) as vllm_model:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_path = tmp_path / (model_ref + ".tensors")
 
         vllm_model.apply_model(
@@ -325,7 +336,11 @@ def test_deserialized_encrypted_vllm_model_with_tp_has_same_outputs(
     assert outputs == deserialized_outputs
 
 
+<<<<<<< HEAD
 @retry_until_skip(3)
+=======
+@pytest.mark.flaky(reruns=3)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_vllm_tensorized_model_has_same_outputs(vllm_runner, tmp_path):
     gc.collect()
     torch.cuda.empty_cache()

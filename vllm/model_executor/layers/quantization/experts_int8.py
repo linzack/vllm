@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional
+=======
+from typing import Any, Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -8,6 +12,10 @@ from vllm.distributed import get_tensor_model_parallel_rank, get_tp_group
 from vllm.model_executor.layers.fused_moe import FusedMoE, FusedMoEMethodBase
 from vllm.model_executor.layers.linear import (LinearBase,
                                                UnquantizedLinearMethod)
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig, QuantizeMethodBase)
 from vllm.model_executor.utils import set_weight_attrs
@@ -20,11 +28,19 @@ class ExpertsInt8Config(QuantizationConfig):
         super().__init__()
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "experts_int8"
 
     @classmethod
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "experts_int8"
+
+    @classmethod
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.bfloat16, torch.half]
 
     @classmethod
@@ -32,11 +48,19 @@ class ExpertsInt8Config(QuantizationConfig):
         return 80
 
     @classmethod
+<<<<<<< HEAD
     def get_config_filenames(cls) -> List[str]:
         return []
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ExpertsInt8Config":
+=======
+    def get_config_filenames(cls) -> list[str]:
+        return []
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "ExpertsInt8Config":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return cls()
 
     def get_quant_method(self, layer: torch.nn.Module,
@@ -108,9 +132,19 @@ class ExpertsInt8MoEMethod(FusedMoEMethodBase):
         use_grouped_topk: bool = False,
         topk_group: Optional[int] = None,
         num_expert_group: Optional[int] = None,
+<<<<<<< HEAD
         custom_routing_function: Optional[Callable] = None,
         scoring_func: str = "softmax",
         e_score_correction_bias: Optional[torch.Tensor] = None,
+=======
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+        custom_routing_function: Optional[Callable] = None,
+        scoring_func: str = "softmax",
+        e_score_correction_bias: Optional[torch.Tensor] = None,
+        apply_router_weight_on_input: bool = False,
+        activation: str = "silu",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         from vllm.model_executor.layers.fused_moe import fused_experts
 
@@ -126,6 +160,7 @@ class ExpertsInt8MoEMethod(FusedMoEMethodBase):
             scoring_func=scoring_func,
             e_score_correction_bias=e_score_correction_bias)
 
+<<<<<<< HEAD
         return fused_experts(x,
                              layer.w13_weight,
                              layer.w2_weight,
@@ -135,6 +170,22 @@ class ExpertsInt8MoEMethod(FusedMoEMethodBase):
                              use_int8_w8a16=True,
                              w1_scale=layer.w13_scale,
                              w2_scale=layer.w2_scale)
+=======
+        return fused_experts(
+            x,
+            layer.w13_weight,
+            layer.w2_weight,
+            topk_weights=topk_weights,
+            topk_ids=topk_ids,
+            inplace=True,
+            activation=activation,
+            use_int8_w8a16=True,
+            global_num_experts=global_num_experts,
+            apply_router_weight_on_input=apply_router_weight_on_input,
+            expert_map=expert_map,
+            w1_scale=layer.w13_scale,
+            w2_scale=layer.w2_scale)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def quantizing_weight_loader(layer, weight_loader):

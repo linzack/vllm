@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Utils for model executor."""
+<<<<<<< HEAD
 from typing import Any, Dict, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -12,7 +16,11 @@ def set_random_seed(seed: int) -> None:
 
 def set_weight_attrs(
     weight: torch.Tensor,
+<<<<<<< HEAD
     weight_attrs: Optional[Dict[str, Any]],
+=======
+    weight_attrs: Optional[dict[str, Any]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ):
     """Set attributes on a weight tensor.
 

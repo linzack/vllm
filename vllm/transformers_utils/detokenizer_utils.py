@@ -1,11 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List, Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .tokenizer import AnyTokenizer
 
 
+<<<<<<< HEAD
 def _replace_none_with_empty(tokens: List[Optional[str]]):
+=======
+def _replace_none_with_empty(tokens: list[Optional[str]]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for i, token in enumerate(tokens):
         if token is None:
             tokens[i] = ""
@@ -13,7 +21,11 @@ def _replace_none_with_empty(tokens: List[Optional[str]]):
 
 def _convert_tokens_to_string_with_added_encoders(
     tokenizer: AnyTokenizer,
+<<<<<<< HEAD
     output_tokens: List[str],
+=======
+    output_tokens: list[str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     skip_special_tokens: bool,
     spaces_between_special_tokens: bool,
 ) -> str:
@@ -22,8 +34,13 @@ def _convert_tokens_to_string_with_added_encoders(
     # NOTE(woosuk): The following code is slow because it runs a for loop over
     # the output_tokens. In Python, running a for loop over a list can be slow
     # even when the loop body is very simple.
+<<<<<<< HEAD
     sub_texts: List[str] = []
     current_sub_text: List[str] = []
+=======
+    sub_texts: list[str] = []
+    current_sub_text: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     all_special_tokens = set(tokenizer.all_special_tokens)
     for token in output_tokens:
         if skip_special_tokens and token in all_special_tokens:
@@ -52,9 +69,15 @@ INITIAL_INCREMENTAL_DETOKENIZATION_OFFSET = 5
 
 def convert_prompt_ids_to_tokens(
     tokenizer: AnyTokenizer,
+<<<<<<< HEAD
     prompt_ids: List[int],
     skip_special_tokens: bool = False,
 ) -> Tuple[List[str], int, int]:
+=======
+    prompt_ids: list[int],
+    skip_special_tokens: bool = False,
+) -> tuple[list[str], int, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Converts the prompt ids to tokens and returns the tokens and offsets
     for incremental detokenization.
 
@@ -76,8 +99,13 @@ def convert_prompt_ids_to_tokens(
 
 def convert_ids_list_to_tokens(
     tokenizer: AnyTokenizer,
+<<<<<<< HEAD
     token_ids: List[int],
 ) -> List[str]:
+=======
+    token_ids: list[int],
+) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Detokenize the input ids individually.
 
     Args:
@@ -98,13 +126,22 @@ def convert_ids_list_to_tokens(
 # under Apache 2.0 license
 def detokenize_incrementally(
     tokenizer: AnyTokenizer,
+<<<<<<< HEAD
     all_input_ids: List[int],
     prev_tokens: Optional[List[str]],
+=======
+    all_input_ids: list[int],
+    prev_tokens: Optional[list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     prefix_offset: int,
     read_offset: int,
     skip_special_tokens: bool = False,
     spaces_between_special_tokens: bool = True,
+<<<<<<< HEAD
 ) -> Tuple[List[str], str, int, int]:
+=======
+) -> tuple[list[str], str, int, int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """Detokenizes the input ids incrementally and returns the new tokens
     and the new text.
 

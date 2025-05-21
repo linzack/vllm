@@ -3,10 +3,17 @@
 within a vision language model."""
 
 import math
+<<<<<<< HEAD
 from typing import Iterable, Optional, Set, Tuple, Union
 
 import torch
 from PIL import Image
+=======
+from collections.abc import Iterable
+from typing import Optional, Union
+
+import torch
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from torch import nn
 from transformers import SiglipVisionConfig
 
@@ -20,12 +27,16 @@ from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
+<<<<<<< HEAD
 from vllm.multimodal.utils import consecutive_placeholder_ranges
 from vllm.sequence import SequenceData
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from .vision import VisionEncoderInfo, resolve_visual_encoder_outputs
 
 
+<<<<<<< HEAD
 def get_siglip_patch_grid_length(*, image_size: int, patch_size: int) -> int:
     # Since interpolation is applied, the image size need not be divisible
     # assert image_size % patch_size == 0
@@ -88,6 +99,8 @@ def dummy_image_for_siglip(
     return {"image": image if num_images == 1 else [image] * num_images}
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 class SiglipEncoderInfo(VisionEncoderInfo[SiglipVisionConfig]):
 
     def get_num_image_tokens(
@@ -96,10 +109,14 @@ class SiglipEncoderInfo(VisionEncoderInfo[SiglipVisionConfig]):
         image_width: int,
         image_height: int,
     ) -> int:
+<<<<<<< HEAD
         return get_siglip_image_feature_size(self.vision_config)
 
     def get_max_image_tokens(self) -> int:
         return get_max_siglip_image_tokens(self.vision_config)
+=======
+        return self.get_patch_grid_length()**2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def get_image_size(self) -> int:
         return self.vision_config.image_size
@@ -108,10 +125,15 @@ class SiglipEncoderInfo(VisionEncoderInfo[SiglipVisionConfig]):
         return self.vision_config.patch_size
 
     def get_patch_grid_length(self) -> int:
+<<<<<<< HEAD
         return get_siglip_patch_grid_length(
             image_size=self.vision_config.image_size,
             patch_size=self.vision_config.patch_size,
         )
+=======
+        image_size, patch_size = self.get_image_size(), self.get_patch_size()
+        return image_size // patch_size
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 # Adapted from https://github.com/huggingface/transformers/blob/v4.43.3/src/transformers/models/siglip/modeling_siglip.py#L249 # noqa
@@ -275,8 +297,15 @@ class SiglipMLP(nn.Module):
 
         self.config = config
         self.activation_fn = get_act_fn(config.hidden_act)
+<<<<<<< HEAD
         # Special handling for BNB quantization
         if quant_config and quant_config.get_name() == "bitsandbytes":
+=======
+        # Special handling for BNB and torchao quantization
+        if quant_config and quant_config.get_name() in [
+                "bitsandbytes", "torchao"
+        ]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             quantizable = True
         else:
             # For other quantization, we require the hidden size to be a
@@ -333,7 +362,11 @@ class SiglipEncoderLayer(nn.Module):
     def forward(
         self,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
     ) -> Tuple[torch.Tensor, None]:
+=======
+    ) -> tuple[torch.Tensor, None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         residual = hidden_states
 
         hidden_states = self.layer_norm1(hidden_states)
@@ -548,8 +581,13 @@ class SiglipVisionModel(nn.Module):
             feature_sample_layers=feature_sample_layers,
         )
 
+<<<<<<< HEAD
     def load_weights(self, weights: Iterable[Tuple[str,
                                                    torch.Tensor]]) -> Set[str]:
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         stacked_params_mapping = [
             # (param_name, shard_name, shard_id)
             ("qkv_proj", "q_proj", "q"),
@@ -557,7 +595,11 @@ class SiglipVisionModel(nn.Module):
             ("qkv_proj", "v_proj", "v"),
         ]
         params_dict = dict(self.named_parameters())
+<<<<<<< HEAD
         loaded_params: Set[str] = set()
+=======
+        loaded_params: set[str] = set()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         layer_count = len(self.vision_model.encoder.layers)
 
         for name, loaded_weight in weights:

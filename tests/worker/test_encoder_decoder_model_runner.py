@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import itertools
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import torch
@@ -43,7 +46,11 @@ def test_empty_seq_group():
         enable_chunked_prefill=False,
         enforce_eager=True,
     )
+<<<<<<< HEAD
     seq_group_metadata_list: List[SequenceGroupMetadata] = []
+=======
+    seq_group_metadata_list: list[SequenceGroupMetadata] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     model_input = model_runner._prepare_model_input_tensors(
         seq_group_metadata_list)
     (
@@ -103,9 +110,15 @@ def test_prepare_prompt(batch_size):
         enforce_eager=True,
     )
 
+<<<<<<< HEAD
     seq_lens: List[int] = []
     encoder_seq_lens: List[int] = []
     seq_group_metadata_list: List[SequenceGroupMetadata] = []
+=======
+    seq_lens: list[int] = []
+    encoder_seq_lens: list[int] = []
+    seq_group_metadata_list: list[SequenceGroupMetadata] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     block_tables = {0: [1]}
     cross_block_table = [2]
     for i in range(batch_size):
@@ -295,9 +308,15 @@ def test_prepare_decode(batch_size, multiple_seqs_per_seq_group):
         enforce_eager=True,
     )
 
+<<<<<<< HEAD
     seq_lens: List[int] = []
     encoder_seq_lens: List[int] = []
     seq_group_metadata_list: List[SequenceGroupMetadata] = []
+=======
+    seq_lens: list[int] = []
+    encoder_seq_lens: list[int] = []
+    seq_group_metadata_list: list[SequenceGroupMetadata] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     block_tables = {
         0: [1],
         1: [3]
@@ -503,9 +522,15 @@ def test_prepare_decode_cuda_graph(batch_size, multiple_seqs_per_seq_group):
     } if multiple_seqs_per_seq_group else {
         0: [1]
     }
+<<<<<<< HEAD
     seq_lens: List[int] = []
     encoder_seq_lens: List[int] = []
     seq_group_metadata_list: List[SequenceGroupMetadata] = []
+=======
+    seq_lens: list[int] = []
+    encoder_seq_lens: list[int] = []
+    seq_group_metadata_list: list[SequenceGroupMetadata] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     cross_block_table = [2]
     expanded_batch_size = 0

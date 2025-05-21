@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 
 import vllm
@@ -13,7 +16,11 @@ MODEL_PATH = "baichuan-inc/Baichuan-7B"
 PROMPT_TEMPLATE = """I want you to act as a SQL terminal in front of an example database, you need only to return the sql command to me.Below is an instruction that describes a task, Write a response that appropriately completes the request.\n"\n##Instruction:\nconcert_singer contains tables such as stadium, singer, concert, singer_in_concert. Table stadium has columns such as Stadium_ID, Location, Name, Capacity, Highest, Lowest, Average. Stadium_ID is the primary key.\nTable singer has columns such as Singer_ID, Name, Country, Song_Name, Song_release_year, Age, Is_male. Singer_ID is the primary key.\nTable concert has columns such as concert_ID, concert_Name, Theme, Stadium_ID, Year. concert_ID is the primary key.\nTable singer_in_concert has columns such as concert_ID, Singer_ID. concert_ID is the primary key.\nThe Stadium_ID of concert is the foreign key of Stadium_ID of stadium.\nThe Singer_ID of singer_in_concert is the foreign key of Singer_ID of singer.\nThe concert_ID of singer_in_concert is the foreign key of concert_ID of concert.\n\n###Input:\n{query}\n\n###Response:"""  # noqa: E501
 
 
+<<<<<<< HEAD
 def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
+=======
+def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     prompts = [
         PROMPT_TEMPLATE.format(query="How many singers do we have?"),
         PROMPT_TEMPLATE.format(
@@ -33,7 +40,11 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
         lora_request=LoRARequest(str(lora_id), lora_id, lora_path)
         if lora_id else None)
     # Print the outputs.
+<<<<<<< HEAD
     generated_texts: List[str] = []
+=======
+    generated_texts: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text.strip()
@@ -42,6 +53,7 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
     return generated_texts
 
 
+<<<<<<< HEAD
 @pytest.fixture(autouse=True)
 def v1(run_with_both_engines_lora):
     # Simple autouse wrapper to run both engines for each test
@@ -50,6 +62,8 @@ def v1(run_with_both_engines_lora):
     pass
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_baichuan_lora(baichuan_lora_files):
     llm = vllm.LLM(MODEL_PATH,
                    max_model_len=1024,
@@ -83,7 +97,10 @@ def test_baichuan_tensor_parallel_equality(baichuan_lora_files,
                        max_num_seqs=16,
                        max_loras=4,
                        max_lora_rank=64,
+<<<<<<< HEAD
                        tensor_parallel_size=1,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        trust_remote_code=True,
                        fully_sharded_loras=fully_sharded)
     output_tp1 = do_sample(llm_tp1, baichuan_lora_files, lora_id=1)

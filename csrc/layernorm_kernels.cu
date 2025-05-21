@@ -140,6 +140,13 @@ void rms_norm(torch::Tensor& out,     // [..., hidden_size]
               torch::Tensor& input,   // [..., hidden_size]
               torch::Tensor& weight,  // [hidden_size]
               double epsilon) {
+<<<<<<< HEAD
+=======
+  TORCH_CHECK(out.is_contiguous());
+  TORCH_CHECK(input.is_contiguous());
+  TORCH_CHECK(weight.is_contiguous());
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   int hidden_size = input.size(-1);
   int num_tokens = input.numel() / hidden_size;
 

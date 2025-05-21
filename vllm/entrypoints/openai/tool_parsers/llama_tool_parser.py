@@ -2,13 +2,23 @@
 
 import json
 import re
+<<<<<<< HEAD
 from json import JSONDecoder
 from typing import Dict, List, Sequence, Union
+=======
+from collections.abc import Sequence
+from json import JSONDecoder
+from typing import Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import partial_json_parser
 from partial_json_parser.core.options import Allow
 from transformers import PreTrainedTokenizerBase
 
+<<<<<<< HEAD
+=======
+from vllm.entrypoints.chat_utils import random_tool_call_id
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.entrypoints.openai.protocol import (ChatCompletionRequest,
                                               DeltaFunctionCall, DeltaMessage,
                                               DeltaToolCall,
@@ -20,12 +30,19 @@ from vllm.entrypoints.openai.tool_parsers.utils import (find_common_prefix,
                                                         is_complete_json,
                                                         partial_json_loads)
 from vllm.logger import init_logger
+<<<<<<< HEAD
 from vllm.utils import random_uuid
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
 
 @ToolParserManager.register_module("llama3_json")
+<<<<<<< HEAD
+=======
+@ToolParserManager.register_module("llama4_json")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 class Llama3JsonToolParser(ToolParser):
     """
     Tool call parser for Llama 3.1 models intended for use with the
@@ -40,10 +57,17 @@ class Llama3JsonToolParser(ToolParser):
 
         # initialize properties used for state when parsing tool calls in
         # streaming mode
+<<<<<<< HEAD
         self.prev_tool_call_arr: List[Dict] = []
         self.current_tool_id: int = -1
         self.current_tool_name_sent: bool = False
         self.streamed_args_for_tool: List[str] = [
+=======
+        self.prev_tool_call_arr: list[dict] = []
+        self.current_tool_id: int = -1
+        self.current_tool_name_sent: bool = False
+        self.streamed_args_for_tool: list[str] = [
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         ]  # map what has been streamed for each tool so far to a list
         self.bot_token = "<|python_tag|>"
         self.bot_token_id = tokenizer.encode(self.bot_token,
@@ -78,7 +102,11 @@ class Llama3JsonToolParser(ToolParser):
                 start_idx += end_idx + len('; ')
                 function_call_arr.append(obj)
 
+<<<<<<< HEAD
             tool_calls: List[ToolCall] = [
+=======
+            tool_calls: list[ToolCall] = [
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 ToolCall(
                     type="function",
                     function=FunctionCall(
@@ -152,7 +180,11 @@ class Llama3JsonToolParser(ToolParser):
                 return None
 
             # select as the current tool call the one we're on the state at
+<<<<<<< HEAD
             current_tool_call: Dict = tool_call_arr[self.current_tool_id] \
+=======
+            current_tool_call: dict = tool_call_arr[self.current_tool_id] \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 if len(tool_call_arr) > 0 else {}
 
             # case -- if no tokens have been streamed for the tool, e.g.
@@ -206,7 +238,11 @@ class Llama3JsonToolParser(ToolParser):
                     delta = DeltaMessage(tool_calls=[
                         DeltaToolCall(index=self.current_tool_id,
                                       type="function",
+<<<<<<< HEAD
                                       id=f"chatcmpl-tool-{random_uuid()}",
+=======
+                                      id=random_tool_call_id(),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                       function=DeltaFunctionCall(
                                           name=function_name).model_dump(
                                               exclude_none=True))

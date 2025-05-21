@@ -226,7 +226,11 @@ class PromptAdapterModelManager(AdapterModelManager):
     def pin_adapter(self, prompt_adapter_id: int) -> bool:
         """Pin a PromptAdapterModel in the manager cache."""
         raise NotImplementedError(
+<<<<<<< HEAD
             "Pinning is not supported in PromptAdapterModelManager."
+=======
+            "Pinning is not supported in PromptAdapterModelManager. "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "Use LRUCachePromptAdapterModelManager for pinning"
         )  # type: ignore
 

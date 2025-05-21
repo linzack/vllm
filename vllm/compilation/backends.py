@@ -5,8 +5,14 @@ import dataclasses
 import os
 import pprint
 import time
+<<<<<<< HEAD
 from contextlib import ExitStack
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
+=======
+from collections.abc import Sequence
+from contextlib import ExitStack
+from typing import Any, Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from unittest.mock import patch
 
 import torch
@@ -17,7 +23,12 @@ from vllm.config import CompilationConfig, VllmConfig
 from vllm.logger import init_logger
 from vllm.utils import weak_ref_tensors
 
+<<<<<<< HEAD
 from .compiler_interface import EagerAdaptor, InductorAdaptor
+=======
+from .compiler_interface import (CompilerInterface, EagerAdaptor,
+                                 InductorAdaptor, InductorStandaloneAdaptor)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .counter import compilation_counter
 from .inductor_pass import InductorPass
 from .monitor import end_monitoring_torch_compile
@@ -26,6 +37,22 @@ from .pass_manager import PostGradPassManager
 logger = init_logger(__name__)
 
 
+<<<<<<< HEAD
+=======
+def make_compiler(compilation_config: CompilationConfig) -> CompilerInterface:
+    if compilation_config.use_inductor:
+        if envs.VLLM_TEST_STANDALONE_COMPILE:
+            logger.info("Using InductorStandaloneAdaptor")
+            return InductorStandaloneAdaptor()
+        else:
+            logger.info("Using InductorAdaptor")
+            return InductorAdaptor()
+    else:
+        logger.info("Using EagerAdaptor")
+        return EagerAdaptor()
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 class CompilerManager:
     """
     A manager to manage the compilation process, including
@@ -41,10 +68,18 @@ class CompilerManager:
     support int as key.
     """
 
+<<<<<<< HEAD
     def __init__(self, use_inductor: bool):
         self.cache: Dict[Tuple[Optional[int], int, str], Any] = dict()
         cls = InductorAdaptor if use_inductor else EagerAdaptor
         self.compiler = cls()
+=======
+    def __init__(self, compilation_config: CompilationConfig):
+        self.cache: dict[tuple[Optional[int], int, str], Any] = dict()
+        self.is_cache_updated = False
+        self.compilation_config = compilation_config
+        self.compiler = make_compiler(compilation_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def compute_hash(self, vllm_config: VllmConfig) -> str:
         return self.compiler.compute_hash(vllm_config)
@@ -66,16 +101,28 @@ class CompilerManager:
                                        disable_cache=disable_cache)
 
     def save_to_file(self):
+<<<<<<< HEAD
         if self.disable_cache:
             return
         with open(self.cache_file_path, "w") as f:
             printer = pprint.PrettyPrinter(indent=4)
             data = printer.pformat(self.cache)
+=======
+        if self.disable_cache or not self.is_cache_updated:
+            return
+        printer = pprint.PrettyPrinter(indent=4)
+        data = printer.pformat(self.cache)
+        with open(self.cache_file_path, "w") as f:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             f.write(data)
 
     def load(self,
              graph: fx.GraphModule,
+<<<<<<< HEAD
              example_inputs: List[Any],
+=======
+             example_inputs: list[Any],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
              graph_index: int,
              runtime_shape: Optional[int] = None) -> Optional[Callable]:
         if (runtime_shape, graph_index, self.compiler.name) not in self.cache:
@@ -110,16 +157,39 @@ class CompilerManager:
         compiled_graph = self.load(graph, example_inputs, graph_index,
                                    runtime_shape)
         if compiled_graph is not None:
+<<<<<<< HEAD
             if graph_index == 0:
                 # adds some info logging for the first graph
                 logger.info("Directly load the compiled graph for shape %s "
                             "from the cache", str(runtime_shape))  # noqa
+=======
+            if graph_index == num_graphs - 1:
+                # after loading the last graph for this shape, record the time.
+                # there can be multiple graphs due to piecewise compilation.
+                now = time.time()
+                elapsed = now - compilation_start_time
+                logger.info(
+                    "Directly load the compiled graph(s) for shape %s "
+                    "from the cache, took %.3f s", str(runtime_shape), elapsed)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return compiled_graph
 
         # no compiler cached the graph, or the cache is disabled,
         # we need to compile it
+<<<<<<< HEAD
         compiled_graph, handle = self.compiler.compile(
             graph, example_inputs, additional_inductor_config, runtime_shape)
+=======
+        if isinstance(self.compiler, InductorAdaptor):
+            # Let compile_fx generate a key for us
+            maybe_key = None
+        else:
+            maybe_key = \
+                f"artifact_shape_{runtime_shape}_subgraph_{graph_index}"
+        compiled_graph, handle = self.compiler.compile(
+            graph, example_inputs, additional_inductor_config, runtime_shape,
+            maybe_key)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         assert compiled_graph is not None, "Failed to compile the graph"
 
@@ -127,6 +197,10 @@ class CompilerManager:
         if handle is not None:
             self.cache[(runtime_shape, graph_index,
                         self.compiler.name)] = handle
+<<<<<<< HEAD
+=======
+            self.is_cache_updated = True
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             if graph_index == 0:
                 # adds some info logging for the first graph
                 logger.info("Cache the graph of shape %s for later use",
@@ -159,7 +233,11 @@ class SplitItem:
 
 
 def split_graph(graph: fx.GraphModule,
+<<<<<<< HEAD
                 ops: List[str]) -> Tuple[fx.GraphModule, List[SplitItem]]:
+=======
+                ops: list[str]) -> tuple[fx.GraphModule, list[SplitItem]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # split graph by ops
     subgraph_id = 0
     node_to_subgraph_id = {}
@@ -225,7 +303,11 @@ class PiecewiseCompileInterpreter(torch.fx.Interpreter):
     """
 
     def __init__(self, module: torch.fx.GraphModule,
+<<<<<<< HEAD
                  compile_submod_names: List[str], vllm_config: VllmConfig,
+=======
+                 compile_submod_names: list[str], vllm_config: VllmConfig,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                  graph_pool, vllm_backend: "VllmBackend"):
         super().__init__(module)
         from torch._guards import detect_fake_mode
@@ -235,6 +317,11 @@ class PiecewiseCompileInterpreter(torch.fx.Interpreter):
         self.graph_pool = graph_pool
         self.vllm_config = vllm_config
         self.vllm_backend = vllm_backend
+<<<<<<< HEAD
+=======
+        # When True, it annoyingly dumps the torch.fx.Graph on errors.
+        self.extra_traceback = False
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def run(self, *args):
         fake_args = [
@@ -245,8 +332,13 @@ class PiecewiseCompileInterpreter(torch.fx.Interpreter):
             return super().run(*fake_args)
 
     def call_module(self, target: torch.fx.node.Target,
+<<<<<<< HEAD
                     args: Tuple[torch.fx.node.Argument,
                                 ...], kwargs: Dict[str, Any]) -> Any:
+=======
+                    args: tuple[torch.fx.node.Argument,
+                                ...], kwargs: dict[str, Any]) -> Any:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert isinstance(target, str)
         output = super().call_module(target, args, kwargs)
 
@@ -278,7 +370,11 @@ class PiecewiseCompileInterpreter(torch.fx.Interpreter):
 
 
 class VllmBackend:
+<<<<<<< HEAD
     """The compilation backend for `torch.compile` with VLLM.
+=======
+    """The compilation backend for `torch.compile` with vLLM.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     It is used for compilation level of `CompilationLevel.PIECEWISE`,
     where we customize the compilation.
 
@@ -297,12 +393,21 @@ class VllmBackend:
     graph: fx.GraphModule
     # the stiching graph module for all the piecewise graphs
     split_gm: fx.GraphModule
+<<<<<<< HEAD
     piecewise_graphs: List[SplitItem]
     returned_callable: Callable
     # Inductor passes to run on the graph pre-defunctionalization
     post_grad_passes: Sequence[Callable]
     sym_tensor_indices: List[int]
     input_buffers: List[torch.Tensor]
+=======
+    piecewise_graphs: list[SplitItem]
+    returned_callable: Callable
+    # Inductor passes to run on the graph pre-defunctionalization
+    post_grad_passes: Sequence[Callable]
+    sym_tensor_indices: list[int]
+    input_buffers: list[torch.Tensor]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     compiler_manager: CompilerManager
 
     def __init__(
@@ -328,14 +433,22 @@ class VllmBackend:
         self.compilation_config = vllm_config.compilation_config
 
         self.compiler_manager: CompilerManager = CompilerManager(
+<<<<<<< HEAD
             self.compilation_config.use_inductor)
+=======
+            self.compilation_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # `torch.compile` is JIT compiled, so we don't need to
         # do anything here
 
     def configure_post_pass(self):
         config = self.compilation_config
+<<<<<<< HEAD
         self.post_grad_pass_manager.configure(config.pass_config)
+=======
+        self.post_grad_pass_manager.configure(self.vllm_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Post-grad custom passes are run using the post_grad_custom_post_pass
         # hook. If a pass for that hook exists, add it to the pass manager.
@@ -343,8 +456,17 @@ class VllmBackend:
         PASS_KEY = "post_grad_custom_post_pass"
         if PASS_KEY in inductor_config:
             # Config should automatically wrap all inductor passes
+<<<<<<< HEAD
             assert isinstance(inductor_config[PASS_KEY], InductorPass)
             self.post_grad_pass_manager.add(inductor_config[PASS_KEY])
+=======
+            if isinstance(inductor_config[PASS_KEY], PostGradPassManager):
+                assert (inductor_config[PASS_KEY].uuid() ==
+                        self.post_grad_pass_manager.uuid())
+            else:
+                assert isinstance(inductor_config[PASS_KEY], InductorPass)
+                self.post_grad_pass_manager.add(inductor_config[PASS_KEY])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         inductor_config[PASS_KEY] = self.post_grad_pass_manager
 
     def __call__(self, graph: fx.GraphModule, example_inputs) -> Callable:
@@ -357,6 +479,14 @@ class VllmBackend:
             # graph.
 
             factors = []
+<<<<<<< HEAD
+=======
+            # 0. factors come from the env, for example, The values of
+            # VLLM_PP_LAYER_PARTITION will affects the computation graph.
+            env_hash = envs.compute_hash()
+            factors.append(env_hash)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             # 1. factors come from the vllm_config (it mainly summarizes how the
             #    model is created)
             config_hash = vllm_config.compute_hash()
@@ -373,11 +503,23 @@ class VllmBackend:
             hash_content = []
             for filepath in forward_code_files:
                 hash_content.append(filepath)
+<<<<<<< HEAD
                 with open(filepath) as f:
                     hash_content.append(f.read())
             import hashlib
             code_hash = hashlib.md5(
                 "\n".join(hash_content).encode()).hexdigest()
+=======
+                if filepath == "<string>":
+                    # This means the function was dynamically generated, with
+                    # e.g. exec(). We can't actually check these.
+                    continue
+                with open(filepath) as f:
+                    hash_content.append(f.read())
+            import hashlib
+            code_hash = hashlib.md5("\n".join(hash_content).encode(),
+                                    usedforsecurity=False).hexdigest()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             factors.append(code_hash)
 
             # 3. compiler hash
@@ -385,7 +527,12 @@ class VllmBackend:
             factors.append(compiler_hash)
 
             # combine all factors to generate the cache dir
+<<<<<<< HEAD
             hash_key = hashlib.md5(str(factors).encode()).hexdigest()[:10]
+=======
+            hash_key = hashlib.md5(str(factors).encode(),
+                                   usedforsecurity=False).hexdigest()[:10]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             cache_dir = os.path.join(
                 envs.VLLM_CACHE_ROOT,
@@ -394,10 +541,24 @@ class VllmBackend:
             )
             self.compilation_config.cache_dir = cache_dir
 
+<<<<<<< HEAD
         cache_dir = self.compilation_config.cache_dir
         os.makedirs(cache_dir, exist_ok=True)
         local_cache_dir = os.path.join(
             cache_dir, f"rank_{vllm_config.parallel_config.rank}")
+=======
+        if compilation_counter.num_graphs_seen > 0:
+            cache_dir = self.compilation_config.cache_dir + \
+                f'-{compilation_counter.num_graphs_seen}'
+        else:
+            cache_dir = self.compilation_config.cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+        self.compilation_config.cache_dir = cache_dir
+        rank = vllm_config.parallel_config.rank
+        dp_rank = vllm_config.parallel_config.data_parallel_rank
+        local_cache_dir = os.path.join(cache_dir, f"rank_{rank}_{dp_rank}")
+        os.makedirs(local_cache_dir, exist_ok=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.compilation_config.local_cache_dir = local_cache_dir
 
         disable_cache = envs.VLLM_DISABLE_COMPILE_CACHE
@@ -523,14 +684,22 @@ class ConcreteSizeEntry:
 
     # for cudagraph debugging, track the input addresses
     # during capture, and check if they are the same during replay
+<<<<<<< HEAD
     input_addresses: Optional[List[int]] = None
+=======
+    input_addresses: Optional[list[int]] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class PiecewiseBackend:
 
     def __init__(self, graph: fx.GraphModule, vllm_config: VllmConfig,
                  graph_pool: Any, piecewise_compile_index: int,
+<<<<<<< HEAD
                  total_piecewise_compiles: int, sym_shape_indices: List[int],
+=======
+                 total_piecewise_compiles: int, sym_shape_indices: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                  compiled_graph_for_general_shape: Callable,
                  vllm_backend: VllmBackend):
         """
@@ -558,9 +727,15 @@ class PiecewiseBackend:
         self.is_last_graph = (
             piecewise_compile_index == total_piecewise_compiles - 1)
 
+<<<<<<< HEAD
         self.compile_sizes: Set[int] = set(
             self.compilation_config.compile_sizes)
         self.cudagraph_capture_sizes: Set[int] = set(
+=======
+        self.compile_sizes: set[int] = set(
+            self.compilation_config.compile_sizes)
+        self.cudagraph_capture_sizes: set[int] = set(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             self.compilation_config.cudagraph_capture_sizes
         ) if self.compilation_config.use_cudagraph else set()
 
@@ -574,11 +749,19 @@ class PiecewiseBackend:
 
         # the entries for different shapes that we need to either
         # compile or capture cudagraph
+<<<<<<< HEAD
         self.concrete_size_entries: Dict[int, ConcreteSizeEntry] = {}
 
         # to_be_compiled_sizes tracks the remaining sizes to compile,
         # and updates during the compilation process, so we need to copy it
         self.to_be_compiled_sizes: Set[int] = self.compile_sizes.copy()
+=======
+        self.concrete_size_entries: dict[int, ConcreteSizeEntry] = {}
+
+        # to_be_compiled_sizes tracks the remaining sizes to compile,
+        # and updates during the compilation process, so we need to copy it
+        self.to_be_compiled_sizes: set[int] = self.compile_sizes.copy()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         for shape in self.compile_sizes.union(self.cudagraph_capture_sizes):
             self.concrete_size_entries[shape] = ConcreteSizeEntry(
                 runtime_shape=shape,

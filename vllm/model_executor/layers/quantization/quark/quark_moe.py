@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, Optional
+=======
+from typing import Any, Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -45,7 +49,11 @@ class QuarkMoEMethod(FusedMoEMethodBase):
 
 class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
 
+<<<<<<< HEAD
     def __init__(self, weight_config: Dict[str, Any], input_config: Dict[str,
+=======
+    def __init__(self, weight_config: dict[str, Any], input_config: dict[str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                                          Any]):
         self.weight_quant = weight_config
         self.input_quant = input_config
@@ -55,7 +63,11 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
         if not (weight_qscheme == "per_tensor"
                 and input_qscheme == "per_tensor"):
             raise ValueError(
+<<<<<<< HEAD
                 "For FP8 Fused MoE layers, only per-tensor scales"
+=======
+                "For FP8 Fused MoE layers, only per-tensor scales "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 "for weights and activations are supported. Found "
                 f"{weight_qscheme}, {input_qscheme}")  # noqa E501
 
@@ -142,8 +154,12 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
             layer.w2_input_scale = torch.nn.Parameter(
                 layer.w2_input_scale.max(), requires_grad=False)
 
+<<<<<<< HEAD
         # If rocm, normalize the weights and scales to e4m3fnuz
         if current_platform.is_rocm():
+=======
+        if current_platform.is_fp8_fnuz():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             # Normalize the weights and scales
             w13_weight, w13_weight_scale, w13_input_scale = \
                 normalize_e4m3fn_to_e4m3fnuz(
@@ -174,7 +190,11 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
         assert layer.w13_weight_scale is not None
         shard_size = layer.intermediate_size_per_partition
         max_w13_scales = layer.w13_weight_scale.max(dim=1).values
+<<<<<<< HEAD
         for expert_id in range(layer.num_experts):
+=======
+        for expert_id in range(layer.local_num_experts):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             start = 0
             for shard_id in range(2):
                 dq_weight = per_tensor_dequantize(
@@ -198,9 +218,19 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
         use_grouped_topk: bool = False,
         topk_group: Optional[int] = None,
         num_expert_group: Optional[int] = None,
+<<<<<<< HEAD
         custom_routing_function: Optional[Callable] = None,
         scoring_func: str = "softmax",
         e_score_correction_bias: Optional[torch.Tensor] = None,
+=======
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+        custom_routing_function: Optional[Callable] = None,
+        scoring_func: str = "softmax",
+        e_score_correction_bias: Optional[torch.Tensor] = None,
+        apply_router_weight_on_input: bool = False,
+        activation: str = "silu",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         from vllm.model_executor.layers.fused_moe import fused_experts
 
@@ -216,6 +246,7 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
             scoring_func=scoring_func,
             e_score_correction_bias=e_score_correction_bias)
 
+<<<<<<< HEAD
         return fused_experts(x,
                              layer.w13_weight,
                              layer.w2_weight,
@@ -227,3 +258,20 @@ class QuarkW8A8Fp8MoEMethod(QuarkMoEMethod):
                              w2_scale=layer.w2_weight_scale,
                              a1_scale=layer.w13_input_scale,
                              a2_scale=layer.w2_input_scale)
+=======
+        return fused_experts(
+            x,
+            layer.w13_weight,
+            layer.w2_weight,
+            topk_weights=topk_weights,
+            topk_ids=topk_ids,
+            inplace=True,
+            use_fp8_w8a8=True,
+            global_num_experts=global_num_experts,
+            apply_router_weight_on_input=apply_router_weight_on_input,
+            expert_map=expert_map,
+            w1_scale=layer.w13_weight_scale,
+            w2_scale=layer.w2_weight_scale,
+            a1_scale=layer.w13_input_scale,
+            a2_scale=layer.w2_input_scale)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

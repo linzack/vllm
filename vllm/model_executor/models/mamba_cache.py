@@ -1,12 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Dict, List, Tuple
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
 from vllm.attention.backends.utils import PAD_SLOT_ID
 from vllm.config import VllmConfig
+<<<<<<< HEAD
+=======
+from vllm.model_executor.models.constant_size_cache import ConstantSizeCache
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @dataclass
@@ -21,17 +28,31 @@ class MambaCacheParams:
                                 self.state_indices_tensor)
 
 
+<<<<<<< HEAD
 class MambaCacheManager:
 
     def __init__(self, vllm_config: VllmConfig, dtype: torch.dtype,
                  num_mamba_layers: int, conv_state_shape: Tuple[int, int],
                  temporal_state_shape: Tuple[int, int]):
+=======
+class MambaCacheManager(ConstantSizeCache):
+
+    def __init__(self, vllm_config: VllmConfig, dtype: torch.dtype,
+                 num_mamba_layers: int, conv_state_shape: tuple[int, int],
+                 temporal_state_shape: tuple[int, int]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Determine max batch size to set size of MambaCache
         max_batch_size = vllm_config.scheduler_config.max_num_seqs
         if not vllm_config.model_config.enforce_eager:
             max_batch_size = vllm_config.pad_for_cudagraph(max_batch_size)
 
+<<<<<<< HEAD
+=======
+        # Initialize parent class
+        super().__init__(max_batch_size)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         conv_state = torch.empty(size=(num_mamba_layers, max_batch_size) +
                                  conv_state_shape,
                                  dtype=dtype,
@@ -41,17 +62,31 @@ class MambaCacheManager:
                                      dtype=dtype,
                                      device="cuda")
 
+<<<<<<< HEAD
         self.mamba_cache = (conv_state, temporal_state)
 
         # Maps between the request id and a dict that maps between the seq_id
         # and its index inside the self.mamba_cache
         self.mamba_cache_indices_mapping: Dict[str, Dict[int, int]] = {}
         self.free_cache_indices = list(range(max_batch_size))
+=======
+        self._mamba_cache = (conv_state, temporal_state)
+
+    @property
+    def cache(self):
+        return self._mamba_cache
+
+    def _copy_cache(self, from_index: int, to_index: int):
+        for cache_t in self.cache:
+            cache_t[:, to_index].copy_(cache_t[:, from_index],
+                                       non_blocking=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def current_run_tensors(self, **kwargs) -> MambaCacheParams:
         """
         Return the tensors for the current run's conv and ssm state.
         """
+<<<<<<< HEAD
         if "seqlen_agnostic_capture_inputs" not in kwargs:
             # We get here only on Prefill/Eager mode runs
             request_ids_to_seq_ids = kwargs["request_ids_to_seq_ids"]
@@ -97,12 +132,20 @@ class MambaCacheManager:
         input_state_indices_buffer.copy_(
             torch.as_tensor(state_indices, dtype=torch.int32, device="cuda"))
 
+=======
+        cache_tensors, state_indices_tensor = super().current_run_tensors(
+            **kwargs)
+        return MambaCacheParams(cache_tensors[0], cache_tensors[1],
+                                state_indices_tensor)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_seqlen_agnostic_capture_inputs(self, batch_size: int):
         """
         Provide the CUDA graph capture runs with a buffer in adjusted size.
         The buffer is used to maintain the Mamba Cache during the CUDA graph
         replay runs.
         """
+<<<<<<< HEAD
         state_indices_tensor = torch.as_tensor([PAD_SLOT_ID] * batch_size,
                                                dtype=torch.int32,
                                                device="cuda")
@@ -164,3 +207,8 @@ class MambaCacheManager:
                     self.free_cache_indices.append(
                         self.mamba_cache_indices_mapping[req_id][seq_id])
                 self.mamba_cache_indices_mapping.pop(req_id)
+=======
+        return self._mamba_cache, torch.as_tensor([PAD_SLOT_ID] * batch_size,
+                                                  dtype=torch.int32,
+                                                  device="cuda")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

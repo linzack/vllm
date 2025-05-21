@@ -99,6 +99,7 @@ def _create_pooling_model_cls(
                     mapper = WeightsMapper(orig_to_new_prefix={"model.": ""})
                     weights = mapper.apply(weights)
 
+<<<<<<< HEAD
                     self.model.load_weights(weights)
                     return
 
@@ -109,6 +110,19 @@ def _create_pooling_model_cls(
             else:
                 loader = AutoWeightsLoader(self)
                 loader.load_weights(weights)
+=======
+                    loaded_params = self.model.load_weights(weights)
+                    loaded_params = {f"model.{name}" for name in loaded_params}
+                    return loaded_params
+
+            # For most other models
+            if hasattr(orig_cls, "load_weights"):
+                return orig_cls.load_weights(self, weights)  # type: ignore
+            # Fallback
+            else:
+                loader = AutoWeightsLoader(self)
+                return loader.load_weights(weights)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     return ModelForPooling  # type: ignore
 
@@ -160,7 +174,10 @@ def as_classification_model(cls: _T) -> _T:
         return cls
 
     # Lazy import
+<<<<<<< HEAD
     from vllm.attention import AttentionMetadata
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     from vllm.config import VllmConfig
     from vllm.model_executor.layers.linear import RowParallelLinear
     from vllm.model_executor.layers.pooler import PoolingType
@@ -201,6 +218,7 @@ def as_classification_model(cls: _T) -> _T:
             self,
             input_ids: torch.Tensor,
             positions: torch.Tensor,
+<<<<<<< HEAD
             kv_caches: list[torch.Tensor],
             attn_metadata: AttentionMetadata,
             intermediate_tensors: Optional[IntermediateTensors] = None,
@@ -208,6 +226,12 @@ def as_classification_model(cls: _T) -> _T:
         ) -> torch.Tensor:
             hidden_states = super().forward(input_ids, positions, kv_caches,
                                             attn_metadata,
+=======
+            intermediate_tensors: Optional[IntermediateTensors] = None,
+            inputs_embeds: Optional[torch.Tensor] = None,
+        ) -> torch.Tensor:
+            hidden_states = super().forward(input_ids, positions,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                             intermediate_tensors,
                                             inputs_embeds)
             logits, _ = self.score(hidden_states)

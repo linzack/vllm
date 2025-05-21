@@ -10,14 +10,22 @@ import pytest
 from tests.mq_llm_engine.utils import RemoteMQLLMEngine, generate
 from vllm.engine.arg_utils import AsyncEngineArgs
 
+<<<<<<< HEAD
 MODEL = "s3://vllm-ci-model-weights/gemma-1.1-2b-it"
+=======
+MODEL = "google/gemma-1.1-2b-it"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 NUM_EXPECTED_TOKENS = 10
 NUM_REQUESTS = 10000
 
 # Scenarios to test for num generated token.
+<<<<<<< HEAD
 ENGINE_ARGS = AsyncEngineArgs(model=MODEL,
                               load_format="runai_streamer",
                               disable_log_requests=True)
+=======
+ENGINE_ARGS = AsyncEngineArgs(model=MODEL, disable_log_requests=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.fixture(scope="function")

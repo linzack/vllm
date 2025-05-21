@@ -155,7 +155,11 @@ def test_an_error_is_raised_when_custom_logging_config_is_unexpected_json(
             with pytest.raises(ValueError) as ex_info:
                 _configure_vllm_root_logger()
             assert ex_info.type == ValueError  # noqa: E721
+<<<<<<< HEAD
             assert "Invalid logging config. Expected Dict, got" in str(ex_info)
+=======
+            assert "Invalid logging config. Expected dict, got" in str(ex_info)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @patch("vllm.logger.VLLM_CONFIGURE_LOGGING", 1)

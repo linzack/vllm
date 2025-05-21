@@ -2,6 +2,7 @@
 """CacheEngine class for managing the KV cache."""
 from typing import List
 
+<<<<<<< HEAD
 import numpy as np
 import torch
 
@@ -13,6 +14,15 @@ from vllm.platforms import current_platform
 from vllm.utils import (STR_DTYPE_TO_TORCH_DTYPE, LayerBlockType,
                         align_to_256bytes, get_dtype_size,
                         is_pin_memory_available)
+=======
+import torch
+
+from vllm.attention import get_attn_backend
+from vllm.config import CacheConfig, DeviceConfig, ModelConfig, ParallelConfig
+from vllm.logger import init_logger
+from vllm.utils import (STR_DTYPE_TO_TORCH_DTYPE, LayerBlockType,
+                        get_dtype_size, is_pin_memory_available)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -42,7 +52,10 @@ class CacheEngine:
         self.num_attention_layers = model_config.get_num_layers_by_block_type(
             parallel_config, LayerBlockType.attention)
         self.num_kv_heads = model_config.get_num_kv_heads(parallel_config)
+<<<<<<< HEAD
         self.align_cache = self._align_cache(model_config)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         self.block_size = cache_config.block_size
         self.num_gpu_blocks = cache_config.num_gpu_blocks
@@ -76,6 +89,7 @@ class CacheEngine:
         device: str,
     ) -> List[torch.Tensor]:
         """Allocates KV cache on the specified device."""
+<<<<<<< HEAD
         kv_cache_shape = self.attn_backend.get_kv_cache_shape(
             num_blocks, self.block_size, self.num_kv_heads, self.head_size)
         pin_memory = is_pin_memory_available() if device == "cpu" else False
@@ -95,11 +109,30 @@ class CacheEngine:
             alloc_shape = (*kv_cache_shape[:2], alloc_entry_size)
         else:
             alloc_shape = kv_cache_shape
+=======
+        kv_cache_generic_shape = self.attn_backend.get_kv_cache_shape(
+            num_blocks, self.block_size, self.num_kv_heads, self.head_size)
+        pin_memory = is_pin_memory_available() if device == "cpu" else False
+        kv_cache: List[torch.Tensor] = []
+        try:
+            kv_cache_stride_order = self.attn_backend.get_kv_cache_stride_order(
+            )
+        except (AttributeError, NotImplementedError):
+            kv_cache_stride_order = tuple(range(len(kv_cache_generic_shape)))
+
+        # The allocation respects the backend-defined stride order to ensure
+        # the semantic remains consistent for each backend. We first obtain the
+        # generic kv cache shape and then permute it according to the stride
+        # order which could result in a non-contiguous tensor.
+        kv_cache_allocation_shape = tuple(kv_cache_generic_shape[i]
+                                          for i in kv_cache_stride_order)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for _ in range(self.num_attention_layers):
             # null block in CpuGpuBlockAllocator requires at least that
             # block to be zeroed-out.
             # We zero-out everything for simplicity.
+<<<<<<< HEAD
             layer_kv_cache = torch.zeros(alloc_shape,
                                          dtype=self.dtype,
                                          pin_memory=pin_memory,
@@ -113,6 +146,17 @@ class CacheEngine:
             # view back to (TOTAL_PAGES, PAGE_SIZE, entry_shape...) for cases
             # when entry_shape is higher than 1D
             kv_cache.append(layer_kv_cache.view(kv_cache_shape))
+=======
+            layer_kv_cache = torch.zeros(
+                kv_cache_allocation_shape,
+                dtype=self.dtype,
+                pin_memory=pin_memory,
+                device=device).permute(*kv_cache_stride_order)
+
+            # view back to (TOTAL_PAGES, PAGE_SIZE, entry_shape...) for cases
+            # when entry_shape is higher than 1D
+            kv_cache.append(layer_kv_cache)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return kv_cache
 
     def swap_in(self, src_to_dst: torch.Tensor) -> None:
@@ -129,6 +173,7 @@ class CacheEngine:
         self.attn_backend.copy_blocks(self.gpu_cache, src_to_dsts)
 
     @staticmethod
+<<<<<<< HEAD
     def _align_cache(model_config: ModelConfig):
         # Currently align_cache only applies to MLA models since the other
         # cache kernels haven't been updated yet to support non-continguous
@@ -137,6 +182,8 @@ class CacheEngine:
             and envs.VLLM_CUDA_MEM_ALIGN_KV_CACHE
 
     @staticmethod
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def get_cache_block_size(
         cache_config: CacheConfig,
         model_config: ModelConfig,
@@ -153,9 +200,12 @@ class CacheEngine:
             dtype = STR_DTYPE_TO_TORCH_DTYPE[cache_config.cache_dtype]
 
         key_cache_entry = num_heads * head_size
+<<<<<<< HEAD
         if CacheEngine._align_cache(model_config):
             key_cache_entry = align_to_256bytes(key_cache_entry,
                                                 model_config.dtype)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # For MLA there is no value cache, since the latent vector
         # is joint keys and values.

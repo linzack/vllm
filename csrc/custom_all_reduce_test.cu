@@ -1,9 +1,15 @@
 /**
  * This is a standalone test for custom allreduce.
  * To compile, make sure you have MPI and NCCL installed in your system.
+<<<<<<< HEAD
  * export MPI_HOME=xxx
  * nvcc -O2 -arch=native -std=c++17 custom_all_reduce_test.cu -o
  * custom_all_reduce_test -lnccl -I${MPI_HOME} -lmpi
+=======
+ * export MPI_HOME=XXX
+ * nvcc -O2 -arch=native -std=c++17 custom_all_reduce_test.cu -o
+ * custom_all_reduce_test -lnccl -I${MPI_HOME}/include -lmpi
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
  *
  * Warning: this C++ test is not designed to be very readable and was used
  * during the rapid prototyping process.
@@ -22,7 +28,19 @@
 #include "cuda_profiler_api.h"
 #include "custom_all_reduce.cuh"
 #include "mpi.h"
+<<<<<<< HEAD
 #include "nccl.h"
+=======
+#ifdef USE_ROCM
+  #include <hip/hip_bf16.h>
+typedef __hip_bfloat16 nv_bfloat16;
+  #include "rccl/rccl.h"
+  #include "custom_all_reduce_hip.cuh"
+#else
+  #include "nccl.h"
+  #include "custom_all_reduce.cuh"
+#endif
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 #define MPICHECK(cmd)                                                  \
   do {                                                                 \
@@ -43,16 +61,41 @@
     }                                                               \
   } while (0)
 
+<<<<<<< HEAD
 __global__ void dummy_kernel() {
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700
   for (int i = 0; i < 100; i++) __nanosleep(1000000);  // 100ms
 #else
+=======
+#ifdef USE_ROCM
+__global__ void dummy_kernel() {
+  for (int i = 0; i < 100; i++) {
+    uint64_t start = wall_clock64();
+    uint64_t cycles_elapsed;
+    do {
+      cycles_elapsed = wall_clock64() - start;
+    } while (cycles_elapsed < 100);
+  }
+  for (int i = 0; i < 100; i++) __nanosleep(1000000);  // 100ms
+}
+#else
+__global__ void dummy_kernel() {
+  #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700
+  for (int i = 0; i < 100; i++) __nanosleep(1000000);  // 100ms
+  #else
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   for (int i = 0; i < 100; i++) {
     long long int start = clock64();
     while (clock64() - start < 150000000);  // approximately 98.4ms on P40
   }
+<<<<<<< HEAD
 #endif
 }
+=======
+  #endif
+}
+#endif
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 template <typename T>
 __global__ void set_data(T* data, int size, int myRank) {
@@ -121,8 +164,19 @@ void run(int myRank, int nRanks, ncclComm_t& comm, int threads, int block_limit,
    * registration, they are allocated and registered together in the test for
    * convenience.
    */
+<<<<<<< HEAD
   CUDACHECK(
       cudaMalloc(&buffer, 2 * data_size * sizeof(T) + sizeof(vllm::Signal)));
+=======
+#ifdef USE_ROCM
+  CUDACHECK(hipExtMallocWithFlags(
+      (void**)&buffer, 2 * data_size * sizeof(T) + sizeof(vllm::Signal),
+      hipDeviceMallocUncached));
+#else
+  CUDACHECK(
+      cudaMalloc(&buffer, 2 * data_size * sizeof(T) + sizeof(vllm::Signal)));
+#endif
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   CUDACHECK(
       cudaMemset(buffer, 0, 2 * data_size * sizeof(T) + sizeof(vllm::Signal)));
   CUDACHECK(cudaMalloc(&self_data_copy, data_size * sizeof(T)));
@@ -311,6 +365,7 @@ int main(int argc, char** argv) {
 
   bool performance_test = true;
   cudaProfilerStart();
+<<<<<<< HEAD
   // Uncomment to scan through different block size configs.
   // for (int threads : {256, 512, 1024}) {
   //   for (int block_limit = 16; block_limit < 112; block_limit += 4) {
@@ -318,6 +373,20 @@ int main(int argc, char** argv) {
   //     performance_test);
   //   }
   // }
+=======
+// Uncomment to scan through different block size configs.
+// for (int threads : {256, 512, 1024}) {
+//   for (int block_limit = 16; block_limit < 112; block_limit += 4) {
+//     run<half>(myRank, nRanks, comm, threads, block_limit, 1024 * 1024,
+//     performance_test);
+//   }
+// }
+#ifdef USE_ROCM
+  const int block_limit = 16;
+#else
+  const int block_limit = 36;
+#endif
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   // Scan through different sizes to test performance.
   for (int sz = 512; sz <= (8 << 20); sz *= 2) {
     run<half>(myRank, nRanks, comm, 512, 36, sz + 8 * 47, performance_test);
@@ -326,4 +395,8 @@ int main(int argc, char** argv) {
   cudaProfilerStop();
   MPICHECK(MPI_Finalize());
   return EXIT_SUCCESS;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

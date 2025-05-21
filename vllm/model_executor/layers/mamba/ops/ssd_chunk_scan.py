@@ -5,6 +5,7 @@
 
 # ruff: noqa: E501,SIM102
 
+<<<<<<< HEAD
 import math
 
 import torch
@@ -12,6 +13,13 @@ import triton
 import triton.language as tl
 from packaging import version
 
+=======
+import torch
+from packaging import version
+
+from vllm.triton_utils import tl, triton
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 TRITON_22 = version.parse(triton.__version__) >= version.parse('2.2.0')
 
 
@@ -442,6 +450,7 @@ def _chunk_scan_fwd_kernel(
              (offs_out_n[None, :] < hdim))
 
 
+<<<<<<< HEAD
 def _seq_idx_to_chunk_indices_offsets(seq_idx, chunk_size: int):
 
     # convert seq_idx to chunk indices and offsets
@@ -476,6 +485,8 @@ def _seq_idx_to_chunk_indices_offsets(seq_idx, chunk_size: int):
     return chunk_indices, chunk_offsets
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def _chunk_scan_fwd(
     cb,
     x,
@@ -486,6 +497,11 @@ def _chunk_scan_fwd(
     D=None,
     z=None,
     seq_idx=None,
+<<<<<<< HEAD
+=======
+    chunk_indices=None,
+    chunk_offsets=None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     initial_states=None,
 ):
     batch, seqlen, nheads, headdim = x.shape
@@ -502,7 +518,10 @@ def _chunk_scan_fwd(
     assert dA_cumsum.shape == (batch, nheads, nchunks, chunk_size)
     assert states.shape == (batch, nchunks, nheads, headdim, dstate)
 
+<<<<<<< HEAD
     chunk_indices, chunk_offsets = None, None
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if seq_idx is not None:
         assert seq_idx.shape == (batch, seqlen)
 
@@ -510,15 +529,29 @@ def _chunk_scan_fwd(
             # with initial states, we need to take care of how
             # seq_idx crosses the boundaries
             assert batch == 1, "chunk scan only supports initial states with batch 1"
+<<<<<<< HEAD
             assert initial_states.shape == (seq_idx[0].max() + 1, nheads,
                                             headdim, dstate)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             if initial_states.shape[0] == 1:
                 # no in this case no point to use initial states
                 initial_states = None
             else:
+<<<<<<< HEAD
                 chunk_indices, chunk_offsets = _seq_idx_to_chunk_indices_offsets(
                     seq_idx, chunk_size)
+=======
+                assert chunk_indices is not None and chunk_offsets is not None, \
+                    (
+                        "chunk_indices and chunk_offsets should have been set"
+                    )
+        else:
+            chunk_indices, chunk_offsets = None, None
+    else:
+        chunk_indices, chunk_offsets = None, None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Allocates output.
     out = torch.empty(batch,

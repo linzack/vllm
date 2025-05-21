@@ -13,9 +13,18 @@ import requests
 from prometheus_client.parser import text_string_to_metric_families
 from transformers import AutoTokenizer
 
+<<<<<<< HEAD
 from ...utils import RemoteOpenAIServer
 
 MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+=======
+from vllm import version
+
+from ...utils import RemoteOpenAIServer
+
+MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+PREV_MINOR_VERSION = version._prev_minor_version()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.fixture(scope="module", params=[True, False])
@@ -55,6 +64,10 @@ def default_server_args():
                     "",
                     "--enable-chunked-prefill",
                     "--disable-frontend-multiprocessing",
+<<<<<<< HEAD
+=======
+                    f"--show-hidden-metrics-for-version={PREV_MINOR_VERSION}",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 ])
 def server(use_v1, default_server_args, request):
     if request.param:
@@ -129,7 +142,13 @@ async def test_metrics_counts(server: RemoteOpenAIServer,
 
     # Loop over all expected metric_families
     for metric_family, suffix_values_list in EXPECTED_VALUES.items():
+<<<<<<< HEAD
         if use_v1 and metric_family not in EXPECTED_METRICS_V1:
+=======
+        if ((use_v1 and metric_family not in EXPECTED_METRICS_V1)
+                or (not server.show_hidden_metrics
+                    and metric_family in HIDDEN_DEPRECATED_METRICS)):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             continue
 
         found_metric = False
@@ -165,10 +184,17 @@ async def test_metrics_counts(server: RemoteOpenAIServer,
 
 EXPECTED_METRICS = [
     "vllm:num_requests_running",
+<<<<<<< HEAD
     "vllm:num_requests_swapped",
     "vllm:num_requests_waiting",
     "vllm:gpu_cache_usage_perc",
     "vllm:cpu_cache_usage_perc",
+=======
+    "vllm:num_requests_swapped",  # deprecated
+    "vllm:num_requests_waiting",
+    "vllm:gpu_cache_usage_perc",
+    "vllm:cpu_cache_usage_perc",  # deprecated
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "vllm:time_to_first_token_seconds_sum",
     "vllm:time_to_first_token_seconds_bucket",
     "vllm:time_to_first_token_seconds_count",
@@ -227,6 +253,10 @@ EXPECTED_METRICS_V1 = [
     "vllm:gpu_cache_usage_perc",
     "vllm:gpu_prefix_cache_queries",
     "vllm:gpu_prefix_cache_hits",
+<<<<<<< HEAD
+=======
+    "vllm:num_preemptions_total",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "vllm:prompt_tokens_total",
     "vllm:generation_tokens_total",
     "vllm:iteration_tokens_total",
@@ -238,6 +268,15 @@ EXPECTED_METRICS_V1 = [
     "vllm:request_generation_tokens_sum",
     "vllm:request_generation_tokens_bucket",
     "vllm:request_generation_tokens_count",
+<<<<<<< HEAD
+=======
+    "vllm:request_params_n_sum",
+    "vllm:request_params_n_bucket",
+    "vllm:request_params_n_count",
+    "vllm:request_params_max_tokens_sum",
+    "vllm:request_params_max_tokens_bucket",
+    "vllm:request_params_max_tokens_count",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "vllm:time_to_first_token_seconds_sum",
     "vllm:time_to_first_token_seconds_bucket",
     "vllm:time_to_first_token_seconds_count",
@@ -261,6 +300,14 @@ EXPECTED_METRICS_V1 = [
     "vllm:request_decode_time_seconds_count",
 ]
 
+<<<<<<< HEAD
+=======
+HIDDEN_DEPRECATED_METRICS = [
+    "vllm:num_requests_swapped",
+    "vllm:cpu_cache_usage_perc",
+]
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 @pytest.mark.asyncio
 async def test_metrics_exist(server: RemoteOpenAIServer,
@@ -275,13 +322,23 @@ async def test_metrics_exist(server: RemoteOpenAIServer,
     assert response.status_code == HTTPStatus.OK
 
     for metric in (EXPECTED_METRICS_V1 if use_v1 else EXPECTED_METRICS):
+<<<<<<< HEAD
         assert metric in response.text
+=======
+        if (not server.show_hidden_metrics
+                and metric not in HIDDEN_DEPRECATED_METRICS):
+            assert metric in response.text
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def test_metrics_exist_run_batch(use_v1: bool):
     if use_v1:
         pytest.skip("Skipping test on vllm V1")
+<<<<<<< HEAD
     input_batch = """{"custom_id": "request-0", "method": "POST", "url": "/v1/embeddings", "body": {"model": "intfloat/e5-mistral-7b-instruct", "input": "You are a helpful assistant."}}"""  # noqa: E501
+=======
+    input_batch = """{"custom_id": "request-0", "method": "POST", "url": "/v1/embeddings", "body": {"model": "intfloat/multilingual-e5-small", "input": "You are a helpful assistant."}}"""  # noqa: E501
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     base_url = "0.0.0.0"
     port = "8001"
@@ -301,7 +358,11 @@ def test_metrics_exist_run_batch(use_v1: bool):
             "-o",
             output_file.name,
             "--model",
+<<<<<<< HEAD
             "intfloat/e5-mistral-7b-instruct",
+=======
+            "intfloat/multilingual-e5-small",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "--enable-metrics",
             "--url",
             base_url,

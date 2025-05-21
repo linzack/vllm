@@ -44,7 +44,11 @@
             {{- tool_call.name + '(' -}}
             {%- for param in tool_call.arguments %}
                 {{- param + '=' -}}
+<<<<<<< HEAD
                 {{- "%sr" | format(tool_call.arguments[param]) -}}
+=======
+                {{- "%s" | format(tool_call.arguments[param]) -}}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 {% if not loop.last %}, {% endif %}
             {%- endfor %}
             {{- ')' -}}

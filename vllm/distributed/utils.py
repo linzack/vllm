@@ -5,20 +5,38 @@
 # https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/core/tensor_parallel/utils.py
 # Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 import dataclasses
+<<<<<<< HEAD
 import pickle
 import time
 from collections import deque
 from typing import Any, Deque, Dict, Optional, Sequence, Tuple
+=======
+import datetime
+import pickle
+import socket
+import time
+from collections import deque
+from collections.abc import Sequence
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch.distributed import ProcessGroup, TCPStore
 from torch.distributed.distributed_c10d import (Backend, PrefixStore,
                                                 _get_default_timeout,
+<<<<<<< HEAD
+=======
+                                                _unregister_process_group,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                                 is_nccl_available)
 from torch.distributed.rendezvous import rendezvous
 
 import vllm.envs as envs
 from vllm.logger import init_logger
+<<<<<<< HEAD
+=======
+from vllm.utils import get_tcp_uri, is_torch_equal_or_newer
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -65,10 +83,26 @@ def split_tensor_along_last_dim(
 
 
 def get_pp_indices(num_hidden_layers: int, pp_rank: int,
+<<<<<<< HEAD
                    pp_size: int) -> Tuple[int, int]:
     """Try to evenly distribute layers across partitions.
     If the number of layers is not divisible by the number of partitions,
     the last partition will have the remaining layers.
+=======
+                   pp_size: int) -> tuple[int, int]:
+    """Try to evenly distribute layers across partitions.
+
+    If the number of layers is not divisible by the number of partitions,
+    the remaining layers are evenly distributed across all but the last
+    partition. The last partition is excluded because it often contains an
+    additional norm layer and we are attempting to balance compute.
+
+    If `pp_size > 2` and the number of remaining layers is
+    `0 < x <= pp_size - 2` then the remaining layers are evenly distributed
+    across the middle partitions. The first and last partitions are excluded
+    because they contain the input and output embeddings respectively and we
+    are attempting to reduce maximum memory consumption across partitions.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     partition_list_str = envs.VLLM_PP_LAYER_PARTITION
     if partition_list_str is not None:
@@ -84,6 +118,7 @@ def get_pp_indices(num_hidden_layers: int, pp_rank: int,
         if sum(partitions) != num_hidden_layers:
             raise ValueError(
                 f"{sum(partitions)=} does not match {num_hidden_layers=}.")
+<<<<<<< HEAD
         start_layer = sum(partitions[:pp_rank])
         end_layer = start_layer + partitions[pp_rank]
     else:
@@ -93,6 +128,23 @@ def get_pp_indices(num_hidden_layers: int, pp_rank: int,
 
         if pp_rank == pp_size - 1:
             end_layer = num_hidden_layers
+=======
+    else:
+        layers_per_partition = num_hidden_layers // pp_size
+        partitions = [layers_per_partition for _ in range(pp_size)]
+
+        if remaining_layers := num_hidden_layers % pp_size:
+            for i in range(2, remaining_layers + 2):
+                partitions[-i] += 1
+            logger.info(
+                "Hidden layers were unevenly partitioned: [%s]. "
+                "This can be manually overridden using the "
+                "VLLM_PP_LAYER_PARTITION environment variable",
+                ",".join(str(p) for p in partitions))
+
+    start_layer = sum(partitions[:pp_rank])
+    end_layer = start_layer + partitions[pp_rank]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     return (start_layer, end_layer)
 
@@ -106,6 +158,7 @@ class StatelessProcessGroup:
     rank: int
     world_size: int
     store: torch._C._distributed_c10d.Store
+<<<<<<< HEAD
     data_expiration_seconds: int = 3600  # 1 hour
 
     # dst rank -> counter
@@ -118,6 +171,24 @@ class StatelessProcessGroup:
 
     # A deque to store the data entries, with key and timestamp.
     entries: Deque[Tuple[str,
+=======
+
+    # stores a reference to the socket so that the file descriptor stays alive
+    socket: Optional[socket.socket]
+
+    data_expiration_seconds: int = 3600  # 1 hour
+
+    # dst rank -> counter
+    send_dst_counter: dict[int, int] = dataclasses.field(default_factory=dict)
+    # src rank -> counter
+    recv_src_counter: dict[int, int] = dataclasses.field(default_factory=dict)
+    broadcast_send_counter: int = 0
+    broadcast_recv_src_counter: dict[int, int] = dataclasses.field(
+        default_factory=dict)
+
+    # A deque to store the data entries, with key and timestamp.
+    entries: deque[tuple[str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                          float]] = dataclasses.field(default_factory=deque)
 
     def __post_init__(self):
@@ -191,10 +262,14 @@ class StatelessProcessGroup:
     def barrier(self):
         """A barrier to synchronize all ranks."""
         for i in range(self.world_size):
+<<<<<<< HEAD
             if i == self.rank:
                 self.broadcast_obj(None, src=self.rank)
             else:
                 self.broadcast_obj(None, src=i)
+=======
+            self.broadcast_obj(None, src=i)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def create(
@@ -203,6 +278,10 @@ class StatelessProcessGroup:
         rank: int,
         world_size: int,
         data_expiration_seconds: int = 3600,
+<<<<<<< HEAD
+=======
+        store_timeout: int = 300,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> "StatelessProcessGroup":
         """A replacement for `torch.distributed.init_process_group` that does not
         pollute the global state.
@@ -219,17 +298,43 @@ class StatelessProcessGroup:
         can call `StatelessProcessGroup.create` to form a group, and then process A, B,
         C, and D can call `StatelessProcessGroup.create` to form another group.
         """ # noqa
+<<<<<<< HEAD
+=======
+        launch_server = rank == 0
+        if launch_server:
+            # listen on the specified interface (instead of 0.0.0.0)
+            listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listen_socket.bind((host, port))
+            listen_socket.listen()
+            listen_fd = listen_socket.fileno()
+        else:
+            listen_socket = None
+            listen_fd = None
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         store = TCPStore(
             host_name=host,
             port=port,
             world_size=world_size,
+<<<<<<< HEAD
             is_master=(rank == 0),
+=======
+            is_master=launch_server,
+            timeout=datetime.timedelta(seconds=store_timeout),
+            use_libuv=False,  # for now: github.com/pytorch/pytorch/pull/150215
+            master_listen_fd=listen_fd,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
         return StatelessProcessGroup(
             rank=rank,
             world_size=world_size,
             store=store,
+<<<<<<< HEAD
+=======
+            socket=listen_socket,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             data_expiration_seconds=data_expiration_seconds)
 
 
@@ -267,7 +372,11 @@ def stateless_init_torch_distributed_process_group(
     always formed with process 1, 2, ..., 8, and the additional communication
     channel is formed with process 9 and 10.
     """
+<<<<<<< HEAD
     init_method = f"tcp://{host}:{port}"
+=======
+    init_method = get_tcp_uri(host, port)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     backend = Backend(backend)  # it is basically string
     timeout = _get_default_timeout(backend)
 
@@ -282,13 +391,19 @@ def stateless_init_torch_distributed_process_group(
     # different systems (e.g. RPC) in case the store is multi-tenant.
     prefix_store = PrefixStore(init_method, store)
 
+<<<<<<< HEAD
     pg_options = ProcessGroup.Options(backend=backend, timeout=timeout)
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     pg: ProcessGroup = ProcessGroup(
         prefix_store,
         group_rank,
         group_size,
+<<<<<<< HEAD
         pg_options,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     )
 
     if backend == "gloo":
@@ -310,9 +425,35 @@ def stateless_init_torch_distributed_process_group(
                                          backend_options)
         backend_type = ProcessGroup.BackendType.NCCL
         device = torch.device("cuda")
+<<<<<<< HEAD
 
+=======
+    else:
+        raise RuntimeError(f"Unsupported torch distributed backend: {backend}")
+
+    pg._set_default_backend(backend_type)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     backend_class._set_sequence_number_for_group()
 
     pg._register_backend(device, backend_type, backend_class)
 
     return pg
+<<<<<<< HEAD
+=======
+
+
+def stateless_destroy_torch_distributed_process_group(
+        pg: ProcessGroup) -> None:
+    """
+    Destroy ProcessGroup returned by
+        stateless_init_torch_distributed_process_group().
+    """
+    if is_torch_equal_or_newer("2.7"):
+        pg.shutdown()
+    else:
+        # Lazy import for non-CUDA backends.
+        from torch.distributed.distributed_c10d import _shutdown_backend
+        _shutdown_backend(pg)
+
+    _unregister_process_group(pg.group_name)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

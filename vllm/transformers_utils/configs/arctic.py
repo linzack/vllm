@@ -8,7 +8,11 @@
 """ Arctic model configuration"""
 
 from dataclasses import asdict, dataclass
+<<<<<<< HEAD
 from typing import Any, Dict
+=======
+from typing import Any
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from transformers.configuration_utils import PretrainedConfig
 from transformers.utils import logging
@@ -21,7 +25,11 @@ ARCTIC_PRETRAINED_CONFIG_ARCHIVE_MAP = {
 
 
 @dataclass
+<<<<<<< HEAD
 class ArcticLoraConfig:
+=======
+class ArcticLoRAConfig:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     lora_r: int = 64
     lora_alpha: float = 16
     shard_base_weights: bool = False
@@ -192,14 +200,22 @@ class ArcticConfig(PretrainedConfig):
         )
 
     @classmethod
+<<<<<<< HEAD
     def from_dict(cls, config_dict: Dict[str, Any], **kwargs) -> "ArcticConfig":
+=======
+    def from_dict(cls, config_dict: dict[str, Any], **kwargs) -> "ArcticConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         result = super().from_dict(config_dict, **kwargs)
         config = result[0] if isinstance(result, tuple) else result
         if isinstance(config.quantization, dict):
             config.quantization = ArcticQuantizationConfig(**config.quantization)
         return result
 
+<<<<<<< HEAD
     def to_dict(self) -> Dict[str, Any]:
+=======
+    def to_dict(self) -> dict[str, Any]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         ret = super().to_dict()
         if isinstance(ret["quantization"], ArcticQuantizationConfig):
             ret["quantization"] = asdict(ret["quantization"])

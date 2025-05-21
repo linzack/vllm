@@ -11,12 +11,20 @@ import vllm.platforms
 from vllm.config import ParallelConfig
 from vllm.executor.msgspec_utils import decode_hook, encode_hook
 from vllm.logger import init_logger
+<<<<<<< HEAD
+=======
+from vllm.platforms import current_platform
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.sequence import ExecuteModelRequest, IntermediateTensors
 from vllm.utils import get_ip
 from vllm.worker.worker_base import WorkerWrapperBase
 
 if TYPE_CHECKING:
+<<<<<<< HEAD
     from vllm.v1.core.scheduler import SchedulerOutput
+=======
+    from vllm.v1.core.sched.output import SchedulerOutput
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     from vllm.v1.outputs import ModelRunnerOutput
 
 logger = init_logger(__name__)
@@ -83,9 +91,15 @@ try:
 
             execute_model_req = self.input_decoder.decode(serialized_req)
 
+<<<<<<< HEAD
             # TODO(swang): This is needed right now because Ray aDAG executes
             # on a background thread, so we need to reset torch's current
             # device.
+=======
+            # TODO(swang): This is needed right now because Ray Compiled Graph
+            # executes on a background thread, so we need to reset torch's
+            # current device.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             import torch
             if not self.compiled_dag_cuda_device_set:
                 torch.cuda.set_device(self.worker.device)
@@ -106,6 +120,7 @@ try:
             # on a background thread, so we need to reset torch's current
             # device.
             # We can remove this API after it is fixed in compiled graph.
+<<<<<<< HEAD
             import torch
             assert self.worker is not None, "Worker is not initialized"
             if not self.compiled_dag_cuda_device_set:
@@ -116,6 +131,28 @@ try:
             self,
             scheduler_output: "SchedulerOutput",
         ) -> "ModelRunnerOutput":
+=======
+            assert self.worker is not None, "Worker is not initialized"
+            if not self.compiled_dag_cuda_device_set:
+                if current_platform.is_tpu():
+                    # Not needed
+                    pass
+                else:
+                    import torch
+                    torch.cuda.set_device(self.worker.device)
+
+                self.compiled_dag_cuda_device_set = True
+
+        def execute_model_ray(
+            self,
+            scheduler_output: Union["SchedulerOutput",
+                                    Tuple["SchedulerOutput",
+                                          "IntermediateTensors"]],
+        ) -> Union["ModelRunnerOutput", Tuple["SchedulerOutput",
+                                              "IntermediateTensors"]]:
+            # This method is used by Ray Compiled Graph to execute the model,
+            # and it needs a special logic of self.setup_device_if_necessary()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             self.setup_device_if_necessary()
             assert self.worker is not None, "Worker is not initialized"
             if isinstance(scheduler_output, tuple):
@@ -179,8 +216,14 @@ def _verify_bundles(placement_group: "PlacementGroup",
             f"group {placement_group.id}. Node id -> bundles "
             f"{node_id_to_bundle}. "
             "You don't have enough GPUs available in a current node. Check "
+<<<<<<< HEAD
             "`ray status` to see if you have available GPUs in a node "
             f"{driver_node_id} before starting an vLLM engine.")
+=======
+            "`ray status` and `ray list nodes` to see if you have available "
+            "GPUs in a node `{driver_node_id}` before starting an vLLM engine."
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for node_id, bundles in node_id_to_bundle.items():
         if len(bundles) < parallel_config.tensor_parallel_size:
@@ -220,8 +263,13 @@ def _wait_until_pg_ready(current_placement_group: "PlacementGroup"):
         wait_interval *= 2
         logger.info(
             "Waiting for creating a placement group of specs for "
+<<<<<<< HEAD
             "%d seconds. specs=%s. Check "
             "`ray status` to see if you have enough resources,"
+=======
+            "%d seconds. specs=%s. Check `ray status` and "
+            "`ray list nodes` to see if you have enough resources,"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             " and make sure the IP addresses used by ray cluster"
             " are the same as VLLM_HOST_IP environment variable"
             " specified in each node if you are running on a multi-node.",
@@ -233,8 +281,13 @@ def _wait_until_pg_ready(current_placement_group: "PlacementGroup"):
         raise ValueError(
             "Cannot provide a placement group of "
             f"{placement_group_specs=} within {PG_WAIT_TIMEOUT} seconds. See "
+<<<<<<< HEAD
             "`ray status` to make sure the cluster has enough resources."
         ) from None
+=======
+            "`ray status` and `ray list nodes` to make sure the cluster has "
+            "enough resources.") from None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def _wait_until_pg_removed(current_placement_group: "PlacementGroup"):
@@ -272,15 +325,25 @@ def initialize_ray_cluster(
     assert_ray_available()
     from vllm.platforms import current_platform
 
+<<<<<<< HEAD
     # Connect to a ray cluster.
     if current_platform.is_rocm() or current_platform.is_xpu():
         # Try to connect existing ray instance and create a new one if not found
         try:
             ray.init("auto", ignore_reinit_error=True)
+=======
+    if ray.is_initialized():
+        logger.info("Ray is already initialized. Skipping Ray initialization.")
+    elif current_platform.is_rocm() or current_platform.is_xpu():
+        # Try to connect existing ray instance and create a new one if not found
+        try:
+            ray.init("auto")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         except ConnectionError:
             logger.warning(
                 "No existing RAY instance detected. "
                 "A new instance will be launched with current node resources.")
+<<<<<<< HEAD
             ray.init(address=ray_address,
                      ignore_reinit_error=True,
                      num_gpus=parallel_config.world_size)
@@ -290,6 +353,11 @@ def initialize_ray_cluster(
     if parallel_config.placement_group:
         # Placement group is already set.
         return
+=======
+            ray.init(address=ray_address, num_gpus=parallel_config.world_size)
+    else:
+        ray.init(address=ray_address)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     device_str = current_platform.ray_device_key
     if not device_str:
@@ -297,9 +365,21 @@ def initialize_ray_cluster(
             f"current platform {current_platform.device_name} does not "
             "support ray.")
 
+<<<<<<< HEAD
     # Create placement group for worker processes
     current_placement_group = ray.util.get_current_placement_group()
     if current_placement_group:
+=======
+    # Create or get the placement group for worker processes
+    if parallel_config.placement_group:
+        current_placement_group = parallel_config.placement_group
+    else:
+        current_placement_group = ray.util.get_current_placement_group()
+
+    if current_placement_group:
+        logger.info("Using the existing placement group")
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # We are in a placement group
         bundles = current_placement_group.bundle_specs
         # Verify that we can use the placement group.
@@ -315,10 +395,19 @@ def initialize_ray_cluster(
         if parallel_config.world_size > device_bundles:
             raise ValueError(
                 f"The number of required {device_str}s exceeds the total "
+<<<<<<< HEAD
                 f"number of available {device_str}s in the placement group."
                 f"Required number of devices: {parallel_config.world_size}. "
                 f"Total number of devices: {device_bundles}.")
     else:
+=======
+                f"number of available {device_str}s in the placement group. "
+                f"Required number of devices: {parallel_config.world_size}. "
+                f"Total number of devices: {device_bundles}.")
+    else:
+        logger.info("No current placement group found. "
+                    "Creating a new placement group.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_devices_in_cluster = ray.cluster_resources().get(device_str, 0)
         # Log a warning message and delay resource allocation failure response.
         # Avoid immediate rejection to allow user-initiated placement group

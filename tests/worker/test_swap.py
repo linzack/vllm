@@ -10,7 +10,11 @@ from vllm.worker.worker import Worker
 
 def test_swap() -> None:
     # Configure the engine.
+<<<<<<< HEAD
     engine_args = EngineArgs(model="s3://vllm-ci-model-weights/distilgpt2",
+=======
+    engine_args = EngineArgs(model="distilbert/distilgpt2",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              dtype="half",
                              load_format="dummy")
     engine_config = engine_args.create_engine_config()

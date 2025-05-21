@@ -30,20 +30,34 @@ It supports page size >= 1.
 
 import logging
 
+<<<<<<< HEAD
 import triton
 import triton.language as tl
 
 from vllm.platforms import current_platform
+=======
+from vllm.platforms import current_platform
+from vllm.triton_utils import tl, triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 is_hip_ = current_platform.is_rocm()
 
 logger = logging.getLogger(__name__)
 
+<<<<<<< HEAD
 # TODO: Remove this when triton>=3.2.0. This issue will not affect performance
 # and accuracy.
 logger.warning(
     "The following error message 'operation scheduled before its operands' "
     "can be ignored.")
+=======
+# Only print the following warnings when triton version < 3.2.0.
+# The issue won't affect performance or accuracy.
+if triton.__version__ < '3.2.0':
+    logger.warning(
+        "The following error message 'operation scheduled before its operands' "
+        "can be ignored.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @triton.jit
@@ -178,7 +192,12 @@ def _decode_att_m_fwd(
     page_size,
     logit_cap,
 ):
+<<<<<<< HEAD
     BLOCK = 64
+=======
+    BLOCK = 64 if not is_hip_ else 8
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     NUM_KV_SPLITS = num_kv_splits
     Lk = k_buffer.shape[-1]
     Lv = v_buffer.shape[-1]
@@ -188,7 +207,13 @@ def _decode_att_m_fwd(
     grid = (batch, head_num, NUM_KV_SPLITS)
     kv_group_num = q.shape[1] // k_buffer.shape[-2]
 
+<<<<<<< HEAD
     num_warps = 4 if kv_group_num == 1 else 2
+=======
+    num_warps = 4
+    if kv_group_num != 1:
+        num_warps = 1 if is_hip_ else 2
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     BLOCK_DMODEL = triton.next_power_of_2(Lk)
     BLOCK_DV = triton.next_power_of_2(Lv)
@@ -418,6 +443,7 @@ def _decode_grouped_att_m_fwd(
     )
 
     extra_kargs = {}
+<<<<<<< HEAD
     if is_hip_:
         # https://rocm.docs.amd.com/en/docs-6.2.0/how-to/llm-fine-tuning-optimization/optimizing-triton-kernel.html
         # https://github.com/triton-lang/triton/blob/main/third_party/amd/backend/compiler.py
@@ -426,6 +452,18 @@ def _decode_grouped_att_m_fwd(
             "matrix_instr_nonkdim": 16,
             "kpack": 2
         }
+=======
+    num_stages = 2
+    if is_hip_:
+        # https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/workload.html#mi300x-triton-kernel-performance-optimization
+        # https://github.com/triton-lang/triton/blob/main/third_party/amd/backend/compiler.py
+        extra_kargs = {
+            "waves_per_eu": 1,
+            "matrix_instr_nonkdim": 16,
+            "kpack": 2
+        }
+        num_stages = 1
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     _fwd_grouped_kernel_stage1[grid](
         q,
@@ -456,7 +494,11 @@ def _decode_grouped_att_m_fwd(
         PAGE_SIZE=page_size,
         logit_cap=logit_cap,
         num_warps=4,
+<<<<<<< HEAD
         num_stages=2,
+=======
+        num_stages=num_stages,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Lk=Lk,
         Lv=Lv,
         **extra_kargs,

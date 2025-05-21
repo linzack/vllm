@@ -25,7 +25,11 @@ ACCURACY_CONFIGS = [
     GSM8KAccuracyTestConfig(
         model_name="neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w8a8",
         excepted_value=0.76),  # no bias
+<<<<<<< HEAD
     # NOTE(rob): We cannot re-initialize VLLM in the same process for TPU,
+=======
+    # NOTE(rob): We cannot re-initialize vLLM in the same process for TPU,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # so only one of these tests can run in a single call to pytest. As
     # a follow up, move this into the LM-EVAL section of the CI.
     # GSM8KAccuracyTestConfig(

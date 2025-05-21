@@ -19,6 +19,15 @@ To use INT8 quantization with vLLM, you'll need to install the [llm-compressor](
 pip install llmcompressor
 ```
 
+<<<<<<< HEAD
+=======
+Additionally, install `vllm` and `lm-evaluation-harness` for evaluation:
+
+```console
+pip install vllm lm-eval==0.4.4
+```
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ## Quantization Process
 
 The quantization process involves four main steps:
@@ -91,7 +100,11 @@ oneshot(
     num_calibration_samples=NUM_CALIBRATION_SAMPLES,
 )
 
+<<<<<<< HEAD
 # Save the compressed model
+=======
+# Save the compressed model: Meta-Llama-3-8B-Instruct-W8A8-Dynamic-Per-Token
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 SAVE_DIR = MODEL_ID.split("/")[1] + "-W8A8-Dynamic-Per-Token"
 model.save_pretrained(SAVE_DIR, save_compressed=True)
 tokenizer.save_pretrained(SAVE_DIR)
@@ -132,4 +145,8 @@ Quantized models can be sensitive to the presence of the `bos` token. Make sure 
 
 ## Troubleshooting and Support
 
+<<<<<<< HEAD
 If you encounter any issues or have feature requests, please open an issue on the [`vllm-project/llm-compressor`](https://github.com/vllm-project/llm-compressor) GitHub repository.
+=======
+If you encounter any issues or have feature requests, please open an issue on the [vllm-project/llm-compressor](https://github.com/vllm-project/llm-compressor/issues) GitHub repository.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

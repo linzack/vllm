@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch.nn.parameter import Parameter
@@ -8,6 +12,10 @@ from torch.nn.parameter import Parameter
 from vllm import _custom_ops as ops
 from vllm.logger import init_logger
 from vllm.model_executor.layers.linear import LinearBase, LinearMethodBase
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig)
 from vllm.model_executor.parameter import (BasevLLMParameter,
@@ -85,11 +93,19 @@ class GPTQMarlin24Config(QuantizationConfig):
             self.quant_type, self.group_size)
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "gptq_marlin_24"
 
     @classmethod
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "gptq_marlin_24"
+
+    @classmethod
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.half]
 
     @classmethod
@@ -98,18 +114,31 @@ class GPTQMarlin24Config(QuantizationConfig):
         return 80
 
     @classmethod
+<<<<<<< HEAD
     def get_config_filenames(cls) -> List[str]:
         return ["quantize_config.json"]
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "GPTQMarlin24Config":
+=======
+    def get_config_filenames(cls) -> list[str]:
+        return ["quantize_config.json"]
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "GPTQMarlin24Config":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         weight_bits = cls.get_from_keys(config, ["bits"])
         group_size = cls.get_from_keys(config, ["group_size"])
         return cls(weight_bits, group_size)
 
     @classmethod
+<<<<<<< HEAD
     def override_quantization_method(cls, hf_quant_cfg,
                                      user_quant) -> Optional[str]:
+=======
+    def override_quantization_method(
+            cls, hf_quant_cfg, user_quant) -> Optional[QuantizationMethods]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         is_marlin_24_format = (
             hf_quant_cfg.get("checkpoint_format") == "marlin_24")
 
@@ -145,7 +174,11 @@ class GPTQMarlin24LinearMethod(LinearMethodBase):
         self,
         layer: torch.nn.Module,
         input_size_per_partition: int,
+<<<<<<< HEAD
         output_partition_sizes: List[int],
+=======
+        output_partition_sizes: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         input_size: int,
         output_size: int,
         params_dtype: torch.dtype,

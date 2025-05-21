@@ -126,7 +126,11 @@ oneshot(
     num_calibration_samples=NUM_CALIBRATION_SAMPLES,
 )
 
+<<<<<<< HEAD
 # Save quantized model
+=======
+# Save quantized model: Llama-3.1-8B-Instruct-FP8-KV
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 SAVE_DIR = MODEL_ID.split("/")[1] + "-FP8-KV"
 model.save_pretrained(SAVE_DIR, save_compressed=True)
 tokenizer.save_pretrained(SAVE_DIR)

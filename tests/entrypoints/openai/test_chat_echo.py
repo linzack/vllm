@@ -10,7 +10,10 @@ from ...utils import RemoteOpenAIServer
 
 # # any model with a chat template should work here
 MODEL_NAME = "Qwen/Qwen2-1.5B-Instruct"
+<<<<<<< HEAD
 DUMMY_CHAT_TEMPLATE = """{% for message in messages %}{{message['role'] + ': ' + message['content'] + '\\n'}}{% endfor %}"""  # noqa: E501
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.fixture(scope="module")
@@ -22,8 +25,11 @@ def server():
         "--enforce-eager",
         "--max-model-len",
         "4080",
+<<<<<<< HEAD
         "--chat-template",
         DUMMY_CHAT_TEMPLATE,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ]
 
     with RemoteOpenAIServer(MODEL_NAME, args) as remote_server:

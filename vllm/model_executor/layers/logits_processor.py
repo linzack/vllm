@@ -8,7 +8,10 @@ import torch
 import torch.nn as nn
 
 import vllm.envs as envs
+<<<<<<< HEAD
 from vllm.config import get_current_vllm_config
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.distributed import (tensor_model_parallel_all_gather,
                               tensor_model_parallel_gather)
 from vllm.model_executor.layers.vocab_parallel_embedding import (
@@ -51,10 +54,14 @@ class LogitsProcessor(nn.Module):
         # Soft cap the logits. Used in Gemma 2.
         self.soft_cap = soft_cap
         # Whether to use gather or all-gather to gather the logits.
+<<<<<<< HEAD
         parallel_config = get_current_vllm_config().parallel_config
         self.use_all_gather = current_platform.is_tpu() \
             or envs.VLLM_USE_V1 \
             or parallel_config.distributed_executor_backend == "external_launcher" # noqa
+=======
+        self.use_all_gather = current_platform.use_all_gather()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def forward(
         self,
@@ -82,7 +89,12 @@ class LogitsProcessor(nn.Module):
                 logits *= self.scale
 
             # Apply logits processors (if any).
+<<<<<<< HEAD
             if sampling_metadata is not None:
+=======
+            if sampling_metadata is not None and \
+                sampling_metadata.seq_groups is not None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 logits = _apply_logits_processors(logits, sampling_metadata)
 
         return logits
@@ -122,7 +134,11 @@ class LogitsProcessor(nn.Module):
 
     def extra_repr(self) -> str:
         s = f"vocab_size={self.vocab_size}"
+<<<<<<< HEAD
         s += f", forg_vocab_size={self.org_vocab_size}"
+=======
+        s += f", org_vocab_size={self.org_vocab_size}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         s += f", scale={self.scale}, logits_as_input={self.logits_as_input}"
         return s
 

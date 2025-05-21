@@ -3,9 +3,14 @@
 import pytest
 
 from vllm.multimodal import MULTIMODAL_REGISTRY
+<<<<<<< HEAD
 from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
 
 from ....conftest import _ImageAssets
+=======
+
+from ....conftest import ImageTestAssets
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from ...utils import build_model_context
 
 
@@ -20,7 +25,11 @@ from ...utils import build_model_context
 @pytest.mark.parametrize("num_imgs", [1, 2])
 @pytest.mark.parametrize("kwargs_on_init", [True, False])
 def test_processor_override(
+<<<<<<< HEAD
     image_assets: _ImageAssets,
+=======
+    image_assets: ImageTestAssets,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     model_id: str,
     mm_processor_kwargs: dict[str, object],
     expected_toks_per_img: int,
@@ -30,6 +39,7 @@ def test_processor_override(
 ):
     """Ensure Qwen2VLMultiModalProcessor handles min/max pixels properly."""
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model_id,
         tokenizer_name=model_id,
         mm_processor_kwargs=mm_processor_kwargs if kwargs_on_init else None,
@@ -40,6 +50,14 @@ def test_processor_override(
         ctx.model_config,
         tokenizer=tokenizer,
     )
+=======
+        model_id,
+        mm_processor_kwargs=mm_processor_kwargs if kwargs_on_init else None,
+        limit_mm_per_prompt={"image": num_imgs},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+    tokenizer = processor.info.get_tokenizer()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     hf_processor_mm_kwargs = {} if kwargs_on_init else mm_processor_kwargs
 
     # Build the image str / prompt based on the number of images we pass

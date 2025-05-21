@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+<<<<<<< HEAD
 
 import functools
 import gc
@@ -7,16 +8,31 @@ from typing import Callable, TypeVar
 import pytest
 import torch
 from typing_extensions import ParamSpec
+=======
+import pytest
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.distributed import cleanup_dist_env_and_memory
 from vllm.model_executor.model_loader.tensorizer import TensorizerConfig
 
 
+<<<<<<< HEAD
+=======
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch):
+    """
+    Tensorizer only tested on V0 so far.
+    """
+    monkeypatch.setenv('VLLM_USE_V1', '0')
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest.fixture(autouse=True)
 def cleanup():
     cleanup_dist_env_and_memory(shutdown_ray=True)
 
 
+<<<<<<< HEAD
 _P = ParamSpec("_P")
 _R = TypeVar("_R")
 
@@ -43,6 +59,8 @@ def retry_until_skip(n: int):
     return decorator_retry
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 @pytest.fixture(autouse=True)
 def tensorizer_config():
     config = TensorizerConfig(tensorizer_uri="vllm")

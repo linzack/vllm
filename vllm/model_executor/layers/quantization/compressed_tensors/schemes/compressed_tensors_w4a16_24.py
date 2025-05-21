@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Callable, List, Optional
+=======
+from typing import Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch.nn import Parameter
@@ -58,7 +62,11 @@ class CompressedTensorsW4A16Sparse24(CompressedTensorsScheme):
         layer.meta = Parameter(layer.meta.data, requires_grad=False)
 
     def create_weights(self, layer: torch.nn.Module, input_size: int,
+<<<<<<< HEAD
                        output_partition_sizes: List[int],
+=======
+                       output_partition_sizes: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        input_size_per_partition: int,
                        params_dtype: torch.dtype, weight_loader: Callable,
                        **kwargs):

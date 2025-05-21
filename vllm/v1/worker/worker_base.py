@@ -51,7 +51,11 @@ class WorkerBase(WorkerBaseV0):
         self.device: Optional[torch.device] = None
         self.model_runner: Optional[nn.Module] = None
 
+<<<<<<< HEAD
     def get_kv_cache_spec(self) -> KVCacheSpec:
+=======
+    def get_kv_cache_spec(self) -> dict[str, KVCacheSpec]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Get specifications for KV cache implementation."""
         raise NotImplementedError
 

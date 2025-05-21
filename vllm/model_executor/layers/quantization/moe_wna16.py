@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional
+=======
+from typing import Any, Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -9,6 +13,10 @@ from vllm.model_executor.layers.fused_moe.layer import (
     FusedMoE, FusedMoEMethodBase, FusedMoeWeightScaleSupported)
 from vllm.model_executor.layers.linear import (LinearBase,
                                                UnquantizedLinearMethod)
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig, QuantizeMethodBase)
 from vllm.model_executor.layers.quantization.utils.marlin_utils import (
@@ -22,8 +30,13 @@ class MoeWNA16Config(QuantizationConfig):
 
     def __init__(self, linear_quant_method: str, weight_bits: int,
                  group_size: int, has_zp: bool, lm_head_quantized: bool,
+<<<<<<< HEAD
                  modules_to_not_convert: Optional[List[str]],
                  full_config: Dict[str, Any]) -> None:
+=======
+                 modules_to_not_convert: Optional[list[str]],
+                 full_config: dict[str, Any]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         super().__init__()
         self.weight_bits = weight_bits
         self.group_size = group_size
@@ -64,11 +77,19 @@ class MoeWNA16Config(QuantizationConfig):
             self.modules_to_not_convert = modules_to_not_convert
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "moe_wna16"
 
     @classmethod
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "moe_wna16"
+
+    @classmethod
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.bfloat16, torch.half]
 
     @classmethod
@@ -76,11 +97,19 @@ class MoeWNA16Config(QuantizationConfig):
         return 70
 
     @classmethod
+<<<<<<< HEAD
     def get_config_filenames(cls) -> List[str]:
         return ["quantize_config.json"]
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "MoeWNA16Config":
+=======
+    def get_config_filenames(cls) -> list[str]:
+        return ["quantize_config.json"]
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "MoeWNA16Config":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         linear_quant_method = cls.get_from_keys(config, ["quant_method"])
         weight_bits = cls.get_from_keys(config, ["bits"])
         group_size = cls.get_from_keys(config, ["group_size"])
@@ -100,15 +129,24 @@ class MoeWNA16Config(QuantizationConfig):
                    lm_head_quantized, modules_to_not_convert, config)
 
     @classmethod
+<<<<<<< HEAD
     def override_quantization_method(cls, hf_quant_cfg,
                                      user_quant) -> Optional[str]:
+=======
+    def override_quantization_method(
+            cls, hf_quant_cfg, user_quant) -> Optional[QuantizationMethods]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         can_convert = cls.is_moe_wna16_compatible(hf_quant_cfg)
         if can_convert and user_quant == "moe_wna16":
             return cls.get_name()
         return None
 
     @classmethod
+<<<<<<< HEAD
     def is_moe_wna16_compatible(cls, quant_config: Dict[str, Any]):
+=======
+    def is_moe_wna16_compatible(cls, quant_config: dict[str, Any]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # Extract data from quant config.
         quant_method = quant_config.get("quant_method", "").lower()
         num_bits = quant_config.get("bits")
@@ -162,7 +200,11 @@ class MoeWNA16Config(QuantizationConfig):
         return None
 
 
+<<<<<<< HEAD
 def is_layer_skipped_quant(prefix: str, modules_to_not_convert: List[str]):
+=======
+def is_layer_skipped_quant(prefix: str, modules_to_not_convert: list[str]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return any(module_name in prefix for module_name in modules_to_not_convert)
 
 
@@ -288,12 +330,25 @@ class MoeWNA16Method(FusedMoEMethodBase):
         use_grouped_topk: bool = False,
         topk_group: Optional[int] = None,
         num_expert_group: Optional[int] = None,
+<<<<<<< HEAD
         custom_routing_function: Optional[Callable] = None,
         scoring_func: str = "softmax",
         e_score_correction_bias: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         from vllm.model_executor.layers.fused_moe import fused_experts
 
+=======
+        global_num_experts: int = -1,
+        expert_map: Optional[torch.Tensor] = None,
+        custom_routing_function: Optional[Callable] = None,
+        scoring_func: str = "softmax",
+        e_score_correction_bias: Optional[torch.Tensor] = None,
+        apply_router_weight_on_input: bool = False,
+        activation: str = "silu",
+    ) -> torch.Tensor:
+        from vllm.model_executor.layers.fused_moe import fused_experts
+        assert activation == "silu", "Only SiLU activation is supported."
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         topk_weights, topk_ids = FusedMoE.select_experts(
             hidden_states=x,
             router_logits=router_logits,
@@ -309,6 +364,7 @@ class MoeWNA16Method(FusedMoEMethodBase):
         weight_bits = self.quant_config.weight_bits
         has_zp = self.quant_config.has_zp
 
+<<<<<<< HEAD
         return fused_experts(x,
                              layer.w13_qweight,
                              layer.w2_qweight,
@@ -322,6 +378,25 @@ class MoeWNA16Method(FusedMoEMethodBase):
                              w1_zp=layer.w13_qzeros if has_zp else None,
                              w2_zp=layer.w2_qzeros if has_zp else None,
                              block_shape=[0, layer.group_size])
+=======
+        return fused_experts(
+            x,
+            layer.w13_qweight,
+            layer.w2_qweight,
+            topk_weights=topk_weights,
+            topk_ids=topk_ids,
+            inplace=True,
+            use_int4_w4a16=weight_bits == 4,
+            use_int8_w8a16=weight_bits == 8,
+            global_num_experts=global_num_experts,
+            apply_router_weight_on_input=apply_router_weight_on_input,
+            expert_map=expert_map,
+            w1_scale=layer.w13_scales,
+            w2_scale=layer.w2_scales,
+            w1_zp=layer.w13_qzeros if has_zp else None,
+            w2_zp=layer.w2_qzeros if has_zp else None,
+            block_shape=[0, layer.group_size])
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def get_weight_loader(layer, weight_loader):

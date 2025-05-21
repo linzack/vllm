@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 import torch
 
@@ -42,7 +45,11 @@ def test_get_token_ids_to_score(k: int):
         device='cuda',
     )
 
+<<<<<<< HEAD
     expected_output: List[List[int]] = [
+=======
+    expected_output: list[list[int]] = [
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         [],
     ]
     for i in range(proposal_token_ids.shape[0]):

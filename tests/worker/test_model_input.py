@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import dataclasses
+<<<<<<< HEAD
 from typing import List, Tuple, Type
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -27,6 +30,7 @@ class MockAttentionBackend(AttentionBackend):
         raise NotImplementedError
 
     @staticmethod
+<<<<<<< HEAD
     def get_metadata_cls() -> Type["AttentionMetadata"]:
         return AttentionMetadata
 
@@ -36,6 +40,17 @@ class MockAttentionBackend(AttentionBackend):
 
     @staticmethod
     def get_state_cls() -> Type["CommonAttentionState"]:
+=======
+    def get_metadata_cls() -> type["AttentionMetadata"]:
+        return AttentionMetadata
+
+    @staticmethod
+    def get_builder_cls() -> type["AttentionMetadataBuilder"]:
+        return AttentionMetadataBuilder
+
+    @staticmethod
+    def get_state_cls() -> type["CommonAttentionState"]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return CommonAttentionState
 
     @staticmethod
@@ -44,7 +59,11 @@ class MockAttentionBackend(AttentionBackend):
         block_size: int,
         num_kv_heads: int,
         head_size: int,
+<<<<<<< HEAD
     ) -> Tuple[int, ...]:
+=======
+    ) -> tuple[int, ...]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError
 
     @staticmethod
@@ -57,7 +76,11 @@ class MockAttentionBackend(AttentionBackend):
 
     @staticmethod
     def copy_blocks(
+<<<<<<< HEAD
         kv_caches: List[torch.Tensor],
+=======
+        kv_caches: list[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         src_to_dists: torch.Tensor,
     ) -> None:
         pass

@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from collections import OrderedDict
+<<<<<<< HEAD
+=======
+from typing import NamedTuple, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from unittest.mock import patch
 
 import pytest
@@ -9,6 +13,7 @@ from torch import nn
 
 from vllm.lora.utils import (get_adapter_absolute_path,
                              parse_fine_tuned_lora_name, replace_submodule)
+<<<<<<< HEAD
 from vllm.utils import LRUCache
 
 
@@ -17,33 +22,117 @@ def test_parse_fine_tuned_lora_name_valid():
         ("base_model.model.lm_head.lora_A.weight", "lm_head", True, False),
         ("base_model.model.lm_head.lora_B.weight", "lm_head", False, False),
         (
+=======
+from vllm.model_executor.models.utils import WeightsMapper
+
+
+class LoRANameParserTestConfig(NamedTuple):
+    name: str
+    module_name: str
+    is_lora_a: bool
+    is_bias: bool
+    weights_mapper: Optional[WeightsMapper] = None
+
+
+def test_parse_fine_tuned_lora_name_valid():
+    fixture = [
+        LoRANameParserTestConfig("base_model.model.lm_head.lora_A.weight",
+                                 "lm_head", True, False),
+        LoRANameParserTestConfig("base_model.model.lm_head.lora_B.weight",
+                                 "lm_head", False, False),
+        LoRANameParserTestConfig(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "base_model.model.model.embed_tokens.lora_embedding_A",
             "model.embed_tokens",
             True,
             False,
         ),
+<<<<<<< HEAD
         (
+=======
+        LoRANameParserTestConfig(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "base_model.model.model.embed_tokens.lora_embedding_B",
             "model.embed_tokens",
             False,
             False,
         ),
+<<<<<<< HEAD
         (
+=======
+        LoRANameParserTestConfig(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "base_model.model.model.layers.9.mlp.down_proj.lora_A.weight",
             "model.layers.9.mlp.down_proj",
             True,
             False,
         ),
+<<<<<<< HEAD
         (
+=======
+        LoRANameParserTestConfig(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             "base_model.model.model.layers.9.mlp.down_proj.lora_B.weight",
             "model.layers.9.mlp.down_proj",
             False,
             False,
         ),
+<<<<<<< HEAD
     }
     for name, module_name, is_lora_a, is_bias in fixture:
         assert (module_name, is_lora_a,
                 is_bias) == parse_fine_tuned_lora_name(name)
+=======
+        LoRANameParserTestConfig(
+            "language_model.layers.9.mlp.down_proj.lora_A.weight",
+            "language_model.layers.9.mlp.down_proj",
+            True,
+            False,
+        ),
+        LoRANameParserTestConfig(
+            "language_model.layers.9.mlp.down_proj.lora_B.weight",
+            "language_model.layers.9.mlp.down_proj",
+            False,
+            False,
+        ),
+        # Test with WeightsMapper
+        LoRANameParserTestConfig(
+            "base_model.model.model.layers.9.mlp.down_proj.lora_A.weight",
+            "language_model.model.layers.9.mlp.down_proj",
+            True,
+            False,
+            weights_mapper=WeightsMapper(
+                orig_to_new_prefix={"model.": "language_model.model."}),
+        ),
+        LoRANameParserTestConfig(
+            "base_model.model.model.layers.9.mlp.down_proj.lora_B.weight",
+            "language_model.model.layers.9.mlp.down_proj",
+            False,
+            False,
+            weights_mapper=WeightsMapper(
+                orig_to_new_prefix={"model.": "language_model.model."}),
+        ),
+        LoRANameParserTestConfig(
+            "model.layers.9.mlp.down_proj.lora_A.weight",
+            "language_model.model.layers.9.mlp.down_proj",
+            True,
+            False,
+            weights_mapper=WeightsMapper(
+                orig_to_new_prefix={"model.": "language_model.model."}),
+        ),
+        LoRANameParserTestConfig(
+            "model.layers.9.mlp.down_proj.lora_B.weight",
+            "language_model.model.layers.9.mlp.down_proj",
+            False,
+            False,
+            weights_mapper=WeightsMapper(
+                orig_to_new_prefix={"model.": "language_model.model."}),
+        ),
+    ]
+    for name, module_name, is_lora_a, is_bias, weights_mapper in fixture:
+        assert (module_name, is_lora_a,
+                is_bias) == parse_fine_tuned_lora_name(name, weights_mapper)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def test_parse_fine_tuned_lora_name_invalid():
@@ -85,6 +174,7 @@ def test_replace_submodule():
     assert dict(model.named_modules())["seq1.dense2"] == dense2
 
 
+<<<<<<< HEAD
 class TestLRUCache(LRUCache):
 
     def _on_remove(self, key, value):
@@ -193,6 +283,8 @@ def test_lru_cache():
     assert 6 in cache
 
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # Unit tests for get_adapter_absolute_path
 @patch('os.path.isabs')
 def test_get_adapter_absolute_path_absolute(mock_isabs):

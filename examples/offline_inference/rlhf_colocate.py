@@ -17,6 +17,7 @@ from ray.util.placement_group import placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 
 from vllm import LLM
+<<<<<<< HEAD
 from vllm.worker.worker import Worker
 
 
@@ -51,6 +52,8 @@ class MyWorker(Worker):
             weights_updated = weights_updated and torch.allclose(
                 p, torch.zeros_like(p))
         return weights_updated
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MyLLM(LLM):
@@ -150,7 +153,11 @@ for (i, bundle_indices) in enumerate([[0, 1], [2, 3]]):
     )(MyLLM).remote(
         model="facebook/opt-125m",
         enforce_eager=True,
+<<<<<<< HEAD
         worker_cls=MyWorker,
+=======
+        worker_extension_cls="rlhf_utils.ColocateWorkerExtension",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         tensor_parallel_size=2,
         distributed_executor_backend="ray",
         gpu_memory_utilization=0.4,

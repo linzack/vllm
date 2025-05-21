@@ -5,15 +5,25 @@ import json
 import os
 import sys
 from argparse import RawTextHelpFormatter
+<<<<<<< HEAD
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Generator, List, Optional, TypeAlias
+=======
+from collections.abc import Generator
+from dataclasses import asdict, dataclass
+from typing import Any, Optional, TypeAlias
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import tqdm
 
 from vllm import LLM, SamplingParams
 from vllm.engine.arg_utils import EngineArgs
+<<<<<<< HEAD
 from vllm.profiler import layerwise_profile
+=======
+from vllm.profiler.layerwise_profile import layerwise_profile
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.utils import FlexibleArgumentParser
 
 BATCH_SIZE_DEFAULT = 1
@@ -42,8 +52,13 @@ def get_dtype(dtype: str):
         return dtype
 
 
+<<<<<<< HEAD
 OutputLen_NumReqs_Map: TypeAlias = Dict[int, int]
 def compute_request_output_lengths(batch_size: int, step_requests: List[int]) \
+=======
+OutputLen_NumReqs_Map: TypeAlias = dict[int, int]
+def compute_request_output_lengths(batch_size: int, step_requests: list[int]) \
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       -> OutputLen_NumReqs_Map:
     """
     Given the number of requests, batch_size, and the number of requests
@@ -63,7 +78,11 @@ def compute_request_output_lengths(batch_size: int, step_requests: List[int]) \
     Args:
         batch_size (int): Number of requests submitted for profile. This is
             args.batch_size.
+<<<<<<< HEAD
         step_requests (List[int]): step_requests[i] is the number of requests
+=======
+        step_requests (list[int]): step_requests[i] is the number of requests
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             that the ith engine step should process.
 
     Returns:
@@ -114,7 +133,11 @@ def compute_request_output_lengths(batch_size: int, step_requests: List[int]) \
     return ol_nr
 
 
+<<<<<<< HEAD
 def determine_requests_per_step(context: ProfileContext) -> List[int]:
+=======
+def determine_requests_per_step(context: ProfileContext) -> list[int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
     Determine number of requests each engine step should process.
     If context.num_steps is set, then all engine steps process the
@@ -130,7 +153,11 @@ def determine_requests_per_step(context: ProfileContext) -> List[int]:
         context: ProfileContext object.
 
     Returns:
+<<<<<<< HEAD
         List[int]: Number of requests to process for all engine-steps. 
+=======
+        list[int]: Number of requests to process for all engine-steps. 
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
          output[i], contains the number of requests that the ith step
          should process.
     """
@@ -170,7 +197,11 @@ def run_profile(context: ProfileContext, csv_output: Optional[str],
     for key, value in asdict(context).items():
         print(f"  {key} = {value}")
 
+<<<<<<< HEAD
     requests_per_step: List[int] = determine_requests_per_step(context)
+=======
+    requests_per_step: list[int] = determine_requests_per_step(context)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     ol_nr: OutputLen_NumReqs_Map = compute_request_output_lengths(
         context.batch_size, requests_per_step)
@@ -192,7 +223,11 @@ def run_profile(context: ProfileContext, csv_output: Optional[str],
     batch_size = context.batch_size
     prompt_len = context.prompt_len
 
+<<<<<<< HEAD
     scheduler_config = llm.llm_engine.scheduler_config
+=======
+    scheduler_config = llm.llm_engine.vllm_config.scheduler_config
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     max_model_len = llm.llm_engine.model_config.max_model_len
     max_num_batched_tokens = scheduler_config.max_num_batched_tokens
     max_num_seqs = scheduler_config.max_num_seqs
@@ -233,9 +268,14 @@ def run_profile(context: ProfileContext, csv_output: Optional[str],
             sampling_params.max_tokens = next(output_len_generator)
             assert isinstance(sampling_params.max_tokens, int)
 
+<<<<<<< HEAD
             prompt_token_ids = torch.randint(
                 llm.llm_engine.model_config.get_vocab_size(),
                 size=(prompt_len, )).tolist()
+=======
+            prompt_token_ids = torch.randint(llm.get_tokenizer().vocab_size,
+                                             size=(prompt_len, )).tolist()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
             llm.llm_engine.add_request(
                 request_id=f"seq{i}",
@@ -359,7 +399,11 @@ def run_profile(context: ProfileContext, csv_output: Optional[str],
               f" in folder {context.save_chrome_traces_folder}")
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
+=======
+def parse_args():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     parser = FlexibleArgumentParser(description="""
 Profile a model
 
@@ -449,7 +493,14 @@ Profile a model
 
     EngineArgs.add_cli_args(parser)
 
+<<<<<<< HEAD
     args = parser.parse_args()
+=======
+    return parser.parse_args()
+
+
+def main(args):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     context = ProfileContext(
         engine_args=EngineArgs.from_cli_args(args),
         **{
@@ -458,3 +509,11 @@ Profile a model
             if k in inspect.signature(ProfileContext).parameters
         })
     run_profile(context, csv_output=args.csv, json_output=args.json)
+<<<<<<< HEAD
+=======
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

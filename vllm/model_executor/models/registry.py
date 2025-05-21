@@ -10,19 +10,33 @@ import subprocess
 import sys
 import tempfile
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import (AbstractSet, Callable, Dict, List, Optional, Tuple, Type,
                     TypeVar, Union)
+=======
+from collections.abc import Set
+from dataclasses import dataclass, field
+from functools import lru_cache
+from typing import Callable, Optional, TypeVar, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import cloudpickle
 import torch.nn as nn
 
 from vllm.logger import init_logger
 
+<<<<<<< HEAD
 from .interfaces import (has_inner_state, is_attention_free, is_hybrid,
                          supports_cross_encoding, supports_multimodal,
                          supports_pp, supports_transcription)
+=======
+from .interfaces import (has_inner_state, has_noops, is_attention_free,
+                         is_hybrid, supports_cross_encoding,
+                         supports_multimodal, supports_pp,
+                         supports_transcription, supports_v0_only)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from .interfaces_base import is_text_generation_model
 
 logger = init_logger(__name__)
@@ -33,6 +47,10 @@ _TEXT_GENERATION_MODELS = {
     "AquilaModel": ("llama", "LlamaForCausalLM"),
     "AquilaForCausalLM": ("llama", "LlamaForCausalLM"),  # AquilaChat2
     "ArcticForCausalLM": ("arctic", "ArcticForCausalLM"),
+<<<<<<< HEAD
+=======
+    "MiniMaxText01ForCausalLM": ("minimax_text_01", "MiniMaxText01ForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # baichuan-7b, upper case 'C' in the class name
     "BaiChuanForCausalLM": ("baichuan", "BaiChuanForCausalLM"),
     # baichuan-13b, lower case 'c' in the class name
@@ -40,10 +58,18 @@ _TEXT_GENERATION_MODELS = {
     "BambaForCausalLM": ("bamba", "BambaForCausalLM"),
     "BloomForCausalLM": ("bloom", "BloomForCausalLM"),
     "ChatGLMModel": ("chatglm", "ChatGLMForCausalLM"),
+<<<<<<< HEAD
     "CohereForCausalLM": ("commandr", "CohereForCausalLM"),
     "Cohere2ForCausalLM": ("commandr", "CohereForCausalLM"),
     "DbrxForCausalLM": ("dbrx", "DbrxForCausalLM"),
     "DeciLMForCausalLM": ("decilm", "DeciLMForCausalLM"),
+=======
+    "ChatGLMForConditionalGeneration": ("chatglm", "ChatGLMForCausalLM"),
+    "CohereForCausalLM": ("commandr", "CohereForCausalLM"),
+    "Cohere2ForCausalLM": ("commandr", "CohereForCausalLM"),
+    "DbrxForCausalLM": ("dbrx", "DbrxForCausalLM"),
+    "DeciLMForCausalLM": ("nemotron_nas", "DeciLMForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "DeepseekForCausalLM": ("deepseek", "DeepseekForCausalLM"),
     "DeepseekV2ForCausalLM": ("deepseek_v2", "DeepseekV2ForCausalLM"),
     "DeepseekV3ForCausalLM": ("deepseek_v2", "DeepseekV3ForCausalLM"),
@@ -52,14 +78,27 @@ _TEXT_GENERATION_MODELS = {
     "Fairseq2LlamaForCausalLM": ("fairseq2_llama", "Fairseq2LlamaForCausalLM"),
     "GemmaForCausalLM": ("gemma", "GemmaForCausalLM"),
     "Gemma2ForCausalLM": ("gemma2", "Gemma2ForCausalLM"),
+<<<<<<< HEAD
     "GlmForCausalLM": ("glm", "GlmForCausalLM"),
+=======
+    "Gemma3ForCausalLM": ("gemma3", "Gemma3ForCausalLM"),
+    "GlmForCausalLM": ("glm", "GlmForCausalLM"),
+    "Glm4ForCausalLM": ("glm4", "Glm4ForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "GPT2LMHeadModel": ("gpt2", "GPT2LMHeadModel"),
     "GPTBigCodeForCausalLM": ("gpt_bigcode", "GPTBigCodeForCausalLM"),
     "GPTJForCausalLM": ("gpt_j", "GPTJForCausalLM"),
     "GPTNeoXForCausalLM": ("gpt_neox", "GPTNeoXForCausalLM"),
     "GraniteForCausalLM": ("granite", "GraniteForCausalLM"),
     "GraniteMoeForCausalLM": ("granitemoe", "GraniteMoeForCausalLM"),
+<<<<<<< HEAD
     "GritLM": ("gritlm", "GritLM"),
+=======
+    "GraniteMoeHybridForCausalLM": ("granitemoehybrid", "GraniteMoeHybridForCausalLM"),   # noqa: E501
+    "GraniteMoeSharedForCausalLM": ("granitemoeshared", "GraniteMoeSharedForCausalLM"),   # noqa: E501
+    "GritLM": ("gritlm", "GritLM"),
+    "Grok1ModelForCausalLM": ("grok1", "Grok1ForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "InternLMForCausalLM": ("llama", "LlamaForCausalLM"),
     "InternLM2ForCausalLM": ("internlm2", "InternLM2ForCausalLM"),
     "InternLM2VEForCausalLM": ("internlm2_ve", "InternLM2VEForCausalLM"),
@@ -71,6 +110,10 @@ _TEXT_GENERATION_MODELS = {
     "LLaMAForCausalLM": ("llama", "LlamaForCausalLM"),
     "MambaForCausalLM": ("mamba", "MambaForCausalLM"),
     "FalconMambaForCausalLM": ("mamba", "MambaForCausalLM"),
+<<<<<<< HEAD
+=======
+    "FalconH1ForCausalLM":("falcon_h1", "FalconH1ForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "Mamba2ForCausalLM": ("mamba2", "Mamba2ForCausalLM"),
     "MiniCPMForCausalLM": ("minicpm", "MiniCPMForCausalLM"),
     "MiniCPM3ForCausalLM": ("minicpm3", "MiniCPM3ForCausalLM"),
@@ -80,6 +123,10 @@ _TEXT_GENERATION_MODELS = {
     # transformers's mpt class has lower case
     "MptForCausalLM": ("mpt", "MPTForCausalLM"),
     "MPTForCausalLM": ("mpt", "MPTForCausalLM"),
+<<<<<<< HEAD
+=======
+    "MiMoForCausalLM": ("mimo", "MiMoForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "NemotronForCausalLM": ("nemotron", "NemotronForCausalLM"),
     "OlmoForCausalLM": ("olmo", "OlmoForCausalLM"),
     "Olmo2ForCausalLM": ("olmo2", "Olmo2ForCausalLM"),
@@ -91,25 +138,44 @@ _TEXT_GENERATION_MODELS = {
     "Phi3ForCausalLM": ("phi3", "Phi3ForCausalLM"),
     "Phi3SmallForCausalLM": ("phi3_small", "Phi3SmallForCausalLM"),
     "PhiMoEForCausalLM": ("phimoe", "PhiMoEForCausalLM"),
+<<<<<<< HEAD
     "QWenLMHeadModel": ("qwen", "QWenLMHeadModel"),
     "Qwen2ForCausalLM": ("qwen2", "Qwen2ForCausalLM"),
     "Qwen2MoeForCausalLM": ("qwen2_moe", "Qwen2MoeForCausalLM"),
+=======
+    "Plamo2ForCausalLM": ("plamo2", "Plamo2ForCausalLM"),
+    "QWenLMHeadModel": ("qwen", "QWenLMHeadModel"),
+    "Qwen2ForCausalLM": ("qwen2", "Qwen2ForCausalLM"),
+    "Qwen2MoeForCausalLM": ("qwen2_moe", "Qwen2MoeForCausalLM"),
+    "Qwen3ForCausalLM": ("qwen3", "Qwen3ForCausalLM"),
+    "Qwen3MoeForCausalLM": ("qwen3_moe", "Qwen3MoeForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "RWForCausalLM": ("falcon", "FalconForCausalLM"),
     "StableLMEpochForCausalLM": ("stablelm", "StablelmForCausalLM"),
     "StableLmForCausalLM": ("stablelm", "StablelmForCausalLM"),
     "Starcoder2ForCausalLM": ("starcoder2", "Starcoder2ForCausalLM"),
     "SolarForCausalLM": ("solar", "SolarForCausalLM"),
     "TeleChat2ForCausalLM": ("telechat2", "TeleChat2ForCausalLM"),
+<<<<<<< HEAD
     "XverseForCausalLM": ("llama", "LlamaForCausalLM"),
     # [Encoder-decoder]
     "BartModel": ("bart", "BartForConditionalGeneration"),
     "BartForConditionalGeneration": ("bart", "BartForConditionalGeneration"),
     "Florence2ForConditionalGeneration": ("florence2", "Florence2ForConditionalGeneration"),  # noqa: E501
+=======
+    "TeleFLMForCausalLM": ("teleflm", "TeleFLMForCausalLM"),
+    "XverseForCausalLM": ("llama", "LlamaForCausalLM"),
+    "Zamba2ForCausalLM": ("zamba2", "Zamba2ForCausalLM"),
+    # [Encoder-decoder]
+    "BartModel": ("bart", "BartForConditionalGeneration"),
+    "BartForConditionalGeneration": ("bart", "BartForConditionalGeneration"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 
 _EMBEDDING_MODELS = {
     # [Text-only]
     "BertModel": ("bert", "BertEmbeddingModel"),
+<<<<<<< HEAD
     "RobertaModel": ("roberta", "RobertaEmbeddingModel"),
     "RobertaForMaskedLM": ("roberta", "RobertaEmbeddingModel"),
     "XLMRobertaModel": ("roberta", "RobertaEmbeddingModel"),
@@ -117,6 +183,14 @@ _EMBEDDING_MODELS = {
     "Gemma2Model": ("gemma2", "Gemma2ForCausalLM"),
     "GlmForCausalLM": ("glm", "GlmForCausalLM"),
     "GritLM": ("gritlm", "GritLM"),
+=======
+    "DeciLMForCausalLM": ("nemotron_nas", "DeciLMForCausalLM"),
+    "Gemma2Model": ("gemma2", "Gemma2ForCausalLM"),
+    "GlmForCausalLM": ("glm", "GlmForCausalLM"),
+    "GritLM": ("gritlm", "GritLM"),
+    "GteModel": ("bert_with_rope", "SnowflakeGteNewModel"),
+    "GteNewModel": ("bert_with_rope", "GteNewModel"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "InternLM2ForRewardModel": ("internlm2", "InternLM2ForRewardModel"),
     "JambaForSequenceClassification": ("jamba", "JambaForSequenceClassification"),  # noqa: E501
     "LlamaModel": ("llama", "LlamaForCausalLM"),
@@ -126,12 +200,24 @@ _EMBEDDING_MODELS = {
         if arch == "LlamaForCausalLM"
     },
     "MistralModel": ("llama", "LlamaForCausalLM"),
+<<<<<<< HEAD
+=======
+    "ModernBertModel": ("modernbert", "ModernBertModel"),
+    "NomicBertModel": ("bert_with_rope", "NomicBertModel"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "Phi3ForCausalLM": ("phi3", "Phi3ForCausalLM"),
     "Qwen2Model": ("qwen2", "Qwen2EmbeddingModel"),
     "Qwen2ForCausalLM": ("qwen2", "Qwen2ForCausalLM"),
     "Qwen2ForRewardModel": ("qwen2_rm", "Qwen2ForRewardModel"),
     "Qwen2ForProcessRewardModel": ("qwen2_rm", "Qwen2ForProcessRewardModel"),
+<<<<<<< HEAD
     "TeleChat2ForCausalLM": ("telechat2", "TeleChat2ForCausalLM"),
+=======
+    "RobertaForMaskedLM": ("roberta", "RobertaEmbeddingModel"),
+    "RobertaModel": ("roberta", "RobertaEmbeddingModel"),
+    "TeleChat2ForCausalLM": ("telechat2", "TeleChat2ForCausalLM"),
+    "XLMRobertaModel": ("roberta", "RobertaEmbeddingModel"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # [Multimodal]
     "LlavaNextForConditionalGeneration": ("llava_next", "LlavaNextForConditionalGeneration"),  # noqa: E501
     "Phi3VForCausalLM": ("phi3v", "Phi3VForCausalLM"),
@@ -150,28 +236,58 @@ _CROSS_ENCODER_MODELS = {
                                          "RobertaForSequenceClassification"),
     "XLMRobertaForSequenceClassification": ("roberta",
                                             "RobertaForSequenceClassification"),
+<<<<<<< HEAD
+=======
+    "ModernBertForSequenceClassification": ("modernbert",
+                                            "ModernBertForSequenceClassification"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 
 _MULTIMODAL_MODELS = {
     # [Decoder-only]
     "AriaForConditionalGeneration": ("aria", "AriaForConditionalGeneration"),
+<<<<<<< HEAD
+=======
+    "AyaVisionForConditionalGeneration": ("aya_vision", "AyaVisionForConditionalGeneration"),  # noqa: E501
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "Blip2ForConditionalGeneration": ("blip2", "Blip2ForConditionalGeneration"),
     "ChameleonForConditionalGeneration": ("chameleon", "ChameleonForConditionalGeneration"),  # noqa: E501
     "DeepseekVLV2ForCausalLM": ("deepseek_vl2", "DeepseekVLV2ForCausalLM"),
     "FuyuForCausalLM": ("fuyu", "FuyuForCausalLM"),
+<<<<<<< HEAD
     "GLM4VForCausalLM": ("glm4v", "GLM4VForCausalLM"),
     "H2OVLChatModel": ("h2ovl", "H2OVLChatModel"),
     "InternVLChatModel": ("internvl", "InternVLChatModel"),
     "Idefics3ForConditionalGeneration":("idefics3","Idefics3ForConditionalGeneration"),
+=======
+    "Gemma3ForConditionalGeneration": ("gemma3_mm", "Gemma3ForConditionalGeneration"),  # noqa: E501
+    "GLM4VForCausalLM": ("glm4v", "GLM4VForCausalLM"),
+    "GraniteSpeechForConditionalGeneration": ("granite_speech", "GraniteSpeechForConditionalGeneration"),  # noqa: E501
+    "H2OVLChatModel": ("h2ovl", "H2OVLChatModel"),
+    "InternVLChatModel": ("internvl", "InternVLChatModel"),
+    "Idefics3ForConditionalGeneration":("idefics3","Idefics3ForConditionalGeneration"),
+    "SmolVLMForConditionalGeneration": ("smolvlm","SmolVLMForConditionalGeneration"),  # noqa: E501
+    "KimiVLForConditionalGeneration": ("kimi_vl", "KimiVLForConditionalGeneration"),  # noqa: E501
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "LlavaForConditionalGeneration": ("llava", "LlavaForConditionalGeneration"),
     "LlavaNextForConditionalGeneration": ("llava_next", "LlavaNextForConditionalGeneration"),  # noqa: E501
     "LlavaNextVideoForConditionalGeneration": ("llava_next_video", "LlavaNextVideoForConditionalGeneration"),  # noqa: E501
     "LlavaOnevisionForConditionalGeneration": ("llava_onevision", "LlavaOnevisionForConditionalGeneration"),  # noqa: E501
     "MantisForConditionalGeneration": ("llava", "MantisForConditionalGeneration"),  # noqa: E501
+<<<<<<< HEAD
     "MiniCPMO": ("minicpmo", "MiniCPMO"),
     "MiniCPMV": ("minicpmv", "MiniCPMV"),
     "MolmoForCausalLM": ("molmo", "MolmoForCausalLM"),
     "NVLM_D": ("nvlm_d", "NVLM_D_Model"),
+=======
+    "MiniMaxVL01ForConditionalGeneration": ("minimax_vl_01", "MiniMaxVL01ForConditionalGeneration"),  # noqa: E501
+    "MiniCPMO": ("minicpmo", "MiniCPMO"),
+    "MiniCPMV": ("minicpmv", "MiniCPMV"),
+    "Mistral3ForConditionalGeneration": ("mistral3", "Mistral3ForConditionalGeneration"),  # noqa: E501
+    "MolmoForCausalLM": ("molmo", "MolmoForCausalLM"),
+    "NVLM_D": ("nvlm_d", "NVLM_D_Model"),
+    "Ovis": ("ovis", "Ovis"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "PaliGemmaForConditionalGeneration": ("paligemma", "PaliGemmaForConditionalGeneration"),  # noqa: E501
     "Phi3VForCausalLM": ("phi3v", "Phi3VForCausalLM"),
     "PixtralForConditionalGeneration": ("pixtral", "PixtralForConditionalGeneration"),  # noqa: E501
@@ -179,21 +295,44 @@ _MULTIMODAL_MODELS = {
     "Qwen2VLForConditionalGeneration": ("qwen2_vl", "Qwen2VLForConditionalGeneration"),  # noqa: E501
     "Qwen2_5_VLForConditionalGeneration": ("qwen2_5_vl", "Qwen2_5_VLForConditionalGeneration"),  # noqa: E501
     "Qwen2AudioForConditionalGeneration": ("qwen2_audio", "Qwen2AudioForConditionalGeneration"),  # noqa: E501
+<<<<<<< HEAD
     "UltravoxModel": ("ultravox", "UltravoxModel"),
     # [Encoder-decoder]
     "MllamaForConditionalGeneration": ("mllama", "MllamaForConditionalGeneration"),  # noqa: E501
+=======
+    "Qwen2_5OmniModel": ("qwen2_5_omni_thinker", "Qwen2_5OmniThinkerForConditionalGeneration"),  # noqa: E501
+    "UltravoxModel": ("ultravox", "UltravoxModel"),
+    "Phi4MMForCausalLM": ("phi4mm", "Phi4MMForCausalLM"),
+    # [Encoder-decoder]
+    "Florence2ForConditionalGeneration": ("florence2", "Florence2ForConditionalGeneration"),  # noqa: E501
+    "MllamaForConditionalGeneration": ("mllama", "MllamaForConditionalGeneration"),  # noqa: E501
+    "Llama4ForConditionalGeneration": ("mllama4", "Llama4ForConditionalGeneration"),  # noqa: E501
+    "SkyworkR1VChatModel": ("skyworkr1v", "SkyworkR1VChatModel"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "WhisperForConditionalGeneration": ("whisper", "WhisperForConditionalGeneration"),  # noqa: E501
 }
 
 _SPECULATIVE_DECODING_MODELS = {
+<<<<<<< HEAD
     "EAGLEModel": ("eagle", "EAGLE"),
+=======
+    "MiMoMTPModel": ("mimo_mtp", "MiMoMTP"),
+    "EAGLEModel": ("eagle", "EAGLE"),
+    "EagleLlamaForCausalLM": ("llama_eagle", "EagleLlamaForCausalLM"),
+    "Eagle3LlamaForCausalLM": ("llama_eagle3", "Eagle3LlamaForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "DeepSeekMTPModel": ("deepseek_mtp", "DeepSeekMTP"),
     "MedusaModel": ("medusa", "Medusa"),
     "MLPSpeculatorPreTrainedModel": ("mlp_speculator", "MLPSpeculator"),
 }
 
+<<<<<<< HEAD
 _FALLBACK_MODEL = {
     "TransformersModel": ("transformers", "TransformersModel"),
+=======
+_TRANSFORMERS_MODELS = {
+    "TransformersForCausalLM": ("transformers", "TransformersForCausalLM"),
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 # yapf: enable
 
@@ -203,7 +342,11 @@ _VLLM_MODELS = {
     **_CROSS_ENCODER_MODELS,
     **_MULTIMODAL_MODELS,
     **_SPECULATIVE_DECODING_MODELS,
+<<<<<<< HEAD
     **_FALLBACK_MODEL,
+=======
+    **_TRANSFORMERS_MODELS,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 
 # This variable is used as the args for subprocess.run(). We
@@ -226,10 +369,19 @@ class _ModelInfo:
     has_inner_state: bool
     is_attention_free: bool
     is_hybrid: bool
+<<<<<<< HEAD
     supports_transcription: bool
 
     @staticmethod
     def from_model_cls(model: Type[nn.Module]) -> "_ModelInfo":
+=======
+    has_noops: bool
+    supports_transcription: bool
+    supports_v0_only: bool
+
+    @staticmethod
+    def from_model_cls(model: type[nn.Module]) -> "_ModelInfo":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return _ModelInfo(
             architecture=model.__name__,
             is_text_generation_model=is_text_generation_model(model),
@@ -240,7 +392,14 @@ class _ModelInfo:
             has_inner_state=has_inner_state(model),
             is_attention_free=is_attention_free(model),
             is_hybrid=is_hybrid(model),
+<<<<<<< HEAD
             supports_transcription=supports_transcription(model))
+=======
+            supports_transcription=supports_transcription(model),
+            supports_v0_only=supports_v0_only(model),
+            has_noops=has_noops(model),
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class _BaseRegisteredModel(ABC):
@@ -250,7 +409,11 @@ class _BaseRegisteredModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
+<<<<<<< HEAD
     def load_model_cls(self) -> Type[nn.Module]:
+=======
+    def load_model_cls(self) -> type[nn.Module]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError
 
 
@@ -261,10 +424,17 @@ class _RegisteredModel(_BaseRegisteredModel):
     """
 
     interfaces: _ModelInfo
+<<<<<<< HEAD
     model_cls: Type[nn.Module]
 
     @staticmethod
     def from_model_cls(model_cls: Type[nn.Module]):
+=======
+    model_cls: type[nn.Module]
+
+    @staticmethod
+    def from_model_cls(model_cls: type[nn.Module]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return _RegisteredModel(
             interfaces=_ModelInfo.from_model_cls(model_cls),
             model_cls=model_cls,
@@ -273,7 +443,11 @@ class _RegisteredModel(_BaseRegisteredModel):
     def inspect_model_cls(self) -> _ModelInfo:
         return self.interfaces
 
+<<<<<<< HEAD
     def load_model_cls(self) -> Type[nn.Module]:
+=======
+    def load_model_cls(self) -> type[nn.Module]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return self.model_cls
 
 
@@ -290,7 +464,11 @@ class _LazyRegisteredModel(_BaseRegisteredModel):
         return _run_in_subprocess(
             lambda: _ModelInfo.from_model_cls(self.load_model_cls()))
 
+<<<<<<< HEAD
     def load_model_cls(self) -> Type[nn.Module]:
+=======
+    def load_model_cls(self) -> type[nn.Module]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         mod = importlib.import_module(self.module_name)
         return getattr(mod, self.class_name)
 
@@ -299,7 +477,11 @@ class _LazyRegisteredModel(_BaseRegisteredModel):
 def _try_load_model_cls(
     model_arch: str,
     model: _BaseRegisteredModel,
+<<<<<<< HEAD
 ) -> Optional[Type[nn.Module]]:
+=======
+) -> Optional[type[nn.Module]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     from vllm.platforms import current_platform
     current_platform.verify_model_arch(model_arch)
     try:
@@ -326,19 +508,30 @@ def _try_inspect_model_cls(
 @dataclass
 class _ModelRegistry:
     # Keyed by model_arch
+<<<<<<< HEAD
     models: Dict[str, _BaseRegisteredModel] = field(default_factory=dict)
 
     def get_supported_archs(self) -> AbstractSet[str]:
+=======
+    models: dict[str, _BaseRegisteredModel] = field(default_factory=dict)
+
+    def get_supported_archs(self) -> Set[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return self.models.keys()
 
     def register_model(
         self,
         model_arch: str,
+<<<<<<< HEAD
         model_cls: Union[Type[nn.Module], str],
+=======
+        model_cls: Union[type[nn.Module], str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> None:
         """
         Register an external model to be used in vLLM.
 
+<<<<<<< HEAD
         :code:`model_cls` can be either:
 
         - A :class:`torch.nn.Module` class directly referencing the model.
@@ -347,6 +540,20 @@ class _ModelRegistry:
           when importing the model and thus the related error
           :code:`RuntimeError: Cannot re-initialize CUDA in forked subprocess`.
         """
+=======
+        `model_cls` can be either:
+
+        - A {class}`torch.nn.Module` class directly referencing the model.
+        - A string in the format `<module>:<class>` which can be used to
+          lazily import the model. This is useful to avoid initializing CUDA
+          when importing the model and thus the related error
+          `RuntimeError: Cannot re-initialize CUDA in forked subprocess`.
+        """
+        if not isinstance(model_arch, str):
+            msg = f"`model_arch` should be a string, not a {type(model_arch)}"
+            raise TypeError(msg)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if model_arch in self.models:
             logger.warning(
                 "Model architecture %s is already registered, and will be "
@@ -360,12 +567,25 @@ class _ModelRegistry:
                 raise ValueError(msg)
 
             model = _LazyRegisteredModel(*split_str)
+<<<<<<< HEAD
         else:
             model = _RegisteredModel.from_model_cls(model_cls)
 
         self.models[model_arch] = model
 
     def _raise_for_unsupported(self, architectures: List[str]):
+=======
+        elif isinstance(model_cls, type) and issubclass(model_cls, nn.Module):
+            model = _RegisteredModel.from_model_cls(model_cls)
+        else:
+            msg = ("`model_cls` should be a string or PyTorch model class, "
+                   f"not a {type(model_arch)}")
+            raise TypeError(msg)
+
+        self.models[model_arch] = model
+
+    def _raise_for_unsupported(self, architectures: list[str]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         all_supported_archs = self.get_supported_archs()
 
         if any(arch in all_supported_archs for arch in architectures):
@@ -378,7 +598,11 @@ class _ModelRegistry:
             f"Supported architectures: {all_supported_archs}")
 
     def _try_load_model_cls(self,
+<<<<<<< HEAD
                             model_arch: str) -> Optional[Type[nn.Module]]:
+=======
+                            model_arch: str) -> Optional[type[nn.Module]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if model_arch not in self.models:
             return None
 
@@ -392,24 +616,44 @@ class _ModelRegistry:
 
     def _normalize_archs(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
     ) -> List[str]:
+=======
+        architectures: Union[str, list[str]],
+    ) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if isinstance(architectures, str):
             architectures = [architectures]
         if not architectures:
             logger.warning("No model architectures are specified")
 
+<<<<<<< HEAD
         normalized_arch = []
         for model in architectures:
             if model not in self.models:
                 model = "TransformersModel"
             normalized_arch.append(model)
+=======
+        # filter out support architectures
+        normalized_arch = list(
+            filter(lambda model: model in self.models, architectures))
+
+        # make sure Transformers backend is put at the last as a fallback
+        if len(normalized_arch) != len(architectures):
+            normalized_arch.append("TransformersForCausalLM")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return normalized_arch
 
     def inspect_model_cls(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
     ) -> Tuple[_ModelInfo, str]:
+=======
+        architectures: Union[str, list[str]],
+    ) -> tuple[_ModelInfo, str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         architectures = self._normalize_archs(architectures)
 
         for arch in architectures:
@@ -421,8 +665,13 @@ class _ModelRegistry:
 
     def resolve_model_cls(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
     ) -> Tuple[Type[nn.Module], str]:
+=======
+        architectures: Union[str, list[str]],
+    ) -> tuple[type[nn.Module], str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         architectures = self._normalize_archs(architectures)
 
         for arch in architectures:
@@ -434,67 +683,122 @@ class _ModelRegistry:
 
     def is_text_generation_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.is_text_generation_model
 
     def is_pooling_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.is_pooling_model
 
     def is_cross_encoder_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.supports_cross_encoding
 
     def is_multimodal_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.supports_multimodal
 
     def is_pp_supported_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.supports_pp
 
     def model_has_inner_state(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.has_inner_state
 
     def is_attention_free_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.is_attention_free
 
     def is_hybrid_model(
         self,
+<<<<<<< HEAD
         architectures: Union[str, List[str]],
+=======
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.is_hybrid
 
+<<<<<<< HEAD
     def is_transcription_model(
         self,
         architectures: Union[str, List[str]],
+=======
+    def is_noops_model(
+        self,
+        architectures: Union[str, list[str]],
+    ) -> bool:
+        model_cls, _ = self.inspect_model_cls(architectures)
+        return model_cls.has_noops
+
+    def is_transcription_model(
+        self,
+        architectures: Union[str, list[str]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> bool:
         model_cls, _ = self.inspect_model_cls(architectures)
         return model_cls.supports_transcription
 
+<<<<<<< HEAD
+=======
+    def is_v1_compatible(
+        self,
+        architectures: Union[str, list[str]],
+    ) -> bool:
+        model_cls, _ = self.inspect_model_cls(architectures)
+        return not model_cls.supports_v0_only
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 ModelRegistry = _ModelRegistry({
     model_arch:

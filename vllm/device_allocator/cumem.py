@@ -8,8 +8,15 @@
 # not sure why, they are created from a different context.
 # the only successful approach is to call cuda driver API in C.
 import dataclasses
+<<<<<<< HEAD
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, Optional, Tuple, Union
+=======
+import gc
+import os
+from contextlib import contextmanager
+from typing import Any, Callable, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -61,7 +68,11 @@ except ModuleNotFoundError:
     libcudart = None
 
 # py_device, py_alignedSize, py_d_mem, py_p_memHandle
+<<<<<<< HEAD
 HandleType = Tuple[int, int, int, int]
+=======
+HandleType = tuple[int, int, int, int]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @dataclasses.dataclass
@@ -140,9 +151,21 @@ class CuMemAllocator:
         return CuMemAllocator.instance
 
     def __init__(self):
+<<<<<<< HEAD
         self.pointer_to_data: Dict[int, AllocationData] = {}
         self.current_tag: str = CuMemAllocator.default_tag
         self.allocator_and_pools: Dict[str, Any] = {}
+=======
+        conf = os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "")
+        assert "expandable_segments:True" not in conf, \
+            ("Expandable segments are not compatible with memory pool. "
+            "Please track https://github.com/pytorch/pytorch/issues/147851 "
+            "for the latest updates.")
+
+        self.pointer_to_data: dict[int, AllocationData] = {}
+        self.current_tag: str = CuMemAllocator.default_tag
+        self.allocator_and_pools: dict[str, Any] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def python_malloc_callback(self, allocation_handle: HandleType) -> None:
         """
@@ -164,11 +187,19 @@ class CuMemAllocator:
 
     def sleep(
             self,
+<<<<<<< HEAD
             offload_tags: Optional[Union[Tuple[str, ...],
                                          str]] = None) -> None:
         """
         Put the allocator in sleep mode.
         All data in the memory allocation with the specified tag will be 
+=======
+            offload_tags: Optional[Union[tuple[str, ...],
+                                         str]] = None) -> None:
+        """
+        Put the allocator in sleep mode.
+        All data in the memory allocation with the specified tag will be
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         offloaded to CPU memory, and others will be discarded.
 
         :param offload_tags: The tags of the memory allocation that will be
@@ -197,6 +228,7 @@ class CuMemAllocator:
                 data.cpu_backup_tensor = cpu_backup_tensor
             unmap_and_release(handle)
 
+<<<<<<< HEAD
     def wake_up(self):
         """
         Wake up the allocator from sleep mode.
@@ -213,12 +245,43 @@ class CuMemAllocator:
                     cpu_ptr = cpu_backup_tensor.data_ptr()
                     libcudart.cudaMemcpy(ptr, cpu_ptr, size_in_bytes)
                     data.cpu_backup_tensor = None
+=======
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    def wake_up(self, tags: Optional[list[str]] = None) -> None:
+        """
+        Wake up the allocator from sleep mode.
+        All data that is previously offloaded will be loaded back to GPU 
+        memory, and the rest of the data will have empty memory.
+        
+        :param tags: The tags of the memory allocation that will be loaded
+            back to GPU memory. If None, all memory allocation will be loaded
+            back to GPU memory.
+        """
+        for ptr, data in self.pointer_to_data.items():
+            if tags is None or data.tag in tags:
+                handle = data.handle
+                create_and_map(handle)
+                if data.cpu_backup_tensor is not None:
+                    cpu_backup_tensor = data.cpu_backup_tensor
+                    if cpu_backup_tensor is not None:
+                        size_in_bytes = cpu_backup_tensor.numel(
+                        ) * cpu_backup_tensor.element_size()
+                        cpu_ptr = cpu_backup_tensor.data_ptr()
+                        libcudart.cudaMemcpy(ptr, cpu_ptr, size_in_bytes)
+                        data.cpu_backup_tensor = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @contextmanager
     def use_memory_pool(self, tag: Optional[str] = None):
         """
         A context manager to use the memory pool.
+<<<<<<< HEAD
         All memory allocation created inside the context will be allocated 
+=======
+        All memory allocation created inside the context will be allocated
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         in the memory pool, and has the specified tag.
 
         :param tag: The tag of the memory allocation. If None, the default tag

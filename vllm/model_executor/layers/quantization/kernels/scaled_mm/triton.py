@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Optional, Tuple
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -18,7 +22,11 @@ class TritonScaledMMLinearKernel(CutlassScaledMMLinearKernel):
 
     @classmethod
     def can_implement(
+<<<<<<< HEAD
             cls, c: ScaledMMLinearLayerConfig) -> Tuple[bool, Optional[str]]:
+=======
+            cls, c: ScaledMMLinearLayerConfig) -> tuple[bool, Optional[str]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if current_platform.is_cpu():
             return (
                 False,

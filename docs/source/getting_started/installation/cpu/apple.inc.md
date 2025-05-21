@@ -25,7 +25,11 @@ After installation of XCode and the Command Line Tools, which include Apple Clan
 ```console
 git clone https://github.com/vllm-project/vllm.git
 cd vllm
+<<<<<<< HEAD
 pip install -r requirements-cpu.txt
+=======
+pip install -r requirements/cpu.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 pip install -e . 
 ```
 

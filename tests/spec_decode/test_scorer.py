@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import random
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import torch
@@ -15,7 +18,11 @@ from vllm.worker.worker import Worker
 from .utils import create_batch, create_worker
 
 
+<<<<<<< HEAD
 def create_proposal(propose_lens: List[int], vocab_size: int,
+=======
+def create_proposal(propose_lens: list[int], vocab_size: int,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     device: str) -> SpeculativeProposals:
     batch_size = len(propose_lens)
     max_propose_len = max(propose_lens)
@@ -63,9 +70,14 @@ def test_scorer(model_name: str, batch_size: int, max_propose_len: int,
     scorer_worker = create_worker(Worker, model_name, block_size,
                                   num_gpu_blocks, seed)
     scorer_worker.model_runner.disable_logprobs = True  # accessed by mqa_scorer
+<<<<<<< HEAD
     scorer_worker.model_runner.model.sampler.include_gpu_probs_tensor = True
     scorer_worker.model_runner.model.sampler.\
         should_modify_greedy_probs_inplace = True
+=======
+    scorer_worker.model_runner.sampler.include_gpu_probs_tensor = True
+    scorer_worker.model_runner.sampler.should_modify_greedy_probs_inplace = True
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     vocab_size = scorer_worker.vocab_size
 

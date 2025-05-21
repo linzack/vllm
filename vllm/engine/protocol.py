@@ -2,10 +2,17 @@
 
 import asyncio
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import AsyncGenerator, List, Mapping, Optional
 
 from vllm.beam_search import BeamSearchSequence, create_sort_beams_key_function
 from vllm.config import DecodingConfig, ModelConfig
+=======
+from typing import AsyncGenerator, Mapping, Optional
+
+from vllm.beam_search import BeamSearchSequence, create_sort_beams_key_function
+from vllm.config import DecodingConfig, ModelConfig, VllmConfig
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.core.scheduler import SchedulerOutputs
 from vllm.inputs.data import PromptType, TokensPrompt
 from vllm.inputs.parse import is_explicit_encoder_decoder_prompt
@@ -18,7 +25,11 @@ from vllm.pooling_params import PoolingParams
 from vllm.prompt_adapter.request import PromptAdapterRequest
 from vllm.sampling_params import BeamSearchParams, SamplingParams
 from vllm.transformers_utils.tokenizer import AnyTokenizer
+<<<<<<< HEAD
 from vllm.utils import collect_from_async_generator, random_uuid
+=======
+from vllm.utils import Device, collect_from_async_generator, random_uuid
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -81,10 +92,17 @@ class EngineClient(ABC):
         if is_explicit_encoder_decoder_prompt(prompt):
             raise NotImplementedError
         else:
+<<<<<<< HEAD
             processed_inputs = preprocessor._prompt_to_llm_inputs(
                 prompt,
                 request_id=request_id,
             )
+=======
+            processed_inputs = preprocessor._prompt_to_llm_inputs(prompt)
+
+        if processed_inputs["type"] == "embeds":
+            raise NotImplementedError
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         prompt_token_ids = processed_inputs["prompt_token_ids"]
         prompt_text = processed_inputs.get("prompt")
@@ -224,6 +242,14 @@ class EngineClient(ABC):
         ...
 
     @abstractmethod
+<<<<<<< HEAD
+=======
+    async def get_vllm_config(self) -> VllmConfig:
+        """Get the vllm configuration of the vLLM engine."""
+        ...
+
+    @abstractmethod
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     async def get_model_config(self) -> ModelConfig:
         """Get the model configuration of the vLLM engine."""
         ...
@@ -254,7 +280,11 @@ class EngineClient(ABC):
     async def do_log_stats(
         self,
         scheduler_outputs: Optional[SchedulerOutputs] = None,
+<<<<<<< HEAD
         model_output: Optional[List[SamplerOutput]] = None,
+=======
+        model_output: Optional[list[SamplerOutput]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> None:
         ...
 
@@ -274,7 +304,17 @@ class EngineClient(ABC):
         ...
 
     @abstractmethod
+<<<<<<< HEAD
     async def reset_prefix_cache(self) -> None:
+=======
+    async def reset_mm_cache(self) -> None:
+        """Reset the multi-modal cache"""
+        ...
+
+    @abstractmethod
+    async def reset_prefix_cache(self,
+                                 device: Optional[Device] = None) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Reset the prefix cache"""
         ...
 
@@ -284,11 +324,23 @@ class EngineClient(ABC):
         ...
 
     @abstractmethod
+<<<<<<< HEAD
     async def wake_up(self) -> None:
+=======
+    async def wake_up(self, tags: Optional[list[str]] = None) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """Wake up the engine"""
         ...
 
     @abstractmethod
+<<<<<<< HEAD
+=======
+    async def is_sleeping(self) -> bool:
+        """Check whether the engine is sleeping"""
+        ...
+
+    @abstractmethod
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     async def add_lora(self, lora_request: LoRARequest) -> None:
         """Load a new LoRA adapter into the engine for future requests."""
         ...

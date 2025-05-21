@@ -6,9 +6,16 @@ import io
 import os
 import re
 import time
+<<<<<<< HEAD
 from dataclasses import dataclass
 from functools import partial
 from typing import BinaryIO, Generator, Optional, Tuple, Type, Union
+=======
+from collections.abc import Generator
+from dataclasses import dataclass
+from functools import partial
+from typing import BinaryIO, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
@@ -67,7 +74,11 @@ class TensorizerConfig:
     s3_access_key_id: Optional[str] = None
     s3_secret_access_key: Optional[str] = None
     s3_endpoint: Optional[str] = None
+<<<<<<< HEAD
     model_class: Optional[Type[torch.nn.Module]] = None
+=======
+    model_class: Optional[type[torch.nn.Module]] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     hf_config: Optional[PretrainedConfig] = None
     dtype: Optional[Union[str, torch.dtype]] = None
     _is_sharded: bool = False
@@ -213,6 +224,10 @@ class TensorizerArgs:
 
         group.add_argument(
             "--tensorizer-uri",
+<<<<<<< HEAD
+=======
+            type=str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             help="Path to serialized model tensors. Can be a local file path,"
             " or an HTTP(S) or S3 URI.",
         )
@@ -225,6 +240,10 @@ class TensorizerArgs:
         )
         group.add_argument(
             "--encryption-keyfile",
+<<<<<<< HEAD
+=======
+            type=str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             default=None,
             help="The file path to a binary file containing a binary key to "
             "use for decryption. Can be a file path or S3 network URI.")
@@ -238,18 +257,30 @@ class TensorizerArgs:
             "and model size. This greatly increases performance.")
         group.add_argument(
             "--s3-access-key-id",
+<<<<<<< HEAD
+=======
+            type=str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             default=None,
             help="The access key for the S3 bucket. Can also be set via the "
             "S3_ACCESS_KEY_ID environment variable.",
         )
         group.add_argument(
             "--s3-secret-access-key",
+<<<<<<< HEAD
+=======
+            type=str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             default=None,
             help="The secret access key for the S3 bucket. Can also be set via "
             "the S3_SECRET_ACCESS_KEY environment variable.",
         )
         group.add_argument(
             "--s3-endpoint",
+<<<<<<< HEAD
+=======
+            type=str,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             default=None,
             help="The endpoint for the S3 bucket. Can also be set via the "
             "S3_ENDPOINT_URL environment variable.",
@@ -365,7 +396,11 @@ class TensorizerAgent:
 
 def tensorizer_weights_iterator(
     tensorizer_args: "TensorizerArgs"
+<<<<<<< HEAD
 ) -> Generator[Tuple[str, torch.Tensor], None, None]:
+=======
+) -> Generator[tuple[str, torch.Tensor], None, None]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     logger.warning("Deserializing HuggingFace models is not optimized for "
                    "loading on vLLM, as tensorizer is forced to load to CPU. "
                    "Consider deserializing a vLLM model instead for faster "

@@ -16,16 +16,33 @@ MIN_CAPABILITY = os.environ.get("MIN_CAPABILITY", "80")
 
 
 @pytest.mark.skipif(
+<<<<<<< HEAD
+=======
+    MODEL_NAME == "casperhansen/deepseek-coder-v2-instruct-awq",
+    reason="OOM in the CI")
+@pytest.mark.skipif(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     not current_platform.has_device_capability(int(MIN_CAPABILITY)),
     reason="Current system does not have minimum capability.")
 def test_weight_loading(vllm_runner):
     """
     Test parameter weight loading with tp>1.
     """
+<<<<<<< HEAD
     with vllm_runner(
             model_name=MODEL_NAME,
             revision=REVISION,
             dtype=torch.half if QUANTIZATION == "gptq" else "auto",
+=======
+
+    # MoE models need fp16.
+    NEEDS_FP16 = (QUANTIZATION == "gptq" or MODEL_NAME
+                  == "nm-testing/test-w4a16-mixtral-actorder-group")
+    with vllm_runner(
+            model_name=MODEL_NAME,
+            revision=REVISION,
+            dtype=torch.half if NEEDS_FP16 else "auto",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             quantization=None if QUANTIZATION == "None" else QUANTIZATION,
             max_model_len=MAX_MODEL_LEN,
             tensor_parallel_size=2) as model:

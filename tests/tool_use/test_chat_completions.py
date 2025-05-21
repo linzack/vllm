@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import openai
 import pytest
 
@@ -45,7 +48,11 @@ async def test_chat_completion_without_tools(client: openai.AsyncOpenAI,
         logprobs=False,
         stream=True,
     )
+<<<<<<< HEAD
     chunks: List[str] = []
+=======
+    chunks: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finish_reason_count = 0
     role_sent: bool = False
 
@@ -116,7 +123,11 @@ async def test_chat_completion_with_tools(client: openai.AsyncOpenAI,
         stream=True,
     )
 
+<<<<<<< HEAD
     chunks: List[str] = []
+=======
+    chunks: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finish_reason_count = 0
     role_sent: bool = False
 

@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+<<<<<<< HEAD
 from typing import Generator, List, Optional
+=======
+from collections.abc import Generator
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import partial_json_parser
 import pytest
@@ -26,8 +31,13 @@ def jamba_tool_parser(jamba_tokenizer):
     return JambaToolParser(jamba_tokenizer)
 
 
+<<<<<<< HEAD
 def assert_tool_calls(actual_tool_calls: List[ToolCall],
                       expected_tool_calls: List[ToolCall]):
+=======
+def assert_tool_calls(actual_tool_calls: list[ToolCall],
+                      expected_tool_calls: list[ToolCall]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert len(actual_tool_calls) == len(expected_tool_calls)
 
     for actual_tool_call, expected_tool_call in zip(actual_tool_calls,
@@ -218,10 +228,17 @@ def test_extract_tool_calls_streaming(jamba_tool_parser, jamba_tokenizer,
                                       model_output, expected_tool_calls,
                                       expected_content):
     other_content: str = ''
+<<<<<<< HEAD
     function_names: List[str] = []
     function_args_strs: List[str] = []
     tool_call_idx: int = -1
     tool_call_ids: List[Optional[str]] = []
+=======
+    function_names: list[str] = []
+    function_args_strs: list[str] = []
+    tool_call_idx: int = -1
+    tool_call_ids: list[Optional[str]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for delta_message in stream_delta_message_generator(
             jamba_tool_parser, jamba_tokenizer, model_output):

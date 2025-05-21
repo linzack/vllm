@@ -29,6 +29,16 @@ vllm serve ./tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf --tokenizer TinyLlama/TinyLlam
 We recommend using the tokenizer from base model instead of GGUF model. Because the tokenizer conversion from GGUF is time-consuming and unstable, especially for some models with large vocab size.
 :::
 
+<<<<<<< HEAD
+=======
+GGUF assumes that huggingface can convert the metadata to a config file. In case huggingface doesn't support your model you can manually create a config and pass it as hf-config-path
+
+```console
+# If you model is not supported by huggingface you can manually provide a huggingface compatible config path
+vllm serve ./tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf --tokenizer TinyLlama/TinyLlama-1.1B-Chat-v1.0 --hf-config-path Tinyllama/TInyLlama-1.1B-Chat-v1.0
+```
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 You can also use the GGUF model directly through the LLM entrypoint:
 
 ```python

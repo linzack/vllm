@@ -2,7 +2,11 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Callable, Optional, Tuple
+=======
+from typing import Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
@@ -12,8 +16,13 @@ from vllm.scalar_type import ScalarType
 
 @dataclass
 class MPLinearLayerConfig:
+<<<<<<< HEAD
     full_weight_shape: Tuple[int, int]  # [in, out]
     partition_weight_shape: Tuple[int, int]
+=======
+    full_weight_shape: tuple[int, int]  # [in, out]
+    partition_weight_shape: tuple[int, int]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     weight_type: ScalarType
     act_type: torch.dtype
     group_size: int
@@ -31,7 +40,11 @@ class MPLinearKernel(ABC):
     @classmethod
     @abstractmethod
     def can_implement(cls,
+<<<<<<< HEAD
                       c: MPLinearLayerConfig) -> Tuple[bool, Optional[str]]:
+=======
+                      c: MPLinearLayerConfig) -> tuple[bool, Optional[str]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError
 
     def __init__(self,
@@ -75,7 +88,11 @@ class MPLinearKernel(ABC):
                 torch.nn.Parameter(new_param.data, requires_grad=False))
 
     def _get_weight_params(
+<<<<<<< HEAD
             self, layer: torch.nn.Module) -> Tuple[
+=======
+            self, layer: torch.nn.Module) -> tuple[
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 torch.Tensor,  # w_q
                 torch.Tensor,  # w_s
                 Optional[torch.Tensor],  # w_zp, 

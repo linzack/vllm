@@ -18,6 +18,7 @@ except ImportError:
 
 ASSET_DIR = "multimodal_asset"
 
+<<<<<<< HEAD
 
 @dataclass(frozen=True)
 class AudioAsset:
@@ -26,11 +27,31 @@ class AudioAsset:
     @property
     def audio_and_sample_rate(self) -> tuple[npt.NDArray, float]:
         audio_path = get_vllm_public_assets(filename=f"{self.name}.ogg",
+=======
+AudioAssetName = Literal["winning_call", "mary_had_lamb"]
+
+
+@dataclass(frozen=True)
+class AudioAsset:
+    name: AudioAssetName
+
+    @property
+    def filename(self) -> str:
+        return f"{self.name}.ogg"
+
+    @property
+    def audio_and_sample_rate(self) -> tuple[npt.NDArray, float]:
+        audio_path = get_vllm_public_assets(filename=self.filename,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                             s3_prefix=ASSET_DIR)
         return librosa.load(audio_path, sr=None)
 
     def get_local_path(self) -> Path:
+<<<<<<< HEAD
         return get_vllm_public_assets(filename=f"{self.name}.ogg",
+=======
+        return get_vllm_public_assets(filename=self.filename,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                       s3_prefix=ASSET_DIR)
 
     @property

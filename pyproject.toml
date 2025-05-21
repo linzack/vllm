@@ -1,4 +1,5 @@
 [build-system]
+<<<<<<< HEAD
 # Should be mirrored in requirements-build.txt
 requires = [
     "cmake>=3.26",
@@ -7,6 +8,16 @@ requires = [
     "setuptools>=61",
     "setuptools-scm>=8.0",
     "torch == 2.5.1",
+=======
+# Should be mirrored in requirements/build.txt
+requires = [
+    "cmake>=3.26",
+    "ninja",
+    "packaging>=24.2",
+    "setuptools>=77.0.3,<80.0.0",
+    "setuptools-scm>=8.0",
+    "torch == 2.7.0",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "wheel",
     "jinja2",
 ]
@@ -15,7 +26,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vllm"
 authors = [{name = "vLLM Team"}]
+<<<<<<< HEAD
 license = { "file"= "LICENSE" }
+=======
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 readme = "README.md"
 description = "A high-throughput and memory-efficient inference and serving engine for LLMs"
 classifiers = [
@@ -23,14 +39,21 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+<<<<<<< HEAD
     "License :: OSI Approved :: Apache Software License",
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
+<<<<<<< HEAD
 requires-python = ">=3.9"
+=======
+requires-python = ">=3.9,<3.13"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 dynamic = [ "version", "dependencies", "optional-dependencies"]
 
 [project.urls]
@@ -41,16 +64,31 @@ Slack="http://slack.vllm.ai/"
 [project.scripts]
 vllm = "vllm.entrypoints.cli.main:main"
 
+<<<<<<< HEAD
+=======
+[project.entry-points."vllm.general_plugins"]
+lora_filesystem_resolver = "vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver"
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 [tool.setuptools_scm]
 # no extra settings needed, presence enables setuptools-scm
 
 [tool.setuptools.packages.find]
 where = ["."]
+<<<<<<< HEAD
 exclude = ["benchmarks", "csrc", "docs", "examples", "tests*"]
 namespaces = false
 
 [tool.yapfignore]
 ignore_patterns = [
+=======
+include = ["vllm*"]
+
+[tool.yapfignore]
+ignore_patterns = [
+    ".buildkite/**",
+    "benchmarks/**",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "build/**",
 ]
 
@@ -59,12 +97,33 @@ ignore_patterns = [
 line-length = 80
 exclude = [
     # External file, leaving license intact
+<<<<<<< HEAD
     "examples/other/fp8/quantizer/quantize.py"
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "vllm/version.py" = ["F401"]
 "vllm/_version.py" = ["ALL"]
+=======
+    "examples/other/fp8/quantizer/quantize.py",
+    "vllm/vllm_flash_attn/flash_attn_interface.pyi"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"vllm/third_party/**" = ["ALL"]
+"vllm/version.py" = ["F401"]
+"vllm/_version.py" = ["ALL"]
+# Python 3.8 typing - skip V0 code
+"vllm/attention/**/*.py" = ["UP006", "UP035"]
+"vllm/core/**/*.py" = ["UP006", "UP035"]
+"vllm/engine/**/*.py" = ["UP006", "UP035"]
+"vllm/executor/**/*.py" = ["UP006", "UP035"]
+"vllm/prompt_adapter/**/*.py" = ["UP006", "UP035"]
+"vllm/spec_decode/**/*.py" = ["UP006", "UP035"]
+"vllm/worker/**/*.py" = ["UP006", "UP035"]
+# Python 3.8 typing - skip utils for ROCm
+"vllm/utils.py" = ["UP006", "UP035"]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 [tool.ruff.lint]
 select = [
@@ -80,6 +139,10 @@ select = [
     "SIM",
     # isort
     # "I",
+<<<<<<< HEAD
+=======
+    # flake8-logging-format
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "G",
 ]
 ignore = [
@@ -91,8 +154,11 @@ ignore = [
     "B007",
     # f-string format
     "UP032",
+<<<<<<< HEAD
     # Python 3.8 typing
     "UP006", "UP035",
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Can remove once 3.10+ is the minimum Python version
     "UP007",
 ]
@@ -130,6 +196,13 @@ ignore-words-list = "dout, te, indicies, subtile, ElementE"
 skip = "tests/models/fixtures/*,tests/prompts/*,benchmarks/sonnet.txt,tests/lora/data/*,build/*,vllm/third_party/*"
 
 [tool.isort]
+<<<<<<< HEAD
+=======
+skip_glob = [
+    ".buildkite/*",
+    "benchmarks/*",
+]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 use_parentheses = true
 skip_gitignore = true
 
@@ -138,7 +211,10 @@ markers = [
     "skip_global_cleanup",
     "core_model: enable this model test in each PR instead of only nightly",
     "cpu_model: enable this model test in CPU tests",
+<<<<<<< HEAD
     "quant_model: run this model test under Quantized category",
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "split: run this test as part of a split",
     "distributed: run this test only in distributed GPU tests",
     "skip_v1: do not run this test with v1",
@@ -151,3 +227,12 @@ plugins.md013.enabled = false # line-length
 plugins.md041.enabled = false # first-line-h1
 plugins.md033.enabled = false # inline-html
 plugins.md024.allow_different_nesting = true # no-duplicate-headers
+<<<<<<< HEAD
+=======
+
+[tool.ty]
+respect-ignore-files = true
+
+[tool.ty.environment]
+python = "./.venv"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

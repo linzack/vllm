@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, Optional, TypeVar
+=======
+from typing import Any, Callable, Optional, TypeVar
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from torch import nn
 
@@ -49,9 +53,15 @@ class AdapterModelManager(ABC):
             model: the model to be adapted.
         """
         self.model: nn.Module = model
+<<<<<<< HEAD
         self._registered_adapters: Dict[int, Any] = {}
         # Dict instead of a Set for compatibility with LRUCache.
         self._active_adapters: Dict[int, None] = {}
+=======
+        self._registered_adapters: dict[int, Any] = {}
+        # Dict instead of a Set for compatibility with LRUCache.
+        self._active_adapters: dict[int, None] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.adapter_type = 'Adapter'
         self._last_mapping = None
 
@@ -97,7 +107,11 @@ class AdapterModelManager(ABC):
         raise NotImplementedError
 
     @abstractmethod
+<<<<<<< HEAD
     def list_adapters(self) -> Dict[int, Any]:
+=======
+    def list_adapters(self) -> dict[int, Any]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         raise NotImplementedError
 
     @abstractmethod

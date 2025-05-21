@@ -16,11 +16,15 @@ import torch
 
 from vllm.config import VllmConfig
 from vllm.logger import init_logger
+<<<<<<< HEAD
 from vllm.triton_utils.importing import HAS_TRITON
 from vllm.utils import _check_multiproc_method, get_mp_context, run_method
 
 if HAS_TRITON:
     from vllm.triton_utils import maybe_set_triton_cache_manager
+=======
+from vllm.utils import _maybe_force_spawn, get_mp_context, run_method
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -250,6 +254,19 @@ def _run_worker_process(
     except Exception:
         logger.exception("Worker failed")
 
+<<<<<<< HEAD
+=======
+    # Flush TunableOp results when TunableOp is enabled and
+    # online (in situ) tuning is enabled.
+    # Offline tuning API (record_untuned_is_enabled()) only
+    # available in PyTorch 2.6 or later.
+    if torch.cuda.is_available():
+        import torch.cuda.tunable as tunable
+        if (tunable.is_enabled() and tunable.tuning_is_enabled()
+                and not tunable.record_untuned_is_enabled()):
+            tunable.write_file()
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     logger.info("Worker exiting")
 
 
@@ -285,7 +302,11 @@ def set_multiprocessing_worker_envs(parallel_config):
     in a multiprocessing environment. This should be called by the parent 
     process before worker processes are created"""
 
+<<<<<<< HEAD
     _check_multiproc_method()
+=======
+    _maybe_force_spawn()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Configure thread parallelism if OMP_NUM_THREADS isn't set
     #
@@ -304,7 +325,10 @@ def set_multiprocessing_worker_envs(parallel_config):
             current_parallelism, default_omp_num_threads)
         os.environ["OMP_NUM_THREADS"] = str(default_omp_num_threads)
         torch.set_num_threads(default_omp_num_threads)
+<<<<<<< HEAD
 
     # workaround for https://github.com/vllm-project/vllm/issues/6103
     if HAS_TRITON and parallel_config.world_size > 1:
         maybe_set_triton_cache_manager()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

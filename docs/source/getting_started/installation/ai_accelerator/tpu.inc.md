@@ -44,7 +44,11 @@ There are no pre-built wheels for this device, so you must either use the pre-bu
 
 You can provision Cloud TPUs using the [Cloud TPU API](https://cloud.google.com/tpu/docs/reference/rest)
 or the [queued resources](https://cloud.google.com/tpu/docs/queued-resources)
+<<<<<<< HEAD
 API. This section shows how to create TPUs using the queued resource API. For
+=======
+API (preferred). This section shows how to create TPUs using the queued resource API. For
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 more information about using the Cloud TPU API, see [Create a Cloud TPU using the Create Node API](https://cloud.google.com/tpu/docs/managing-tpus-tpu-vm#create-node-api).
 Queued resources enable you to request Cloud TPU resources in a queued manner.
 When you request queued resources, the request is added to a queue maintained by
@@ -97,10 +101,17 @@ gcloud alpha compute tpus queued-resources create QUEUED_RESOURCE_ID \
     `TPU regions and zones <https://cloud.google.com/tpu/docs/regions-zones>`_
 - * ACCELERATOR_TYPE
   * The TPU version you want to use. Specify the TPU version, for example
+<<<<<<< HEAD
     `v5litepod-4` specifies a v5e TPU with 4 cores. For more information,
     see `TPU versions <https://cloud.devsite.corp.google.com/tpu/docs/system-architecture-tpu-vm#versions>`_.
 - * RUNTIME_VERSION
   * The TPU VM runtime version to use. For more information see `TPU VM images <https://cloud.google.com/tpu/docs/runtimes>`_.
+=======
+    `v5litepod-4` specifies a v5e TPU with 4 cores, `v6e-1` specifies a v6e TPU with 1 core. For more information,
+    see [TPU versions](https://cloud.devsite.corp.google.com/tpu/docs/system-architecture-tpu-vm#versions).
+- * RUNTIME_VERSION
+  * The TPU VM runtime version to use. For example, use `v2-alpha-tpuv6e` for a VM loaded with one or more v6e TPU(s). For more information see [TPU VM images](https://cloud.google.com/tpu/docs/runtimes).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 - * SERVICE_ACCOUNT
   * The email address for your service account. You can find it in the IAM
     Cloud Console under *Service Accounts*. For example:
@@ -151,14 +162,22 @@ pip uninstall torch torch-xla -y
 Install build dependencies:
 
 ```bash
+<<<<<<< HEAD
 pip install -r requirements-tpu.txt
+=======
+pip install -r requirements/tpu.txt
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 sudo apt-get install libopenblas-base libopenmpi-dev libomp-dev
 ```
 
 Run the setup script:
 
 ```bash
+<<<<<<< HEAD
 VLLM_TARGET_DEVICE="tpu" python setup.py develop
+=======
+VLLM_TARGET_DEVICE="tpu" python -m pip install -e .
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 ## Set up using Docker
@@ -169,10 +188,17 @@ See <project:#deployment-docker-pre-built-image> for instructions on using the o
 
 ### Build image from source
 
+<<<<<<< HEAD
 You can use <gh-file:Dockerfile.tpu> to build a Docker image with TPU support.
 
 ```console
 docker build -f Dockerfile.tpu -t vllm-tpu .
+=======
+You can use <gh-file:docker/Dockerfile.tpu> to build a Docker image with TPU support.
+
+```console
+docker build -f docker/Dockerfile.tpu -t vllm-tpu .
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ```
 
 Run the Docker image with the following command:

@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import openai
 import pytest
@@ -44,7 +48,11 @@ async def test_tool_call_and_choice(client: openai.AsyncOpenAI):
 
     # make sure the arguments parse properly
     parsed_arguments = json.loads(tool_calls[0].function.arguments)
+<<<<<<< HEAD
     assert isinstance(parsed_arguments, Dict)
+=======
+    assert isinstance(parsed_arguments, dict)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert isinstance(parsed_arguments.get("city"), str)
     assert isinstance(parsed_arguments.get("state"), str)
     assert parsed_arguments.get("city") == "Dallas"
@@ -117,7 +125,11 @@ async def test_tool_call_and_choice(client: openai.AsyncOpenAI):
 
     # validate arguments
     streamed_args = json.loads(function_args_str)
+<<<<<<< HEAD
     assert isinstance(streamed_args, Dict)
+=======
+    assert isinstance(streamed_args, dict)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert isinstance(streamed_args.get("city"), str)
     assert isinstance(streamed_args.get("state"), str)
     assert streamed_args.get("city") == "Dallas"
@@ -128,7 +140,11 @@ async def test_tool_call_and_choice(client: openai.AsyncOpenAI):
     assert choice.message.role == role_name
     assert choice.message.tool_calls[0].function.name == function_name
 
+<<<<<<< HEAD
     # compare streamed with non-streamed args Dict-wise, not string-wise
+=======
+    # compare streamed with non-streamed args dict-wise, not string-wise
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # because character-to-character comparison might not work e.g. the tool
     # call parser adding extra spaces or something like that. we care about the
     # dicts matching not byte-wise match
@@ -167,7 +183,11 @@ async def test_tool_call_with_results(client: openai.AsyncOpenAI):
         logprobs=False,
         stream=True)
 
+<<<<<<< HEAD
     chunks: List[str] = []
+=======
+    chunks: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     finish_reason_count = 0
     role_sent: bool = False
 

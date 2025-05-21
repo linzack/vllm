@@ -4,7 +4,11 @@ import time
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
+=======
+from typing import TYPE_CHECKING, Any, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.distributed as dist
@@ -26,6 +30,7 @@ batchsize_forward_time: defaultdict = defaultdict(list)
 
 
 @dataclass
+<<<<<<< HEAD
 class ForwardContext:
     # copy from vllm_config.compilation_config.static_forward_context
     attn_layers: Dict[str, Any]
@@ -35,6 +40,28 @@ class ForwardContext:
     virtual_engine: int  # set dynamically for each forward pass
     num_tokens_across_dp: Optional[
         List[int]] = None  # set dynamically for each forward pass
+=======
+class DPMetadata:
+    max_tokens_across_dp_cpu: torch.Tensor
+    cu_tokens_across_dp_cpu: torch.Tensor
+
+
+@dataclass
+class ForwardContext:
+    # copy from vllm_config.compilation_config.static_forward_context
+    no_compile_layers: dict[str, Any]
+    """
+    Type AttentionMetadata for v0, 
+    Type Dict[str, AttentionMetadata] for v1, map from layer_name of each 
+    attention layer to its attention metadata
+    set dynamically for each forward pass
+    """
+    attn_metadata: Union["AttentionMetadata", dict[str, "AttentionMetadata"]]
+    # TODO: remove after making all virtual_engines share the same kv cache
+    virtual_engine: int  # set dynamically for each forward pass
+    # set dynamically for each forward pass
+    dp_metadata: Optional[DPMetadata] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 _forward_context: Optional[ForwardContext] = None
@@ -61,6 +88,7 @@ def set_forward_context(attn_metadata: Any,
     need_to_track_batchsize = track_batchsize and attn_metadata is not None
     if need_to_track_batchsize:
         forward_start_time = time.perf_counter()
+<<<<<<< HEAD
     num_tokens_across_dp = None
     if vllm_config.parallel_config.data_parallel_size > 1:
         dp_size = vllm_config.parallel_config.data_parallel_size
@@ -74,6 +102,19 @@ def set_forward_context(attn_metadata: Any,
                 # for v1 attention backends
                 batchsize = attn_metadata.num_input_tokens
         else:
+=======
+    dp_metadata: Optional[DPMetadata] = None
+    if vllm_config.parallel_config.data_parallel_size > 1:
+        dp_size = vllm_config.parallel_config.data_parallel_size
+        dp_rank = vllm_config.parallel_config.data_parallel_rank
+        if attn_metadata is not None and hasattr(attn_metadata,
+                                                 "num_prefill_tokens"):
+            # for v0 attention backends
+            batchsize = attn_metadata.num_prefill_tokens + \
+                attn_metadata.num_decode_tokens
+        else:
+            # for v1 attention backends or no attn_metadata
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             batchsize = num_tokens
         num_tokens_across_dp = [0] * dp_size
         num_tokens_across_dp[dp_rank] = batchsize
@@ -82,15 +123,31 @@ def set_forward_context(attn_metadata: Any,
                                          dtype=torch.int32)
         from vllm.distributed.parallel_state import get_dp_group
         dist.all_reduce(num_tokens_tensor, group=get_dp_group().cpu_group)
+<<<<<<< HEAD
         num_tokens_across_dp = num_tokens_tensor.tolist()
+=======
+        max_tokens_across_dp_cpu = torch.max(num_tokens_tensor)
+        cu_tokens_across_dp_cpu = torch.cumsum(num_tokens_tensor, dim=0)
+        dp_metadata = DPMetadata(max_tokens_across_dp_cpu,
+                                 cu_tokens_across_dp_cpu)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     global _forward_context
     prev_context = _forward_context
     _forward_context = ForwardContext(
+<<<<<<< HEAD
         attn_layers=vllm_config.compilation_config.static_forward_context,
         virtual_engine=virtual_engine,
         attn_metadata=attn_metadata,
         num_tokens_across_dp=num_tokens_across_dp)
+=======
+        no_compile_layers=vllm_config.compilation_config.
+        static_forward_context,
+        virtual_engine=virtual_engine,
+        attn_metadata=attn_metadata,
+        dp_metadata=dp_metadata)
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         yield
     finally:
@@ -102,7 +159,11 @@ def set_forward_context(attn_metadata: Any,
                     attn_metadata.num_decode_tokens
             else:
                 # for v1 attention backends
+<<<<<<< HEAD
                 batchsize = attn_metadata.num_input_tokens
+=======
+                batchsize = num_tokens
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             # we use synchronous scheduling right now,
             # adding a sync point here should not affect
             # scheduling of the next batch
@@ -126,4 +187,8 @@ def set_forward_context(attn_metadata: Any,
                     logger.info(("Batchsize forward time stats "
                                  "(batchsize, count, median_time(ms)): %s"),
                                 forward_stats)
+<<<<<<< HEAD
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         _forward_context = prev_context

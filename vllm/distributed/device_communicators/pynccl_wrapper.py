@@ -24,7 +24,11 @@
 import ctypes
 import platform
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch.distributed import ReduceOp
@@ -121,7 +125,11 @@ class ncclRedOpTypeEnum:
 class Function:
     name: str
     restype: Any
+<<<<<<< HEAD
     argtypes: List[Any]
+=======
+    argtypes: list[Any]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class NCCLLibrary:
@@ -210,11 +218,19 @@ class NCCLLibrary:
 
     # class attribute to store the mapping from the path to the library
     # to avoid loading the same library multiple times
+<<<<<<< HEAD
     path_to_library_cache: Dict[str, Any] = {}
 
     # class attribute to store the mapping from library path
     #  to the corresponding dictionary
     path_to_dict_mapping: Dict[str, Dict[str, Any]] = {}
+=======
+    path_to_library_cache: dict[str, Any] = {}
+
+    # class attribute to store the mapping from library path
+    #  to the corresponding dictionary
+    path_to_dict_mapping: dict[str, dict[str, Any]] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self, so_file: Optional[str] = None):
 
@@ -227,10 +243,17 @@ class NCCLLibrary:
             self.lib = NCCLLibrary.path_to_library_cache[so_file]
         except Exception as e:
             logger.error(
+<<<<<<< HEAD
                 "Failed to load NCCL library from %s ."
                 "It is expected if you are not running on NVIDIA/AMD GPUs."
                 "Otherwise, the nccl library might not exist, be corrupted "
                 "or it does not support the current platform %s."
+=======
+                "Failed to load NCCL library from %s. "
+                "It is expected if you are not running on NVIDIA/AMD GPUs."
+                "Otherwise, the nccl library might not exist, be corrupted "
+                "or it does not support the current platform %s. "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 "If you already have the library, please set the "
                 "environment variable VLLM_NCCL_SO_PATH"
                 " to point to the correct nccl library path.", so_file,
@@ -238,7 +261,11 @@ class NCCLLibrary:
             raise e
 
         if so_file not in NCCLLibrary.path_to_dict_mapping:
+<<<<<<< HEAD
             _funcs: Dict[str, Any] = {}
+=======
+            _funcs: dict[str, Any] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             for func in NCCLLibrary.exported_functions:
                 f = getattr(self.lib, func.name)
                 f.restype = func.restype

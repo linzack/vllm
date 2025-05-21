@@ -209,6 +209,10 @@ class PagedAttention:
         v_scale: torch.Tensor,
     ) -> torch.Tensor:
         output = torch.empty_like(query)
+<<<<<<< HEAD
+=======
+        max_seq_len = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         context_attention_fwd(
             query,
             key,
@@ -221,6 +225,10 @@ class PagedAttention:
             # query_start_loc is (batch_size + 1,)
             query_start_loc,
             seq_lens_tensor,
+<<<<<<< HEAD
+=======
+            max_seq_len,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             max_query_len,
             k_scale,
             v_scale,

@@ -3,7 +3,10 @@
 import multiprocessing
 import random
 import time
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import torch.distributed as dist
@@ -13,7 +16,11 @@ from vllm.distributed.utils import StatelessProcessGroup
 from vllm.utils import get_ip, get_open_port, update_environment_variables
 
 
+<<<<<<< HEAD
 def get_arrays(n: int, seed: int = 0) -> List[np.ndarray]:
+=======
+def get_arrays(n: int, seed: int = 0) -> list[np.ndarray]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     np.random.seed(seed)
     sizes = np.random.randint(1, 10_000, n)
     # on average, each array will have 5k elements

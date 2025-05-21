@@ -18,10 +18,15 @@ import ray
 import torch
 from ray.util.placement_group import placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+<<<<<<< HEAD
+=======
+from rlhf_utils import stateless_init_process_group
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from transformers import AutoModelForCausalLM
 
 from vllm import LLM, SamplingParams
 from vllm.utils import get_ip, get_open_port
+<<<<<<< HEAD
 from vllm.worker.worker import Worker
 
 
@@ -84,6 +89,8 @@ class MyWorker(Worker):
             weights_updated = weights_updated and torch.allclose(
                 p, torch.zeros_like(p))
         return weights_updated
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MyLLM(LLM):
@@ -129,7 +136,11 @@ llm = ray.remote(
 )(MyLLM).remote(
     model="facebook/opt-125m",
     enforce_eager=True,
+<<<<<<< HEAD
     worker_cls=MyWorker,
+=======
+    worker_extension_cls="rlhf_utils.WorkerExtension",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     tensor_parallel_size=2,
     distributed_executor_backend="ray",
 )
@@ -146,11 +157,21 @@ sampling_params = SamplingParams(temperature=0)
 
 outputs = ray.get(llm.generate.remote(prompts, sampling_params))
 
+<<<<<<< HEAD
 for output in outputs:
     prompt = output.prompt
     generated_text = output.outputs[0].text
     print(f"Prompt: {prompt!r}, "
           f"Generated text: {generated_text!r}")
+=======
+print("-" * 50)
+for output in outputs:
+    prompt = output.prompt
+    generated_text = output.outputs[0].text
+    print(f"Prompt: {prompt!r}\n"
+          f"Generated text: {generated_text!r}")
+    print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 # set up the communication between the training process
 # and the inference engine.
@@ -159,6 +180,10 @@ master_port = get_open_port()
 
 handle = llm.collective_rpc.remote("init_weight_update_group",
                                    args=(master_address, master_port, 1, 3))
+<<<<<<< HEAD
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 model_update_group = stateless_init_process_group(master_address, master_port,
                                                   0, 3, torch.device("cuda:0"))
 ray.get(handle)
@@ -180,8 +205,18 @@ assert all(ray.get(llm.collective_rpc.remote("check_weights_changed")))
 # use the updated model to generate texts, they will be nonsense
 # because the weights are all zeros.
 outputs_updated = ray.get(llm.generate.remote(prompts, sampling_params))
+<<<<<<< HEAD
 for output in outputs_updated:
     prompt = output.prompt
     generated_text = output.outputs[0].text
     print(f"Prompt: {prompt!r}, "
           f"Generated text: {generated_text!r}")
+=======
+print("-" * 50)
+for output in outputs_updated:
+    prompt = output.prompt
+    generated_text = output.outputs[0].text
+    print(f"Prompt: {prompt!r}\n"
+          f"Generated text: {generated_text!r}")
+    print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 import time
+<<<<<<< HEAD
 from typing import Any, AsyncGenerator, Dict, List, Mapping, Optional, Union
+=======
+from collections.abc import AsyncGenerator, Mapping
+from typing import Any, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from fastapi import Request
 
@@ -17,6 +22,10 @@ from vllm.entrypoints.openai.serving_engine import OpenAIServing
 from vllm.entrypoints.openai.serving_models import OpenAIServingModels
 from vllm.entrypoints.score_utils import (_cosine_similarity,
                                           _validate_score_input_lens)
+<<<<<<< HEAD
+=======
+from vllm.entrypoints.utils import _validate_truncation_size
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.inputs.data import TokensPrompt
 from vllm.logger import init_logger
 from vllm.lora.request import LoRARequest
@@ -48,8 +57,13 @@ class ServingScores(OpenAIServing):
     async def _embedding_score(
         self,
         tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
+<<<<<<< HEAD
         texts_1: List[str],
         texts_2: List[str],
+=======
+        texts_1: list[str],
+        texts_2: list[str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request: Union[RerankRequest, ScoreRequest],
         request_id=str,
         tokenization_kwargs: Optional[dict[str, Any]] = None,
@@ -57,11 +71,19 @@ class ServingScores(OpenAIServing):
         prompt_adapter_request: Optional[Union[PromptAdapterRequest,
                                                None]] = None,
         trace_headers: Optional[Mapping[str, str]] = None,
+<<<<<<< HEAD
     ) -> List[PoolingRequestOutput]:
 
         input_texts = texts_1 + texts_2
 
         engine_prompts: List[TokensPrompt] = []
+=======
+    ) -> list[PoolingRequestOutput]:
+
+        input_texts = texts_1 + texts_2
+
+        engine_prompts: list[TokensPrompt] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         tokenize_async = make_async(tokenizer.__call__,
                                     executor=self._tokenizer_executor)
 
@@ -82,7 +104,11 @@ class ServingScores(OpenAIServing):
                     prompt_token_ids=text_token_prompt["prompt_token_ids"]))
 
         # Schedule the request and get the result generator.
+<<<<<<< HEAD
         generators: List[AsyncGenerator[PoolingRequestOutput, None]] = []
+=======
+        generators: list[AsyncGenerator[PoolingRequestOutput, None]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pooling_params = request.to_pooling_params()
 
         for i, engine_prompt in enumerate(engine_prompts):
@@ -108,16 +134,27 @@ class ServingScores(OpenAIServing):
         result_generator = merge_async_iterators(*generators)
 
         # Non-streaming response
+<<<<<<< HEAD
         final_res_batch: List[PoolingRequestOutput] = []
 
         embeddings: List[Optional[PoolingRequestOutput]] =\
+=======
+        final_res_batch: list[PoolingRequestOutput] = []
+
+        embeddings: list[Optional[PoolingRequestOutput]] =\
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
               [None] * len(engine_prompts)
 
         async for i, res in result_generator:
             embeddings[i] = res
 
+<<<<<<< HEAD
         emb_texts_1: List[PoolingRequestOutput] = []
         emb_texts_2: List[PoolingRequestOutput] = []
+=======
+        emb_texts_1: list[PoolingRequestOutput] = []
+        emb_texts_2: list[PoolingRequestOutput] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         for i in range(0, len(texts_1)):
             assert (emb := embeddings[i]) is not None
@@ -139,8 +176,13 @@ class ServingScores(OpenAIServing):
     async def _cross_encoding_score(
         self,
         tokenizer: Union[AnyTokenizer],
+<<<<<<< HEAD
         texts_1: List[str],
         texts_2: List[str],
+=======
+        texts_1: list[str],
+        texts_2: list[str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request: Union[RerankRequest, ScoreRequest],
         request_id=str,
         tokenization_kwargs: Optional[dict[str, Any]] = None,
@@ -148,10 +190,17 @@ class ServingScores(OpenAIServing):
         prompt_adapter_request: Optional[Union[PromptAdapterRequest,
                                                None]] = None,
         trace_headers: Optional[Mapping[str, str]] = None,
+<<<<<<< HEAD
     ) -> List[PoolingRequestOutput]:
 
         request_prompts: List[str] = []
         engine_prompts: List[TokensPrompt] = []
+=======
+    ) -> list[PoolingRequestOutput]:
+
+        request_prompts: list[str] = []
+        engine_prompts: list[TokensPrompt] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if len(texts_1) == 1:
             texts_1 = texts_1 * len(texts_2)
@@ -185,7 +234,11 @@ class ServingScores(OpenAIServing):
             engine_prompts.append(engine_prompt)
 
         # Schedule the request and get the result generator.
+<<<<<<< HEAD
         generators: List[AsyncGenerator[PoolingRequestOutput, None]] = []
+=======
+        generators: list[AsyncGenerator[PoolingRequestOutput, None]] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         pooling_params = request.to_pooling_params()
 
@@ -212,7 +265,11 @@ class ServingScores(OpenAIServing):
         result_generator = merge_async_iterators(*generators)
 
         # Non-streaming response
+<<<<<<< HEAD
         final_res_batch: List[
+=======
+        final_res_batch: list[
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             Optional[PoolingRequestOutput]] = [None] * len(engine_prompts)
 
         async for i, res in result_generator:
@@ -228,12 +285,16 @@ class ServingScores(OpenAIServing):
         request_id: str,
         raw_request: Optional[Request] = None,
         truncate_prompt_tokens: Optional[int] = None,
+<<<<<<< HEAD
     ) -> List[PoolingRequestOutput]:
 
         tokenization_kwargs: Dict[str, Any] = {}
         if truncate_prompt_tokens is not None:
             tokenization_kwargs["truncation"] = True
             tokenization_kwargs["max_length"] = truncate_prompt_tokens
+=======
+    ) -> list[PoolingRequestOutput]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         (
             lora_request,
@@ -246,12 +307,18 @@ class ServingScores(OpenAIServing):
 
         tokenizer = await self.engine_client.get_tokenizer(lora_request)
 
+<<<<<<< HEAD
         if truncate_prompt_tokens is not None and \
                 truncate_prompt_tokens > self.max_model_len:
             raise ValueError(
                 f"truncate_prompt_tokens value ({truncate_prompt_tokens}) "
                 f"is greater than max_model_len ({self.max_model_len})."
                 f" Please, select a smaller truncation size.")
+=======
+        tokenization_kwargs: dict[str, Any] = {}
+        _validate_truncation_size(self.max_model_len, truncate_prompt_tokens,
+                                  tokenization_kwargs)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         trace_headers = (None if raw_request is None else await
                          self._get_trace_headers(raw_request.headers))
@@ -372,12 +439,20 @@ class ServingScores(OpenAIServing):
 
     def request_output_to_score_response(
         self,
+<<<<<<< HEAD
         final_res_batch: List[PoolingRequestOutput],
+=======
+        final_res_batch: list[PoolingRequestOutput],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         request_id: str,
         created_time: int,
         model_name: str,
     ) -> ScoreResponse:
+<<<<<<< HEAD
         items: List[ScoreResponseData] = []
+=======
+        items: list[ScoreResponseData] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_prompt_tokens = 0
 
         for idx, final_res in enumerate(final_res_batch):
@@ -406,13 +481,22 @@ class ServingScores(OpenAIServing):
         )
 
     def request_output_to_rerank_response(
+<<<<<<< HEAD
             self, final_res_batch: List[PoolingRequestOutput], request_id: str,
             model_name: str, documents: List[str],
+=======
+            self, final_res_batch: list[PoolingRequestOutput], request_id: str,
+            model_name: str, documents: list[str],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             top_n: int) -> RerankResponse:
         """
         Convert the output of do_rank to a RerankResponse
         """
+<<<<<<< HEAD
         results: List[RerankResult] = []
+=======
+        results: list[RerankResult] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         num_prompt_tokens = 0
         for idx, final_res in enumerate(final_res_batch):
             classify_res = ScoringRequestOutput.from_base(final_res)

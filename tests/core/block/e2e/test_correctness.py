@@ -195,6 +195,7 @@ def test_lookahead_greedy_equality_with_preemption(baseline_llm_generator,
     ])
 @pytest.mark.parametrize("per_test_common_llm_kwargs",
                          [{
+<<<<<<< HEAD
                              "block_size": 8,
                              "max_num_batched_tokens": 2,
                              "max_num_seqs": 2,
@@ -204,6 +205,17 @@ def test_lookahead_greedy_equality_with_preemption(baseline_llm_generator,
                              "max_num_seqs": 2,
                          }, {
                              "block_size": 8,
+=======
+                             "block_size": 16,
+                             "max_num_batched_tokens": 2,
+                             "max_num_seqs": 2,
+                         }, {
+                             "block_size": 16,
+                             "max_num_batched_tokens": 3,
+                             "max_num_seqs": 2,
+                         }, {
+                             "block_size": 16,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              "max_num_batched_tokens": 256,
                              "max_num_seqs": 10,
                          }])

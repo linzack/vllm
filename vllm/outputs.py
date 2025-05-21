@@ -1,10 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import time
+<<<<<<< HEAD
 from dataclasses import dataclass
 from typing import Dict, Generic, List, MutableSequence, Optional
 from typing import Sequence as GenericSequence
 from typing import Union
+=======
+from collections.abc import MutableSequence
+from collections.abc import Sequence as GenericSequence
+from dataclasses import dataclass
+from typing import Any, Generic, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from typing_extensions import TypeVar, deprecated
@@ -103,23 +110,41 @@ class RequestOutput:
         encoder_prompt_token_ids: The token IDs of the encoder prompt.
                                   None if decoder-only.
         num_cached_tokens: The number of tokens with prefix cache hit.
+<<<<<<< HEAD
+=======
+        kv_transfer_params: The params for remote K/V transfer.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     def __init__(
         self,
         request_id: str,
         prompt: Optional[str],
+<<<<<<< HEAD
         prompt_token_ids: Optional[List[int]],
         prompt_logprobs: Optional[PromptLogprobs],
         outputs: List[CompletionOutput],
+=======
+        prompt_token_ids: Optional[list[int]],
+        prompt_logprobs: Optional[PromptLogprobs],
+        outputs: list[CompletionOutput],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         finished: bool,
         metrics: Optional[RequestMetrics] = None,
         lora_request: Optional[LoRARequest] = None,
         encoder_prompt: Optional[str] = None,
+<<<<<<< HEAD
         encoder_prompt_token_ids: Optional[List[int]] = None,
         num_cached_tokens: Optional[int] = None,
         *,
         multi_modal_placeholders: Optional[MultiModalPlaceholderDict] = None,
+=======
+        encoder_prompt_token_ids: Optional[list[int]] = None,
+        num_cached_tokens: Optional[int] = None,
+        *,
+        multi_modal_placeholders: Optional[MultiModalPlaceholderDict] = None,
+        kv_transfer_params: Optional[dict[str, Any]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> None:
         self.request_id = request_id
         self.prompt = prompt
@@ -133,6 +158,7 @@ class RequestOutput:
         self.encoder_prompt = encoder_prompt
         self.encoder_prompt_token_ids = encoder_prompt_token_ids
         self.num_cached_tokens = num_cached_tokens
+<<<<<<< HEAD
 
     @classmethod
     def new(
@@ -185,11 +211,49 @@ class RequestOutput:
             assert completion.logprobs is not None
             completion.logprobs.extend(next_completion.logprobs)
         completion.cumulative_logprob = next_completion.cumulative_logprob
+=======
+        self.kv_transfer_params = kv_transfer_params
+
+    def add(self, next_output: "RequestOutput", aggregate: bool) -> None:
+        """Merge subsequent RequestOutput into this one"""
+
+        self.finished |= next_output.finished
+        self.kv_transfer_params = next_output.kv_transfer_params
+
+        for next_completion in next_output.outputs:
+            for i, completion in enumerate(self.outputs):
+                if completion.index == next_completion.index:
+                    if aggregate:
+                        # Merge outputs with same index
+                        completion.text += next_completion.text
+                        if not isinstance(completion.token_ids,
+                                          MutableSequence):
+                            completion.token_ids = list(completion.token_ids)
+                        completion.token_ids.extend(next_completion.token_ids)
+                        if next_completion.logprobs:
+                            assert completion.logprobs is not None
+                            completion.logprobs.extend(
+                                next_completion.logprobs)
+                        completion.cumulative_logprob = (
+                            next_completion.cumulative_logprob)
+                        completion.finish_reason = next_completion.finish_reason
+                        completion.stop_reason = next_completion.stop_reason
+                    else:
+                        # Replace the output with the new one
+                        self.outputs[i] = next_completion
+                    break
+            else:
+                self.outputs.append(next_completion)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @classmethod
     def from_seq_group(
         cls, seq_group: SequenceGroup, use_cache: bool,
+<<<<<<< HEAD
         seq_id_to_seq_group: Dict[str, SequenceGroupBase]
+=======
+        seq_id_to_seq_group: dict[str, SequenceGroupBase]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> Optional["RequestOutput"]:
         finished = seq_group.is_finished()
 
@@ -201,6 +265,16 @@ class RequestOutput:
                 group.finish_seq(seq_group)
             if assembled_seq_group is None:
                 return None
+<<<<<<< HEAD
+=======
+
+            # clear finished seq in seq_id_to_seq_group
+            if len(group.to_be_finished) == 0:
+                for sub_request_id in list(group.seq_id_to_index.keys()):
+                    if sub_request_id in seq_id_to_seq_group:
+                        del seq_id_to_seq_group[sub_request_id]
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return cls.from_seq_group(assembled_seq_group, use_cache,
                                       seq_id_to_seq_group)
 
@@ -251,7 +325,16 @@ class RequestOutput:
             if delta:
                 # Slice logprobs delta if applicable
                 if output_logprobs:
+<<<<<<< HEAD
                     output_logprobs = output_logprobs[-num_output_tokens:]
+=======
+                    # num_output_tokens can be 0 when n > 1 and request finishes
+                    # before the others
+                    if num_output_tokens > 0:
+                        output_logprobs = output_logprobs[-num_output_tokens:]
+                    else:
+                        output_logprobs = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 # Don't include prompt if this is after the first output
                 # containing decode token ids
                 if include_prompt and seq.get_output_len() > num_output_tokens:
@@ -363,12 +446,20 @@ class PoolingRequestOutput(Generic[_O]):
     Args:
         request_id (str): A unique identifier for the pooling request.
         outputs (PoolingOutput): The pooling results for the given input.
+<<<<<<< HEAD
         prompt_token_ids (List[int]): A list of token IDs used in the prompt.
+=======
+        prompt_token_ids (list[int]): A list of token IDs used in the prompt.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         finished (bool): A flag indicating whether the pooling is completed.
     """
 
     def __init__(self, request_id: str, outputs: _O,
+<<<<<<< HEAD
                  prompt_token_ids: List[int], finished: bool):
+=======
+                 prompt_token_ids: list[int], finished: bool):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.request_id = request_id
         self.prompt_token_ids = prompt_token_ids
         self.finished = finished
@@ -407,7 +498,11 @@ class RequestOutputFactory:
 
     @staticmethod
     def create(seq_group: SequenceGroup,
+<<<<<<< HEAD
                seq_id_to_seq_group: Dict[str, SequenceGroupBase],
+=======
+               seq_id_to_seq_group: dict[str, SequenceGroupBase],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                use_cache: bool = False):
         if seq_group.pooled_data is not None:
             return PoolingRequestOutput.from_seq_group(seq_group)

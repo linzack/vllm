@@ -1,12 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 """PyTorch MAMBA model."""
+<<<<<<< HEAD
 from typing import Iterable, List, Optional, Set, Tuple
+=======
+from collections.abc import Iterable
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 from torch import nn
 from transformers import MambaConfig
 
+<<<<<<< HEAD
 from vllm.attention.backends.abstract import AttentionMetadata
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.config import CacheConfig, VllmConfig
 from vllm.distributed import get_tensor_model_parallel_world_size
 from vllm.distributed.parallel_state import get_pp_group
@@ -15,23 +23,39 @@ from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.mamba.mamba_mixer import MambaMixer
 from vllm.model_executor.layers.quantization.base_config import (
     QuantizationConfig)
+<<<<<<< HEAD
 from vllm.model_executor.layers.sampler import SamplerOutput, get_sampler
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     DEFAULT_VOCAB_PADDING_SIZE, ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import default_weight_loader
 from vllm.model_executor.models.interfaces import (HasInnerState,
+<<<<<<< HEAD
                                                    IsAttentionFree, SupportsPP)
+=======
+                                                   IsAttentionFree, SupportsPP,
+                                                   SupportsV0Only)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.models.mamba_cache import (MambaCacheManager,
                                                     MambaCacheParams)
 from vllm.model_executor.sampling_metadata import SamplingMetadata
 from vllm.sequence import IntermediateTensors
 from vllm.utils import LayerBlockType
 
+<<<<<<< HEAD
 from .utils import (is_pp_missing_parameter,
                     make_empty_intermediate_tensors_factory, make_layers,
                     maybe_prefix)
 
 KVCache = Tuple[torch.Tensor, torch.Tensor]
+=======
+from .utils import (AutoWeightsLoader, is_pp_missing_parameter,
+                    make_empty_intermediate_tensors_factory, make_layers,
+                    maybe_prefix)
+
+KVCache = tuple[torch.Tensor, torch.Tensor]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class MambaDecoderLayer(nn.Module):
@@ -64,7 +88,10 @@ class MambaDecoderLayer(nn.Module):
     def forward(
         self,
         hidden_states: torch.Tensor,
+<<<<<<< HEAD
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         residual: Optional[torch.Tensor],
         mamba_cache_params: MambaCacheParams,
         **kwargs,
@@ -75,8 +102,12 @@ class MambaDecoderLayer(nn.Module):
         else:
             hidden_states, residual = self.norm(hidden_states, residual)
 
+<<<<<<< HEAD
         hidden_states = self.mixer(hidden_states, attn_metadata,
                                    mamba_cache_params)
+=======
+        hidden_states = self.mixer(hidden_states, mamba_cache_params)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return hidden_states, residual
 
 
@@ -92,7 +123,10 @@ class MambaModel(nn.Module):
         is_lora_enabled = bool(lora_config)
 
         self.config = config
+<<<<<<< HEAD
         self.padding_idx = config.pad_token_id
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         lora_vocab = ((lora_config.lora_extra_vocab_size *
                        (lora_config.max_loras or 1)) if lora_config else 0)
         self.vocab_size = config.vocab_size + lora_vocab
@@ -125,7 +159,10 @@ class MambaModel(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
+<<<<<<< HEAD
         attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         mamba_cache_params: MambaCacheParams,
         intermediate_tensors: Optional[IntermediateTensors] = None,
         inputs_embeds: Optional[torch.Tensor] = None,
@@ -146,7 +183,10 @@ class MambaModel(nn.Module):
             hidden_states, residual = layer(
                 positions=positions,
                 hidden_states=hidden_states,
+<<<<<<< HEAD
                 attn_metadata=attn_metadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 residual=residual,
                 mamba_cache_params=mamba_cache_params.at_layer_idx(
                     i - self.start_layer))
@@ -159,8 +199,34 @@ class MambaModel(nn.Module):
 
         return hidden_states
 
+<<<<<<< HEAD
 
 class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        params_dict = dict(self.named_parameters())
+        loaded_params: set[str] = set()
+        for name, loaded_weight in weights:
+            if "A_log" in name:
+                name = name.replace("A_log", "A")
+            # Skip loading extra bias for GPTQ models.
+            if name.endswith(".bias") and name not in params_dict:
+                continue
+            if is_pp_missing_parameter(name, self):
+                continue
+
+            param = params_dict[name]
+            weight_loader = getattr(param, "weight_loader",
+                                    default_weight_loader)
+            weight_loader(param, loaded_weight)
+            loaded_params.add(name)
+        return loaded_params
+
+
+class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP,
+                       SupportsV0Only):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
         config = vllm_config.model_config.hf_config
@@ -197,7 +263,10 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
 
         self.logits_processor = LogitsProcessor(self.unpadded_vocab_size,
                                                 config.vocab_size)
+<<<<<<< HEAD
         self.sampler = get_sampler()
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         self.make_empty_intermediate_tensors = (
             self.backbone.make_empty_intermediate_tensors)
@@ -208,8 +277,11 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
     def forward(self,
                 input_ids: torch.Tensor,
                 positions: torch.Tensor,
+<<<<<<< HEAD
                 kv_caches: List[KVCache],
                 attn_metadata: AttentionMetadata,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 intermediate_tensors: Optional[IntermediateTensors] = None,
                 inputs_embeds: Optional[torch.Tensor] = None,
                 **kwargs):
@@ -222,9 +294,14 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
 
         mamba_cache_params = self.mamba_cache.current_run_tensors(**kwargs)
 
+<<<<<<< HEAD
         hidden_states = self.backbone(input_ids, positions, attn_metadata,
                                       mamba_cache_params, intermediate_tensors,
                                       inputs_embeds)
+=======
+        hidden_states = self.backbone(input_ids, positions, mamba_cache_params,
+                                      intermediate_tensors, inputs_embeds)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return hidden_states
 
@@ -236,7 +313,11 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
         return self.mamba_cache.get_seqlen_agnostic_capture_inputs(batch_size)
 
     def _get_mamba_cache_shape(
+<<<<<<< HEAD
             self) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+=======
+            self) -> tuple[tuple[int, int], tuple[int, int]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         world_size = get_tensor_model_parallel_world_size()
         conv_state_shape = (
             self.config.intermediate_size // world_size,
@@ -254,6 +335,7 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
                                        sampling_metadata)
         return logits
 
+<<<<<<< HEAD
     def sample(
         self,
         logits: Optional[torch.Tensor],
@@ -281,3 +363,9 @@ class MambaForCausalLM(nn.Module, HasInnerState, IsAttentionFree, SupportsPP):
             weight_loader(param, loaded_weight)
             loaded_params.add(name)
         return loaded_params
+=======
+    def load_weights(self, weights: Iterable[tuple[str,
+                                                   torch.Tensor]]) -> set[str]:
+        loader = AutoWeightsLoader(self)
+        return loader.load_weights(weights)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

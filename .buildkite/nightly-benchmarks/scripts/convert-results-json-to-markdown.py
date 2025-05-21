@@ -65,6 +65,7 @@ def read_markdown(file):
 
 
 def results_to_json(latency, throughput, serving):
+<<<<<<< HEAD
     return json.dumps({
         'latency': latency.to_dict(),
         'throughput': throughput.to_dict(),
@@ -77,6 +78,20 @@ if __name__ == "__main__":
     # collect results
     for test_file in results_folder.glob("*.json"):
 
+=======
+    return json.dumps(
+        {
+            "latency": latency.to_dict(),
+            "throughput": throughput.to_dict(),
+            "serving": serving.to_dict(),
+        }
+    )
+
+
+if __name__ == "__main__":
+    # collect results
+    for test_file in results_folder.glob("*.json"):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         with open(test_file) as f:
             raw_result = json.loads(f.read())
 
@@ -84,8 +99,18 @@ if __name__ == "__main__":
             # this result is generated via `benchmark_serving.py`
 
             # attach the benchmarking command to raw_result
+<<<<<<< HEAD
             with open(test_file.with_suffix(".commands")) as f:
                 command = json.loads(f.read())
+=======
+            try:
+                with open(test_file.with_suffix(".commands")) as f:
+                    command = json.loads(f.read())
+            except OSError as e:
+                print(e)
+                continue
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             raw_result.update(command)
 
             # update the test name of this result
@@ -99,8 +124,18 @@ if __name__ == "__main__":
             # this result is generated via `benchmark_latency.py`
 
             # attach the benchmarking command to raw_result
+<<<<<<< HEAD
             with open(test_file.with_suffix(".commands")) as f:
                 command = json.loads(f.read())
+=======
+            try:
+                with open(test_file.with_suffix(".commands")) as f:
+                    command = json.loads(f.read())
+            except OSError as e:
+                print(e)
+                continue
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             raw_result.update(command)
 
             # update the test name of this result
@@ -110,7 +145,12 @@ if __name__ == "__main__":
             for perc in [10, 25, 50, 75, 90, 99]:
                 # Multiply 1000 to convert the time unit from s to ms
                 raw_result.update(
+<<<<<<< HEAD
                     {f"P{perc}": 1000 * raw_result["percentiles"][str(perc)]})
+=======
+                    {f"P{perc}": 1000 * raw_result["percentiles"][str(perc)]}
+                )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             raw_result["avg_latency"] = raw_result["avg_latency"] * 1000
 
             # add the result to raw_result
@@ -121,8 +161,18 @@ if __name__ == "__main__":
             # this result is generated via `benchmark_throughput.py`
 
             # attach the benchmarking command to raw_result
+<<<<<<< HEAD
             with open(test_file.with_suffix(".commands")) as f:
                 command = json.loads(f.read())
+=======
+            try:
+                with open(test_file.with_suffix(".commands")) as f:
+                    command = json.loads(f.read())
+            except OSError as e:
+                print(e)
+                continue
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             raw_result.update(command)
 
             # update the test name of this result
@@ -138,6 +188,7 @@ if __name__ == "__main__":
     serving_results = pd.DataFrame.from_dict(serving_results)
     throughput_results = pd.DataFrame.from_dict(throughput_results)
 
+<<<<<<< HEAD
     raw_results_json = results_to_json(latency_results, throughput_results,
                                        serving_results)
 
@@ -158,6 +209,29 @@ if __name__ == "__main__":
     processed_results_json = results_to_json(latency_results,
                                              throughput_results,
                                              serving_results)
+=======
+    raw_results_json = results_to_json(
+        latency_results, throughput_results, serving_results
+    )
+
+    # remapping the key, for visualization purpose
+    if not latency_results.empty:
+        latency_results = latency_results[list(latency_column_mapping.keys())].rename(
+            columns=latency_column_mapping
+        )
+    if not serving_results.empty:
+        serving_results = serving_results[list(serving_column_mapping.keys())].rename(
+            columns=serving_column_mapping
+        )
+    if not throughput_results.empty:
+        throughput_results = throughput_results[
+            list(throughput_results_column_mapping.keys())
+        ].rename(columns=throughput_results_column_mapping)
+
+    processed_results_json = results_to_json(
+        latency_results, throughput_results, serving_results
+    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     for df in [latency_results, serving_results, throughput_results]:
         if df.empty:
@@ -169,6 +243,7 @@ if __name__ == "__main__":
         # The GPUs sometimes come in format of "GPUTYPE\nGPUTYPE\n...",
         # we want to turn it into "8xGPUTYPE"
         df["GPU"] = df["GPU"].apply(
+<<<<<<< HEAD
             lambda x: f"{len(x.split('\n'))}x{x.split('\n')[0]}")
 
     # get markdown tables
@@ -190,17 +265,52 @@ if __name__ == "__main__":
 
         results = read_markdown("../.buildkite/nightly-benchmarks/" +
                                 "performance-benchmarks-descriptions.md")
+=======
+            lambda x: f"{len(x.split('\n'))}x{x.split('\n')[0]}"
+        )
+
+    # get markdown tables
+    latency_md_table = tabulate(
+        latency_results, headers="keys", tablefmt="pipe", showindex=False
+    )
+    serving_md_table = tabulate(
+        serving_results, headers="keys", tablefmt="pipe", showindex=False
+    )
+    throughput_md_table = tabulate(
+        throughput_results, headers="keys", tablefmt="pipe", showindex=False
+    )
+
+    # document the result
+    with open(results_folder / "benchmark_results.md", "w") as f:
+        results = read_markdown(
+            "../.buildkite/nightly-benchmarks/"
+            + "performance-benchmarks-descriptions.md"
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         results = results.format(
             latency_tests_markdown_table=latency_md_table,
             throughput_tests_markdown_table=throughput_md_table,
             serving_tests_markdown_table=serving_md_table,
+<<<<<<< HEAD
             benchmarking_results_in_json_string=processed_results_json)
+=======
+            benchmarking_results_in_json_string=processed_results_json,
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         f.write(results)
 
     # document benchmarking results in json
     with open(results_folder / "benchmark_results.json", "w") as f:
+<<<<<<< HEAD
 
         results = latency_results.to_dict(
             orient='records') + throughput_results.to_dict(
                 orient='records') + serving_results.to_dict(orient='records')
+=======
+        results = (
+            latency_results.to_dict(orient="records")
+            + throughput_results.to_dict(orient="records")
+            + serving_results.to_dict(orient="records")
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         f.write(json.dumps(results))

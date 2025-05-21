@@ -4,7 +4,10 @@
  */
 
 // Include both AMD and NVIDIA fp8 types to avoid circular import
+<<<<<<< HEAD
 // TODO(luka/varun) use FP8_TYPE instead after refactoring
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 #include <c10/util/Float8_e4m3fnuz.h>
 #include <c10/util/Float8_e4m3fn.h>
 

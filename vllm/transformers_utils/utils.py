@@ -1,8 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from os import PathLike
 from pathlib import Path
 from typing import List, Optional, Union
+=======
+import json
+from functools import cache
+from os import PathLike
+from pathlib import Path
+from typing import Optional, Union
+
+from vllm.envs import VLLM_MODEL_REDIRECT_PATH
+from vllm.logger import init_logger
+
+logger = init_logger(__name__)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def is_s3(model_or_path: str) -> bool:
@@ -17,21 +30,40 @@ def check_gguf_file(model: Union[str, PathLike]) -> bool:
     elif model.suffix == ".gguf":
         return True
 
+<<<<<<< HEAD
     with open(model, "rb") as f:
         header = f.read(4)
     return header == b"GGUF"
+=======
+    try:
+        with model.open("rb") as f:
+            header = f.read(4)
+
+        return header == b"GGUF"
+    except Exception as e:
+        logger.debug("Error reading file %s: %s", model, e)
+        return False
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def modelscope_list_repo_files(
     repo_id: str,
     revision: Optional[str] = None,
     token: Union[str, bool, None] = None,
+<<<<<<< HEAD
 ) -> List[str]:
     """List files in a modelscope repo."""
     from modelscope.hub.api import HubApi
     from modelscope.utils.hf_util import _try_login
     _try_login(token)
     api = HubApi()
+=======
+) -> list[str]:
+    """List files in a modelscope repo."""
+    from modelscope.hub.api import HubApi
+    api = HubApi()
+    api.login(token)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # same as huggingface_hub.list_repo_files
     files = [
         file['Path'] for file in api.get_model_files(
@@ -39,3 +71,52 @@ def modelscope_list_repo_files(
         if file['Type'] == 'blob'
     ]
     return files
+<<<<<<< HEAD
+=======
+
+
+def _maybe_json_dict(path: Union[str, PathLike]) -> dict[str, str]:
+    with open(path) as f:
+        try:
+            return json.loads(f.read())
+        except Exception:
+            return dict[str, str]()
+
+
+def _maybe_space_split_dict(path: Union[str, PathLike]) -> dict[str, str]:
+    parsed_dict = dict[str, str]()
+    with open(path) as f:
+        for line in f.readlines():
+            try:
+                model_name, redirect_name = line.strip().split()
+                parsed_dict[model_name] = redirect_name
+            except Exception:
+                pass
+    return parsed_dict
+
+
+@cache
+def maybe_model_redirect(model: str) -> str:
+    """
+    Use model_redirect to redirect the model name to a local folder.
+
+    :param model: hf model name
+    :return: maybe redirect to a local folder
+    """
+
+    model_redirect_path = VLLM_MODEL_REDIRECT_PATH
+
+    if not model_redirect_path:
+        return model
+
+    if not Path(model_redirect_path).exists():
+        return model
+
+    redirect_dict = (_maybe_json_dict(model_redirect_path)
+                     or _maybe_space_split_dict(model_redirect_path))
+    if (redirect_model := redirect_dict.get(model)):
+        logger.info("model redirect: [ %s ] -> [ %s ]", model, redirect_model)
+        return redirect_model
+
+    return model
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

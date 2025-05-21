@@ -4,14 +4,24 @@
 # Adapted from https://github.com/state-spaces/mamba/blob/v2.2.4/mamba_ssm/ops/triton/selective_state_update.py
 
 import torch
+<<<<<<< HEAD
 import triton
 import triton.language as tl
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from packaging import version
 
 from vllm import _custom_ops as ops
 from vllm.attention.backends.utils import PAD_SLOT_ID
+<<<<<<< HEAD
 
 TRITON3 = version.parse(triton.__version__) >= version.parse("3.0.0")
+=======
+from vllm.triton_utils import HAS_TRITON, tl, triton
+
+TRITON3 = HAS_TRITON and (version.parse(triton.__version__)
+                          >= version.parse("3.0.0"))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 if TRITON3:
 

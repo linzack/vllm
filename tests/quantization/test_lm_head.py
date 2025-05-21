@@ -29,7 +29,14 @@ def test_lm_head(
     vllm_runner,
     model_id: str,
     lm_head_quantized: bool,
+<<<<<<< HEAD
 ) -> None:
+=======
+    monkeypatch,
+) -> None:
+    # vllm_runner.apply_model() relies on V0 internals.
+    monkeypatch.setenv("VLLM_USE_V1", "0")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with vllm_runner(model_id, dtype=torch.float16,
                      max_model_len=2048) as vllm_model:
 

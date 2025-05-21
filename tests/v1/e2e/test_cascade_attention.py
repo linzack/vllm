@@ -1,13 +1,31 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from vllm import LLM, SamplingParams
 
 
 def test_cascade_attention(example_system_message, monkeypatch):
+=======
+import pytest
+
+from vllm import LLM, SamplingParams
+
+from ...utils import fork_new_process_for_each_test
+
+
+@fork_new_process_for_each_test
+@pytest.mark.parametrize("attn_backend",
+                         ["FLASH_ATTN_VLLM_V1", "FLASHINFER_VLLM_V1"])
+def test_cascade_attention(example_system_message, monkeypatch, attn_backend):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     prompt = "\n<User>: Implement fibonacci sequence in Python.\n<Claude>:"
 
     with monkeypatch.context() as m:
         m.setenv("VLLM_USE_V1", "1")
+<<<<<<< HEAD
+=======
+        m.setenv("VLLM_ATTENTION_BACKEND", attn_backend)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         llm = LLM(model="Qwen/Qwen2-1.5B-Instruct")
         sampling_params = SamplingParams(temperature=0.0, max_tokens=100)

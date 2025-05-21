@@ -2,7 +2,10 @@
 
 import multiprocessing
 import os
+<<<<<<< HEAD
 from typing import Dict, List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import torch
@@ -20,9 +23,15 @@ from vllm.utils import update_environment_variables
 
 def distributed_run(fn, world_size):
     number_of_processes = world_size
+<<<<<<< HEAD
     processes: List[multiprocessing.Process] = []
     for i in range(number_of_processes):
         env: Dict[str, str] = {}
+=======
+    processes: list[multiprocessing.Process] = []
+    for i in range(number_of_processes):
+        env: dict[str, str] = {}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         env['RANK'] = str(i)
         env['LOCAL_RANK'] = str(i)
         env['WORLD_SIZE'] = str(number_of_processes)

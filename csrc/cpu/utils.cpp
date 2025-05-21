@@ -4,6 +4,14 @@
   #include <string>
   #include <sched.h>
 #endif
+<<<<<<< HEAD
+=======
+#if __GLIBC__ == 2 && __GLIBC_MINOR__ < 30
+  #include <unistd.h>
+  #include <sys/syscall.h>
+  #define gettid() syscall(SYS_gettid)
+#endif
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 #include "cpu_types.hpp"
 
@@ -18,7 +26,11 @@ std::string init_cpu_threads_env(const std::string& cpu_ids) {
 
 #ifndef VLLM_NUMA_DISABLED
 std::string init_cpu_threads_env(const std::string& cpu_ids) {
+<<<<<<< HEAD
   bitmask* omp_cpu_mask = numa_parse_cpustring(cpu_ids.c_str());
+=======
+  bitmask* omp_cpu_mask = numa_parse_cpustring_all(cpu_ids.c_str());
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   TORCH_CHECK(omp_cpu_mask->size > 0);
   std::vector<int> omp_cpu_ids;
   omp_cpu_ids.reserve(omp_cpu_mask->size);

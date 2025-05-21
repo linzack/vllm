@@ -16,6 +16,10 @@
 #include "cutlass/gemm/kernel/gemm_universal.hpp"
 #include "cutlass/epilogue/collective/collective_builder.hpp"
 #include "cutlass/gemm/collective/collective_builder.hpp"
+<<<<<<< HEAD
+=======
+#include "cutlass/util/packed_stride.hpp"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 #include "core/math.hpp"
 #include "cutlass_extensions/common.hpp"
@@ -64,6 +68,7 @@ void cutlass_gemm_caller(torch::Tensor& out, torch::Tensor const& a,
                          torch::Tensor const& b,
                          EpilogueArgs&&... epilogue_params) {
   using ElementAB = typename Gemm::ElementAB;
+<<<<<<< HEAD
   using ElementD = typename Gemm::ElementD;
   using GemmKernel = typename Gemm::GemmKernel;
 
@@ -80,6 +85,30 @@ void cutlass_gemm_caller(torch::Tensor& out, torch::Tensor const& a,
   StrideC c_stride{ldc, cute::Int<1>{}, cute::Int<0>{}};
 
   typename GemmKernel::ProblemShape prob_shape = get_problem_shape(a, b);
+=======
+  using ElementC = typename Gemm::ElementC;
+  using ElementD = typename Gemm::ElementD;
+  using GemmKernel = typename Gemm::GemmKernel;
+
+  using StrideA = typename Gemm::GemmKernel::StrideA;
+  using StrideB = typename Gemm::GemmKernel::StrideB;
+  using StrideC = typename Gemm::GemmKernel::StrideC;
+  using StrideD = StrideC;
+  using StrideAux = StrideC;
+
+  typename GemmKernel::ProblemShape prob_shape = get_problem_shape(a, b);
+  auto [M, N, K, L] = prob_shape;
+
+  StrideA a_stride =
+      cutlass::make_cute_packed_stride(StrideA{}, cute::make_shape(M, K, L));
+  StrideB b_stride =
+      cutlass::make_cute_packed_stride(StrideB{}, cute::make_shape(N, K, L));
+  StrideC c_stride =
+      cutlass::make_cute_packed_stride(StrideC{}, cute::make_shape(M, N, L));
+  StrideD d_stride =
+      cutlass::make_cute_packed_stride(StrideD{}, cute::make_shape(M, N, L));
+  StrideAux aux_stride = d_stride;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
   auto a_ptr = static_cast<ElementAB*>(a.data_ptr());
   auto b_ptr = static_cast<ElementAB*>(b.data_ptr());
@@ -87,10 +116,18 @@ void cutlass_gemm_caller(torch::Tensor& out, torch::Tensor const& a,
                                                        b_stride};
 
   auto c_ptr = static_cast<ElementD*>(out.data_ptr());
+<<<<<<< HEAD
   typename GemmKernel::EpilogueArguments epilogue_args{
       Gemm::Epilogue::prepare_args(
           std::forward<EpilogueArgs>(epilogue_params)...),
       c_ptr, c_stride, c_ptr, c_stride};
+=======
+  // auto d_ptr = static_cast<ElementC*>(out.data_ptr());
+  typename GemmKernel::EpilogueArguments epilogue_args{
+      Gemm::Epilogue::prepare_args(
+          std::forward<EpilogueArgs>(epilogue_params)...),
+      c_ptr, c_stride, c_ptr, d_stride};
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
   cutlass_gemm_caller<GemmKernel>(a.device(), prob_shape, mainloop_args,
                                   epilogue_args);

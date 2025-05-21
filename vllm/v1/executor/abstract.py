@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from concurrent.futures import Future
+<<<<<<< HEAD
 from typing import List, Type, Union
+=======
+from typing import Callable, Union
+
+import torch
+import torch.distributed as dist
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.config import VllmConfig
 from vllm.executor.executor_base import ExecutorBase
@@ -12,6 +19,11 @@ from vllm.executor.uniproc_executor import (  # noqa
 from vllm.v1.kv_cache_interface import KVCacheConfig, KVCacheSpec
 from vllm.v1.outputs import ModelRunnerOutput
 
+<<<<<<< HEAD
+=======
+FailureCallback = Callable[[], None]
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class Executor(ExecutorBase):
     """
@@ -19,8 +31,13 @@ class Executor(ExecutorBase):
     For methods shared by v0 and v1, define them in ExecutorBase"""
 
     @staticmethod
+<<<<<<< HEAD
     def get_class(vllm_config: VllmConfig) -> Type["Executor"]:
         executor_class: Type[Executor]
+=======
+    def get_class(vllm_config: VllmConfig) -> type["Executor"]:
+        executor_class: type[Executor]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         parallel_config = vllm_config.parallel_config
         distributed_executor_backend = (
             parallel_config.distributed_executor_backend)
@@ -49,11 +66,17 @@ class Executor(ExecutorBase):
                              f"{distributed_executor_backend}")
         return executor_class
 
+<<<<<<< HEAD
     def initialize(self, kv_cache_configs: List[KVCacheConfig]) -> None:
+=======
+    def initialize_from_config(self,
+                               kv_cache_configs: list[KVCacheConfig]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         """
         Initialize the KV caches and begin the model execution loop of the
         underlying workers.
         """
+<<<<<<< HEAD
         self.collective_rpc("initialize_cache", args=(kv_cache_configs, ))
         self.collective_rpc("compile_or_warm_up_model")
 
@@ -65,6 +88,24 @@ class Executor(ExecutorBase):
         return min(output)
 
     def get_kv_cache_specs(self) -> List[KVCacheSpec]:
+=======
+        self.collective_rpc("initialize_from_config",
+                            args=(kv_cache_configs, ))
+        self.collective_rpc("compile_or_warm_up_model")
+
+    def register_failure_callback(self, callback: FailureCallback):
+        """
+        Register a function to be called if the executor enters a permanent
+        failed state.
+        """
+        pass
+
+    def determine_available_memory(self) -> list[int]:  # in bytes
+        output = self.collective_rpc("determine_available_memory")
+        return output
+
+    def get_kv_cache_specs(self) -> list[dict[str, KVCacheSpec]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output = self.collective_rpc("get_kv_cache_spec")
         return output
 
@@ -89,4 +130,17 @@ class UniProcExecutor(UniProcExecutorV0, Executor):
 
 
 class ExecutorWithExternalLauncher(ExecutorWithExternalLauncherV0, Executor):
+<<<<<<< HEAD
     pass
+=======
+
+    def determine_available_memory(self) -> list[int]:  # in bytes
+        # same as determine_num_available_blocks in v0,
+        # we need to get the min across all ranks.
+        memory = super().determine_available_memory()
+        from vllm.distributed.parallel_state import get_world_group
+        cpu_group = get_world_group().cpu_group
+        memory_tensor = torch.tensor([memory], device="cpu", dtype=torch.int64)
+        dist.all_reduce(memory_tensor, group=cpu_group, op=dist.ReduceOp.MIN)
+        return [memory_tensor.item()]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

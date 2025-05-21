@@ -17,7 +17,11 @@ async def test_empty_prompt():
         client = remote_server.get_async_client()
 
         with pytest.raises(openai.BadRequestError,
+<<<<<<< HEAD
                            match=re.compile('.+Prompt cannot be empty.+')):
+=======
+                           match="decoder prompt cannot be empty"):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             await client.completions.create(model=model_name,
                                             prompt="",
                                             max_tokens=5,

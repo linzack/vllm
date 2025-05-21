@@ -1,11 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional
+=======
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 
 from vllm.model_executor.layers.linear import (LinearBase, LinearMethodBase,
                                                UnquantizedLinearMethod)
+<<<<<<< HEAD
+=======
+from vllm.model_executor.layers.quantization import QuantizationMethods
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.awq import (AWQLinearMethod,
                                                          is_layer_skipped_awq)
 from vllm.model_executor.layers.quantization.base_config import (
@@ -31,7 +39,11 @@ class IPEXConfig(QuantizationConfig):
         method: str,
         weight_bits: int,
         group_size: int,
+<<<<<<< HEAD
         modules_to_not_convert: Optional[List[str]] = None,
+=======
+        modules_to_not_convert: Optional[list[str]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         desc_act: Optional[bool] = None,
         lm_head_quantized: Optional[bool] = None,
     ) -> None:
@@ -58,11 +70,19 @@ class IPEXConfig(QuantizationConfig):
                 f"group_size={self.group_size})")
 
     @classmethod
+<<<<<<< HEAD
     def get_name(cls) -> str:
         return "ipex"
 
     @classmethod
     def get_supported_act_dtypes(cls) -> List[torch.dtype]:
+=======
+    def get_name(cls) -> QuantizationMethods:
+        return "ipex"
+
+    @classmethod
+    def get_supported_act_dtypes(cls) -> list[torch.dtype]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [torch.bfloat16, torch.float16]
 
     @classmethod
@@ -70,14 +90,22 @@ class IPEXConfig(QuantizationConfig):
         return -1
 
     @staticmethod
+<<<<<<< HEAD
     def get_config_filenames() -> List[str]:
+=======
+    def get_config_filenames() -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return [
             "quant_config.json",
             "quantize_config.json",
         ]
 
     @classmethod
+<<<<<<< HEAD
     def from_config(cls, config: Dict[str, Any]) -> "IPEXConfig":
+=======
+    def from_config(cls, config: dict[str, Any]) -> "IPEXConfig":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         method = cls.get_from_keys(config, ["quant_method"]).lower()
         if method == "awq":
             weight_bits = cls.get_from_keys(config, ["w_bit", "bits"])
@@ -97,8 +125,13 @@ class IPEXConfig(QuantizationConfig):
                    lm_head_quantized)
 
     @classmethod
+<<<<<<< HEAD
     def override_quantization_method(cls, hf_quant_cfg,
                                      user_quant) -> Optional[str]:
+=======
+    def override_quantization_method(
+            cls, hf_quant_cfg, user_quant) -> Optional[QuantizationMethods]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if not current_platform.is_cpu() and not current_platform.is_xpu():
             return None
 
@@ -180,8 +213,11 @@ class IPEXGPTQLinearMethod(GPTQLinearMethod):
               bias: Optional[torch.Tensor] = None) -> torch.Tensor:
         reshaped_x = x.reshape(-1, x.shape[-1])
         out = layer.ipex_qlinear(reshaped_x)
+<<<<<<< HEAD
         if bias is not None:
             out.add_(bias)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         return out.reshape(x.shape[:-1] + (layer.ipex_output_size, ))
 
 

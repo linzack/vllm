@@ -6,12 +6,20 @@ import os
 from enum import Enum
 from json import dumps as json_dumps
 from re import escape as regex_escape
+<<<<<<< HEAD
 from typing import Tuple, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from transformers import PreTrainedTokenizerBase
 
 from vllm.model_executor.guided_decoding.outlines_logits_processors import (
     CFGLogitsProcessor, JSONLogitsProcessor, RegexLogitsProcessor)
+<<<<<<< HEAD
+=======
+from vllm.reasoning import ReasoningParser
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.sampling_params import GuidedDecodingParams
 
 
@@ -58,7 +66,13 @@ _MAX_THREADPOOL_WORKERS = 16
 
 
 async def get_outlines_guided_decoding_logits_processor(
+<<<<<<< HEAD
     guided_params: GuidedDecodingParams, tokenizer: PreTrainedTokenizerBase
+=======
+    guided_params: GuidedDecodingParams,
+    tokenizer: PreTrainedTokenizerBase,
+    reasoner: Optional[ReasoningParser],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> Union[JSONLogitsProcessor, RegexLogitsProcessor, CFGLogitsProcessor,
            None]:
     """
@@ -82,11 +96,22 @@ async def get_outlines_guided_decoding_logits_processor(
 
     return await loop.run_in_executor(global_thread_pool,
                                       _get_logits_processor, guide, tokenizer,
+<<<<<<< HEAD
                                       mode, guided_params.whitespace_pattern)
 
 
 def get_local_outlines_guided_decoding_logits_processor(
     guided_params: GuidedDecodingParams, tokenizer: PreTrainedTokenizerBase
+=======
+                                      mode, guided_params.whitespace_pattern,
+                                      reasoner)
+
+
+def get_local_outlines_guided_decoding_logits_processor(
+    guided_params: GuidedDecodingParams,
+    tokenizer: PreTrainedTokenizerBase,
+    reasoner: Optional[ReasoningParser],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> Union[JSONLogitsProcessor, RegexLogitsProcessor, CFGLogitsProcessor,
            None]:
     """
@@ -100,12 +125,20 @@ def get_local_outlines_guided_decoding_logits_processor(
         return None
 
     return _get_logits_processor(guide, tokenizer, mode,
+<<<<<<< HEAD
                                  guided_params.whitespace_pattern)
+=======
+                                 guided_params.whitespace_pattern, reasoner)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 def _get_guide_and_mode(
     guided_params: GuidedDecodingParams
+<<<<<<< HEAD
 ) -> Union[Tuple[str, GuidedDecodingMode], Tuple[None, None]]:
+=======
+) -> Union[tuple[str, GuidedDecodingMode], tuple[None, None]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if guided_params.json:
         if isinstance(guided_params.json, dict):
             # turn dict into hashable string
@@ -131,6 +164,7 @@ def _get_guide_and_mode(
 
 
 def _get_logits_processor(
+<<<<<<< HEAD
     guide: str, tokenizer: PreTrainedTokenizerBase, mode: GuidedDecodingMode,
     whitespace_pattern: Union[str, None]
 ) -> Union[JSONLogitsProcessor, RegexLogitsProcessor, CFGLogitsProcessor]:
@@ -140,5 +174,20 @@ def _get_logits_processor(
         return RegexLogitsProcessor(guide, tokenizer)
     elif mode == GuidedDecodingMode.GRAMMAR:
         return CFGLogitsProcessor(guide, tokenizer)
+=======
+    guide: str,
+    tokenizer: PreTrainedTokenizerBase,
+    mode: GuidedDecodingMode,
+    whitespace_pattern: Union[str, None],
+    reasoner: Optional[ReasoningParser],
+) -> Union[JSONLogitsProcessor, RegexLogitsProcessor, CFGLogitsProcessor]:
+    if mode == GuidedDecodingMode.JSON:
+        return JSONLogitsProcessor(guide, tokenizer, whitespace_pattern,
+                                   reasoner)
+    elif mode == GuidedDecodingMode.REGEX or mode == GuidedDecodingMode.CHOICE:
+        return RegexLogitsProcessor(guide, tokenizer, reasoner)
+    elif mode == GuidedDecodingMode.GRAMMAR:
+        return CFGLogitsProcessor(guide, tokenizer, reasoner)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     else:
         raise ValueError(f"Unknown guided decoding mode {mode}")

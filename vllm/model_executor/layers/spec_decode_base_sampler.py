@@ -1,12 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from abc import abstractmethod
+<<<<<<< HEAD
 from typing import Dict, Optional, Union
+=======
+from typing import Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.jit
 import torch.nn as nn
 
+<<<<<<< HEAD
+=======
+from vllm.platforms import current_platform
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class SpecDecodeBaseSampler(nn.Module):
     """Base class for samplers used for Speculative Decoding verification
@@ -35,7 +44,11 @@ class SpecDecodeBaseSampler(nn.Module):
     def init_gpu_tensors(self, device: Union[int, str]) -> None:
         assert self.num_accepted_tokens is None
         if isinstance(device, int):
+<<<<<<< HEAD
             device = f"cuda:{device}"
+=======
+            device = f"{current_platform.device_type}:{device}"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         elif not isinstance(device, str):
             raise ValueError(f"Device must be int or str, get {type(device)}")
         self.num_accepted_tokens = torch.tensor(0,
@@ -251,6 +264,10 @@ class SpecDecodeStochasticBaseSampler(SpecDecodeBaseSampler):
         bonus_token_ids: torch.Tensor,
         draft_probs: torch.Tensor,
         draft_token_ids: torch.Tensor,
+<<<<<<< HEAD
         seeded_seqs: Optional[Dict[int, torch.Generator]] = None,
+=======
+        seeded_seqs: Optional[dict[int, torch.Generator]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> torch.Tensor:
         raise NotImplementedError

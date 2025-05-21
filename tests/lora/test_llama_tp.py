@@ -1,15 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import List
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 import ray
 
 import vllm
+<<<<<<< HEAD
 from tests.utils import fork_new_process_for_each_test
 from vllm.lora.request import LoRARequest
 
 from ..utils import multi_gpu_test
+=======
+from vllm.lora.request import LoRARequest
+
+from ..utils import create_new_process_for_each_test, multi_gpu_test
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 MODEL_PATH = "meta-llama/Llama-2-7b-hf"
 
@@ -31,7 +40,19 @@ EXPECTED_LORA_OUTPUT = [
 ]
 
 
+<<<<<<< HEAD
 def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
+=======
+@pytest.fixture(autouse=True)
+def v1(run_with_both_engines_lora):
+    # Simple autouse wrapper to run both engines for each test
+    # This can be promoted up to conftest.py to run for every
+    # test in a package
+    pass
+
+
+def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> list[str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     prompts = [
         "[user] Write a SQL query to answer the question based on the table schema.\n\n context: CREATE TABLE table_name_74 (icao VARCHAR, airport VARCHAR)\n\n question: Name the ICAO for lilongwe international airport [/user] [assistant]",  # noqa: E501
         "[user] Write a SQL query to answer the question based on the table schema.\n\n context: CREATE TABLE table_name_11 (nationality VARCHAR, elector VARCHAR)\n\n question: When Anchero Pantaleone was the elector what is under nationality? [/user] [assistant]",  # noqa: E501
@@ -42,6 +63,10 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
     ]
     sampling_params = vllm.SamplingParams(temperature=0,
                                           max_tokens=256,
+<<<<<<< HEAD
+=======
+                                          skip_special_tokens=False,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                           stop=["[/assistant]"])
     outputs = llm.generate(
         prompts,
@@ -49,7 +74,11 @@ def do_sample(llm: vllm.LLM, lora_path: str, lora_id: int) -> List[str]:
         lora_request=LoRARequest(str(lora_id), lora_id, lora_path)
         if lora_id else None)
     # Print the outputs.
+<<<<<<< HEAD
     generated_texts: List[str] = []
+=======
+    generated_texts: list[str] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text
@@ -74,6 +103,7 @@ def generate_and_test(llm, sql_lora_files):
     print("removing lora")
 
 
+<<<<<<< HEAD
 @pytest.fixture(autouse=True)
 def v1(run_with_both_engines_lora):
     # Simple autouse wrapper to run both engines for each test
@@ -91,13 +121,29 @@ def test_llama_lora(sql_lora_files):
                    max_loras=4,
                    tensor_parallel_size=1,
                    enable_chunked_prefill=True)
+=======
+@create_new_process_for_each_test()
+def test_llama_lora(sql_lora_files):
+
+    llm = vllm.LLM(
+        MODEL_PATH,
+        enable_lora=True,
+        # also test odd max_num_seqs
+        max_num_seqs=13,
+        max_loras=4,
+        enable_chunked_prefill=True)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     generate_and_test(llm, sql_lora_files)
 
 
 # Skipping for v1 as v1 doesn't have a good way to expose the num_gpu_blocks
 # used by the engine yet.
 @pytest.mark.skip_v1
+<<<<<<< HEAD
 @fork_new_process_for_each_test
+=======
+@create_new_process_for_each_test()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_llama_lora_warmup(sql_lora_files):
     """Test that the LLM initialization works with a warmup LORA path and
     is more conservative"""
@@ -126,7 +172,11 @@ def test_llama_lora_warmup(sql_lora_files):
 
 
 @multi_gpu_test(num_gpus=4)
+<<<<<<< HEAD
 @fork_new_process_for_each_test
+=======
+@create_new_process_for_each_test()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_llama_lora_tp4(sql_lora_files):
 
     llm = vllm.LLM(
@@ -141,7 +191,11 @@ def test_llama_lora_tp4(sql_lora_files):
 
 
 @multi_gpu_test(num_gpus=4)
+<<<<<<< HEAD
 @fork_new_process_for_each_test
+=======
+@create_new_process_for_each_test()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 def test_llama_lora_tp4_fully_sharded_loras(sql_lora_files):
 
     llm = vllm.LLM(
@@ -154,6 +208,7 @@ def test_llama_lora_tp4_fully_sharded_loras(sql_lora_files):
         enable_chunked_prefill=True,
     )
     generate_and_test(llm, sql_lora_files)
+<<<<<<< HEAD
 
 
 @multi_gpu_test(num_gpus=4)
@@ -171,3 +226,5 @@ def test_llama_lora_tp4_fully_sharded_enable_bias(sql_lora_files):
         enable_chunked_prefill=True,
     )
     generate_and_test(llm, sql_lora_files)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

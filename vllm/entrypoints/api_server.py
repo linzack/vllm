@@ -10,7 +10,12 @@ import asyncio
 import json
 import ssl
 from argparse import Namespace
+<<<<<<< HEAD
 from typing import Any, AsyncGenerator, Optional
+=======
+from collections.abc import AsyncGenerator
+from typing import Any, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
@@ -110,7 +115,11 @@ async def init_app(
     engine = (llm_engine
               if llm_engine is not None else AsyncLLMEngine.from_engine_args(
                   engine_args, usage_context=UsageContext.API_SERVER))
+<<<<<<< HEAD
 
+=======
+    app.state.engine_client = engine
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     return app
 
 

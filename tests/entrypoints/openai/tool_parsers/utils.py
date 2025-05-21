@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Iterable, List, Tuple, Union
+=======
+from collections.abc import Iterable
+from typing import Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from vllm.entrypoints.openai.protocol import (ChatCompletionRequest,
                                               DeltaMessage,
@@ -12,7 +17,11 @@ from vllm.entrypoints.openai.tool_parsers import ToolParser
 class StreamingToolReconstructor:
 
     def __init__(self, assert_one_tool_per_delta: bool = True):
+<<<<<<< HEAD
         self.tool_calls: List[ToolCall] = []
+=======
+        self.tool_calls: list[ToolCall] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.other_content: str = ""
         self._assert_one_tool_per_delta = assert_one_tool_per_delta
 
@@ -31,7 +40,11 @@ class StreamingToolReconstructor:
             assert len(delta.tool_calls) < 2, (
                 "Streaming should include only one tool call per update.")
         for call_delta in delta.tool_calls:
+<<<<<<< HEAD
             assert call_delta.type == "function", (
+=======
+            assert call_delta.type is None or call_delta.type == "function", (
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                 "Streaming tool calls should only emit function calls. Got "
                 f"{call_delta.type}")
             current_tool_call = self.tool_calls[
@@ -72,7 +85,11 @@ def run_tool_extraction(
     request: Union[ChatCompletionRequest, None] = None,
     streaming: bool = False,
     assert_one_tool_per_delta: bool = True,
+<<<<<<< HEAD
 ) -> Tuple[Union[str, None], List[ToolCall]]:
+=======
+) -> tuple[Union[str, None], list[ToolCall]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if streaming:
         reconstructor = run_tool_extraction_streaming(
             tool_parser,
@@ -106,7 +123,11 @@ def run_tool_extraction_streaming(
     reconstructor = StreamingToolReconstructor(
         assert_one_tool_per_delta=assert_one_tool_per_delta)
     previous_text = ""
+<<<<<<< HEAD
     previous_tokens: List[int] = []
+=======
+    previous_tokens: list[int] = []
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for delta in model_deltas:
         token_delta = [
             tool_parser.vocab.get(token)

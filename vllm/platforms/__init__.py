@@ -2,7 +2,10 @@
 
 import logging
 import traceback
+<<<<<<< HEAD
 from contextlib import suppress
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from itertools import chain
 from typing import TYPE_CHECKING, Optional
 
@@ -32,6 +35,10 @@ def vllm_version_matches_substr(substr: str) -> bool:
 
 def tpu_platform_plugin() -> Optional[str]:
     is_tpu = False
+<<<<<<< HEAD
+=======
+    logger.debug("Checking if TPU platform is available.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         # While it's technically possible to install libtpu on a
         # non-TPU machine, this is a very uncommon scenario. Therefore,
@@ -39,7 +46,13 @@ def tpu_platform_plugin() -> Optional[str]:
         # has TPUs.
         import libtpu  # noqa: F401
         is_tpu = True
+<<<<<<< HEAD
     except Exception:
+=======
+        logger.debug("Confirmed TPU platform is available.")
+    except Exception as e:
+        logger.debug("TPU platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pass
 
     return "vllm.platforms.tpu.TpuPlatform" if is_tpu else None
@@ -47,7 +60,11 @@ def tpu_platform_plugin() -> Optional[str]:
 
 def cuda_platform_plugin() -> Optional[str]:
     is_cuda = False
+<<<<<<< HEAD
 
+=======
+    logger.debug("Checking if CUDA platform is available.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         from vllm.utils import import_pynvml
         pynvml = import_pynvml()
@@ -60,9 +77,25 @@ def cuda_platform_plugin() -> Optional[str]:
             # on a GPU machine, even if in a cpu build.
             is_cuda = (pynvml.nvmlDeviceGetCount() > 0
                        and not vllm_version_matches_substr("cpu"))
+<<<<<<< HEAD
         finally:
             pynvml.nvmlShutdown()
     except Exception as e:
+=======
+            if pynvml.nvmlDeviceGetCount() <= 0:
+                logger.debug(
+                    "CUDA platform is not available because no GPU is found.")
+            if vllm_version_matches_substr("cpu"):
+                logger.debug("CUDA platform is not available because"
+                             " vLLM is built with CPU.")
+            if is_cuda:
+                logger.debug("Confirmed CUDA platform is available.")
+        finally:
+            pynvml.nvmlShutdown()
+    except Exception as e:
+        logger.debug("Exception happens when checking CUDA platform: %s",
+                     str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if "nvml" not in e.__class__.__name__.lower():
             # If the error is not related to NVML, re-raise it.
             raise e
@@ -75,23 +108,45 @@ def cuda_platform_plugin() -> Optional[str]:
                 or os.path.exists("/sys/class/tegra-firmware")
 
         if cuda_is_jetson():
+<<<<<<< HEAD
             is_cuda = True
+=======
+            logger.debug("Confirmed CUDA platform is available on Jetson.")
+            is_cuda = True
+        else:
+            logger.debug("CUDA platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     return "vllm.platforms.cuda.CudaPlatform" if is_cuda else None
 
 
 def rocm_platform_plugin() -> Optional[str]:
     is_rocm = False
+<<<<<<< HEAD
 
+=======
+    logger.debug("Checking if ROCm platform is available.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         import amdsmi
         amdsmi.amdsmi_init()
         try:
             if len(amdsmi.amdsmi_get_processor_handles()) > 0:
                 is_rocm = True
+<<<<<<< HEAD
         finally:
             amdsmi.amdsmi_shut_down()
     except Exception:
+=======
+                logger.debug("Confirmed ROCm platform is available.")
+            else:
+                logger.debug("ROCm platform is not available because"
+                             " no GPU is found.")
+        finally:
+            amdsmi.amdsmi_shut_down()
+    except Exception as e:
+        logger.debug("ROCm platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pass
 
     return "vllm.platforms.rocm.RocmPlatform" if is_rocm else None
@@ -99,10 +154,24 @@ def rocm_platform_plugin() -> Optional[str]:
 
 def hpu_platform_plugin() -> Optional[str]:
     is_hpu = False
+<<<<<<< HEAD
     try:
         from importlib import util
         is_hpu = util.find_spec('habana_frameworks') is not None
     except Exception:
+=======
+    logger.debug("Checking if HPU platform is available.")
+    try:
+        from importlib import util
+        is_hpu = util.find_spec('habana_frameworks') is not None
+        if is_hpu:
+            logger.debug("Confirmed HPU platform is available.")
+        else:
+            logger.debug("HPU platform is not available because "
+                         "habana_frameworks is not found.")
+    except Exception as e:
+        logger.debug("HPU platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pass
 
     return "vllm.platforms.hpu.HpuPlatform" if is_hpu else None
@@ -110,7 +179,11 @@ def hpu_platform_plugin() -> Optional[str]:
 
 def xpu_platform_plugin() -> Optional[str]:
     is_xpu = False
+<<<<<<< HEAD
 
+=======
+    logger.debug("Checking if XPU platform is available.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     try:
         # installed IPEX if the machine has XPUs.
         import intel_extension_for_pytorch  # noqa: F401
@@ -118,7 +191,13 @@ def xpu_platform_plugin() -> Optional[str]:
         import torch
         if hasattr(torch, 'xpu') and torch.xpu.is_available():
             is_xpu = True
+<<<<<<< HEAD
     except Exception:
+=======
+            logger.debug("Confirmed XPU platform is available.")
+    except Exception as e:
+        logger.debug("XPU platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pass
 
     return "vllm.platforms.xpu.XPUPlatform" if is_xpu else None
@@ -126,6 +205,7 @@ def xpu_platform_plugin() -> Optional[str]:
 
 def cpu_platform_plugin() -> Optional[str]:
     is_cpu = False
+<<<<<<< HEAD
     try:
         is_cpu = vllm_version_matches_substr("cpu")
         if not is_cpu:
@@ -133,12 +213,30 @@ def cpu_platform_plugin() -> Optional[str]:
             is_cpu = platform.machine().lower().startswith("arm")
 
     except Exception:
+=======
+    logger.debug("Checking if CPU platform is available.")
+    try:
+        is_cpu = vllm_version_matches_substr("cpu")
+        if is_cpu:
+            logger.debug("Confirmed CPU platform is available because"
+                         " vLLM is built with CPU.")
+        if not is_cpu:
+            import sys
+            is_cpu = sys.platform.startswith("darwin")
+            if is_cpu:
+                logger.debug("Confirmed CPU platform is available"
+                             " because the machine is MacOS.")
+
+    except Exception as e:
+        logger.debug("CPU platform is not available because: %s", str(e))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         pass
 
     return "vllm.platforms.cpu.CpuPlatform" if is_cpu else None
 
 
 def neuron_platform_plugin() -> Optional[str]:
+<<<<<<< HEAD
     is_neuron = False
     try:
         import transformers_neuronx  # noqa: F401
@@ -157,6 +255,31 @@ def openvino_platform_plugin() -> Optional[str]:
     return "vllm.platforms.openvino.OpenVinoPlatform" if is_openvino else None
 
 
+=======
+    tnx_installed = False
+    nxd_installed = False
+    logger.debug("Checking if Neuron platform is available.")
+    try:
+        import transformers_neuronx  # noqa: F401
+        tnx_installed = True
+        logger.debug("Confirmed Neuron platform is available because"
+                     " transformers_neuronx is found.")
+    except ImportError:
+        pass
+
+    try:
+        import neuronx_distributed_inference  # noqa: F401
+        nxd_installed = True
+        logger.debug("Confirmed Neuron platform is available because"
+                     " neuronx_distributed_inference is found.")
+    except ImportError:
+        pass
+
+    is_neuron = tnx_installed or nxd_installed
+    return "vllm.platforms.neuron.NeuronPlatform" if is_neuron else None
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 builtin_platform_plugins = {
     'tpu': tpu_platform_plugin,
     'cuda': cuda_platform_plugin,
@@ -165,7 +288,10 @@ builtin_platform_plugins = {
     'xpu': xpu_platform_plugin,
     'cpu': cpu_platform_plugin,
     'neuron': neuron_platform_plugin,
+<<<<<<< HEAD
     'openvino': openvino_platform_plugin,
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 }
 
 

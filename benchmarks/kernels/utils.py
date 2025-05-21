@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import dataclasses
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, Optional
+=======
+from collections.abc import Iterable
+from typing import Any, Callable, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.utils.benchmark as TBenchmark
@@ -22,6 +27,10 @@ class ArgPool:
     For every invocation during a benchmarking run, it will choose a
     different value from the list.
     """
+<<<<<<< HEAD
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     values: Iterable[Any]
 
     def __getitem__(self, index):
@@ -29,9 +38,13 @@ class ArgPool:
 
 
 class Bench:
+<<<<<<< HEAD
 
     class ArgsIterator:
 
+=======
+    class ArgsIterator:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         def __init__(self, args_list, kwargs_list):
             assert len(args_list) == len(kwargs_list)
             self.args_list = args_list
@@ -52,10 +65,23 @@ class Bench:
         def n_args(self):
             return self.n
 
+<<<<<<< HEAD
     def __init__(self, cuda_graph_params: Optional[CudaGraphBenchParams],
                  label: str, sub_label: str, description: str, fn: Callable,
                  *args, **kwargs):
 
+=======
+    def __init__(
+        self,
+        cuda_graph_params: Optional[CudaGraphBenchParams],
+        label: str,
+        sub_label: str,
+        description: str,
+        fn: Callable,
+        *args,
+        **kwargs,
+    ):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         self.cuda_graph_params = cuda_graph_params
         self.use_cuda_graph = self.cuda_graph_params is not None
         self.label = label
@@ -66,10 +92,15 @@ class Bench:
         # Process args
         self._args = args
         self._kwargs = kwargs
+<<<<<<< HEAD
         self.args_list, self.kwargs_list = self.collapse_argpool(
             *args, **kwargs)
         self.args_iterator = self.ArgsIterator(self.args_list,
                                                self.kwargs_list)
+=======
+        self.args_list, self.kwargs_list = self.collapse_argpool(*args, **kwargs)
+        self.args_iterator = self.ArgsIterator(self.args_list, self.kwargs_list)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Cudagraph runner
         self.g = None
@@ -99,6 +130,7 @@ class Bench:
 
         for i in range(argpool_size):
             # collapse args; Just pick the ith value
+<<<<<<< HEAD
             args_list[i] = tuple([
                 arg[i] if isinstance(arg, ArgPool) else arg
                 for arg in args_list[i]
@@ -109,6 +141,15 @@ class Bench:
             arg_pool_keys = [
                 k for k, v in kwargs_i.items() if isinstance(v, ArgPool)
             ]
+=======
+            args_list[i] = tuple(
+                [arg[i] if isinstance(arg, ArgPool) else arg for arg in args_list[i]]
+            )
+
+            # collapse kwargs
+            kwargs_i = kwargs_list[i]
+            arg_pool_keys = [k for k, v in kwargs_i.items() if isinstance(v, ArgPool)]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             for k in arg_pool_keys:
                 # again just pick the ith value
                 kwargs_i[k] = kwargs_i[k][i]
@@ -141,7 +182,11 @@ class Bench:
 
     def run_cudagrah(self) -> TMeasurement:
         assert self.use_cuda_graph
+<<<<<<< HEAD
         globals = {'g': self.g}
+=======
+        globals = {"g": self.g}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return TBenchmark.Timer(
             stmt="g.replay()",
@@ -161,6 +206,7 @@ class Bench:
 
         has_arg_pool = self.args_iterator.n_args > 1
         if has_arg_pool:
+<<<<<<< HEAD
             setup = '''
                     args_iterator.reset()
                     args_it = args_iterator.__next__()
@@ -170,6 +216,17 @@ class Bench:
                     fn(*args, **kwargs)
                     '''
             globals = {'fn': self.fn, 'args_iterator': self.args_iterator}
+=======
+            setup = """
+                    args_iterator.reset()
+                    args_it = args_iterator.__next__()
+                    """
+            stmt = """
+                    args, kwargs = next(args_it)
+                    fn(*args, **kwargs)
+                    """
+            globals = {"fn": self.fn, "args_iterator": self.args_iterator}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             # no arg pool. Just use the args and kwargs directly
             self.args_iterator.reset()
@@ -177,10 +234,17 @@ class Bench:
             args, kwargs = next(args_it)
 
             setup = ""
+<<<<<<< HEAD
             stmt = '''
                     fn(*args, **kwargs)
                    '''
             globals = {'fn': self.fn, 'args': args, 'kwargs': kwargs}
+=======
+            stmt = """
+                    fn(*args, **kwargs)
+                   """
+            globals = {"fn": self.fn, "args": args, "kwargs": kwargs}
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         return TBenchmark.Timer(
             stmt=stmt,

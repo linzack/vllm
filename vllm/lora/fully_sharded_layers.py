@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # pylint: disable=unused-argument
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
+=======
+from typing import TYPE_CHECKING, Optional, Union, cast
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import torch
 import torch.nn as nn
@@ -13,9 +17,16 @@ from vllm.distributed.communication_op import (
 from vllm.distributed.parallel_state import get_tensor_model_parallel_rank
 from vllm.lora.layers import (ColumnParallelLinearWithLoRA,
                               MergedColumnParallelLinearWithLoRA,
+<<<<<<< HEAD
                               MergedQKVParallelLinearWithLora,
                               QKVParallelLinearWithLora,
                               RowParallelLinearWithLoRA)
+=======
+                              MergedQKVParallelLinearWithLoRA,
+                              QKVParallelLinearWithLoRA,
+                              RowParallelLinearWithLoRA)
+from vllm.platforms import current_platform
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 if TYPE_CHECKING:
     pass
@@ -57,6 +68,7 @@ def _mcp_apply(x, bias, layer: ColumnParallelLinearWithLoRA):
         device=x.device,
     )
 
+<<<<<<< HEAD
     layer.punica_wrapper.add_shrink(buffers, x, layer.lora_a_stacked, 1.0)
     buffers = tensor_model_parallel_all_gather(buffers)
     layer.punica_wrapper.add_expand(output,
@@ -66,6 +78,27 @@ def _mcp_apply(x, bias, layer: ColumnParallelLinearWithLoRA):
                                     layer.output_slices,
                                     offset_start=0,
                                     add_input=True)
+=======
+    shrunk_buffers: Optional[torch.Tensor] = layer.punica_wrapper.add_shrink(
+        buffers, x, layer.lora_a_stacked, 1.0)
+
+    if not current_platform.can_update_inplace():
+        buffers = shrunk_buffers
+
+    buffers = tensor_model_parallel_all_gather(buffers)
+
+    lora_output: Optional[torch.Tensor] = layer.punica_wrapper.add_expand(
+        output,
+        buffers,
+        layer.lora_b_stacked,
+        layer.lora_bias_stacked,
+        layer.output_slices,
+        offset_start=0,
+        add_input=True)
+
+    if not current_platform.can_update_inplace():
+        output = lora_output
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     output = output.view(*out_orig_shape)
     # now have column partitioned and packed output
@@ -107,7 +140,11 @@ class ColumnParallelLinearWithShardedLoRA(ColumnParallelLinearWithLoRA):
         cls,
         source_layer: nn.Module,
         lora_config: LoRAConfig,
+<<<<<<< HEAD
         packed_modules_list: List,
+=======
+        packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_config: Optional[PretrainedConfig],
     ) -> bool:
         # specifying kwargs so they can be easily accessed in decorator
@@ -130,8 +167,13 @@ class MergedColumnParallelLinearWithShardedLoRA(
     """
 
     def slice_lora_a(
+<<<<<<< HEAD
         self, lora_a: List[Union[torch.Tensor, None]]
     ) -> List[Union[torch.Tensor, None]]:
+=======
+        self, lora_a: list[Union[torch.Tensor, None]]
+    ) -> list[Union[torch.Tensor, None]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         #NOTE: lora_a contains 2 subloras, and each sublora could be None.
         output_shard_size = self.lora_a_stacked[0].shape[2]
         output_start_idx = self.tp_rank * output_shard_size
@@ -154,7 +196,11 @@ class MergedColumnParallelLinearWithShardedLoRA(
         cls,
         source_layer: nn.Module,
         lora_config: LoRAConfig,
+<<<<<<< HEAD
         packed_modules_list: List,
+=======
+        packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_config: Optional[PretrainedConfig],
     ) -> bool:
         # specifying kwargs so they can be easily accessed in decorator
@@ -167,9 +213,15 @@ class MergedColumnParallelLinearWithShardedLoRA(
         )
 
 
+<<<<<<< HEAD
 class QKVParallelLinearWithShardedLora(QKVParallelLinearWithLora):
     """
     Differs from QKVParallelLinearWithLora by slicing the
+=======
+class QKVParallelLinearWithShardedLoRA(QKVParallelLinearWithLoRA):
+    """
+    Differs from QKVParallelLinearWithLoRA by slicing the
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     LoRA A's also.
 
     Based on S-LoRA, slicing happens along the rank dim.
@@ -190,7 +242,11 @@ class QKVParallelLinearWithShardedLora(QKVParallelLinearWithLora):
     @classmethod
     @_fully_sharded_can_replace
     def can_replace_layer(cls, source_layer: nn.Module,
+<<<<<<< HEAD
                           lora_config: LoRAConfig, packed_modules_list: List,
+=======
+                          lora_config: LoRAConfig, packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                           model_config: Optional[PretrainedConfig]) -> bool:
         # specifying kwargs so they can be easily accessed in decorator
         return super().can_replace_layer(
@@ -202,17 +258,28 @@ class QKVParallelLinearWithShardedLora(QKVParallelLinearWithLora):
         )
 
 
+<<<<<<< HEAD
 class MergedQKVParallelLinearWithShardedLora(MergedQKVParallelLinearWithLora):
     """
     Differs from MergedQKVParallelLinearWithLora by slicing the 
+=======
+class MergedQKVParallelLinearWithShardedLoRA(MergedQKVParallelLinearWithLoRA):
+    """
+    Differs from MergedQKVParallelLinearWithLoRA by slicing the 
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     LoRA A's also.
 
     Based on S-LoRA, slicing happens along the rank dim.
     """
 
     def slice_lora_a(
+<<<<<<< HEAD
         self, lora_a: List[Union[torch.Tensor, None]]
     ) -> List[Union[torch.Tensor, None]]:
+=======
+        self, lora_a: list[Union[torch.Tensor, None]]
+    ) -> list[Union[torch.Tensor, None]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         # NOTE: lora_a contains 3 subloras, and each sublora could be None.
         shard_size = [self.lora_a_stacked[i].shape[2] for i in range(3)]
         start_idx = [self.tp_rank * shard_size[i] for i in range(3)]
@@ -237,7 +304,11 @@ class MergedQKVParallelLinearWithShardedLora(MergedQKVParallelLinearWithLora):
         cls,
         source_layer: nn.Module,
         lora_config: LoRAConfig,
+<<<<<<< HEAD
         packed_modules_list: List,
+=======
+        packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_config: Optional[PretrainedConfig],
     ) -> bool:
         # specifying kwargs so they can be easily accessed in decorator
@@ -270,7 +341,11 @@ class RowParallelLinearWithShardedLoRA(RowParallelLinearWithLoRA):
     def slice_bias(self, bias: torch.Tensor) -> torch.Tensor:
         if bias is None:
             return bias
+<<<<<<< HEAD
         self.lora_bias_stacked = cast(Tuple[torch.Tensor, ...],
+=======
+        self.lora_bias_stacked = cast(tuple[torch.Tensor, ...],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                       self.lora_bias_stacked)
         shard_size = self.lora_bias_stacked[0].shape[2]
         start_idx = self.tp_rank * shard_size
@@ -292,7 +367,15 @@ class RowParallelLinearWithShardedLoRA(RowParallelLinearWithLoRA):
             device=x.device,
         )
 
+<<<<<<< HEAD
         self.punica_wrapper.add_shrink(buffer, x, self.lora_a_stacked, 1.0)
+=======
+        shrunk_buffer: Optional[torch.Tensor] = self.punica_wrapper.add_shrink(
+            buffer, x, self.lora_a_stacked, 1.0)
+        if not current_platform.can_update_inplace():
+            buffer = shrunk_buffer
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         buffer = tensor_model_parallel_all_reduce(buffer)
 
         # following S-LoRA, allows the fusing of all_gather and all_reduce
@@ -304,7 +387,11 @@ class RowParallelLinearWithShardedLoRA(RowParallelLinearWithLoRA):
         # NOTE offset are based on the rank.
         shard_size = self.lora_b_stacked[0].shape[2]
         offset_start = self.tp_rank * shard_size
+<<<<<<< HEAD
         self.punica_wrapper.add_expand(
+=======
+        lora_output: Optional[torch.Tensor] = self.punica_wrapper.add_expand(
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             output,
             buffer,
             self.lora_b_stacked,
@@ -313,6 +400,13 @@ class RowParallelLinearWithShardedLoRA(RowParallelLinearWithLoRA):
             offset_start=offset_start,
             add_input=True,
         )
+<<<<<<< HEAD
+=======
+
+        if not current_platform.can_update_inplace():
+            output = lora_output
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         output = output.view(*out_orig_shape)
         return output
 
@@ -322,7 +416,11 @@ class RowParallelLinearWithShardedLoRA(RowParallelLinearWithLoRA):
         cls,
         source_layer: nn.Module,
         lora_config: LoRAConfig,
+<<<<<<< HEAD
         packed_modules_list: List,
+=======
+        packed_modules_list: list,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         model_config: Optional[PretrainedConfig],
     ) -> bool:
         # specifying kwargs so they can be easily accessed in decorator

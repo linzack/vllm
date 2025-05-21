@@ -5,7 +5,12 @@ from typing import Dict, List, Optional, Tuple
 try:
     import intel_extension_for_pytorch.llm.modules as ipex_modules
     _use_ipex = True
+<<<<<<< HEAD
 except ImportError:
+=======
+# AttributeError is to handle a bug in ipex https://github.com/intel/intel-extension-for-pytorch/pull/813
+except (ImportError, AttributeError):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     _use_ipex = False
 
 import torch
@@ -17,7 +22,11 @@ class _PagedAttention:
 
     @staticmethod
     def get_supported_head_sizes() -> List[int]:
+<<<<<<< HEAD
         return [32, 64, 80, 96, 112, 128, 256]
+=======
+        return [32, 64, 80, 96, 112, 128, 192, 256]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def get_kv_cache_shape(

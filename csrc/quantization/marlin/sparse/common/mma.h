@@ -127,8 +127,13 @@ __device__ inline FragB dequant_4bit(int q) {
   const int HI = 0x00f000f0;
   const int EX = 0x64006400;
   // Guarantee that the `(a & b) | c` operations are LOP3s.
+<<<<<<< HEAD
   int lo = lop3 < (0xf0 & 0xcc) | 0xaa > (q, LO, EX);
   int hi = lop3 < (0xf0 & 0xcc) | 0xaa > (q, HI, EX);
+=======
+  int lo = lop3<(0xf0 & 0xcc) | 0xaa>(q, LO, EX);
+  int hi = lop3<(0xf0 & 0xcc) | 0xaa>(q, HI, EX);
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
   // We want signed int4 outputs, hence we fuse the `-8` symmetric zero point
   // directly into `SUB` and `ADD`.
   const int SUB = 0x64086408;

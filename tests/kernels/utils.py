@@ -4,9 +4,15 @@
 import itertools
 import random
 import unittest
+<<<<<<< HEAD
 from numbers import Number
 from typing import (Any, Dict, List, NamedTuple, Optional, Sequence, Tuple,
                     Type, Union)
+=======
+from collections.abc import Sequence
+from numbers import Number
+from typing import Any, NamedTuple, Optional, Union
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 import torch
@@ -20,13 +26,21 @@ from vllm.utils import (STR_BACKEND_ENV_VAR, STR_FLASH_ATTN_VAL,
 
 # For now, disable "test_aot_dispatch_dynamic" since there are some
 # bugs related to this test in PyTorch 2.4.
+<<<<<<< HEAD
 DEFAULT_OPCHECK_TEST_UTILS: Tuple[str, ...] = (
+=======
+DEFAULT_OPCHECK_TEST_UTILS: tuple[str, ...] = (
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "test_schema",
     "test_autograd_registration",
     "test_faketensor",
 )
 
+<<<<<<< HEAD
 ALL_OPCHECK_TEST_UTILS: Tuple[str, ...] = (
+=======
+ALL_OPCHECK_TEST_UTILS: tuple[str, ...] = (
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "test_schema",
     "test_autograd_registration",
     "test_faketensor",
@@ -36,12 +50,20 @@ ALL_OPCHECK_TEST_UTILS: Tuple[str, ...] = (
 
 class QKVInputs(NamedTuple):
     '''
+<<<<<<< HEAD
     Data structure for representing unpacked attention inputs, 
+=======
+    Data structure for representing unpacked attention inputs,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     query/key/values and their sequence lengths.
 
     Attributes:
 
+<<<<<<< HEAD
         * {query,key,value}: unpacked (batch_size x padded_seq_len x 
+=======
+        * {query,key,value}: unpacked (batch_size x padded_seq_len x
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              num_heads x head_size) attention inputs
         * q_seq_lens: query sequence lengths list
         * kv_seq_lens: shared key/value sequence lengths list
@@ -50,20 +72,35 @@ class QKVInputs(NamedTuple):
     query: torch.Tensor
     key: torch.Tensor
     value: torch.Tensor
+<<<<<<< HEAD
     q_seq_lens: List[int]
     kv_seq_lens: List[int]
+=======
+    q_seq_lens: list[int]
+    kv_seq_lens: list[int]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class QKVO(NamedTuple):
     '''
+<<<<<<< HEAD
     Data structure for representing unpacked attention inputs, 
+=======
+    Data structure for representing unpacked attention inputs,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     alongside unpacked known-correct attention output
 
     Attributes:
 
+<<<<<<< HEAD
         * qkv: unpacked (batch_size x padded_seq_len x 
                              num_heads x head_size) attention inputs
         * ideal_output: unpacked (batch_size x padded_seq_len x 
+=======
+        * qkv: unpacked (batch_size x padded_seq_len x
+                             num_heads x head_size) attention inputs
+        * ideal_output: unpacked (batch_size x padded_seq_len x
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         num_heads x head_size) known-correct attention output
     '''
 
@@ -77,7 +114,11 @@ class PackedQKVInputs(NamedTuple):
 
     Attributes:
 
+<<<<<<< HEAD
         * {query,key,value}: packed (number_of_tokens x num_heads 
+=======
+        * {query,key,value}: packed (number_of_tokens x num_heads
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              x head_size) attention inputs
         * q_start_loc_list: list of query start locations within packed tensor
         * kv_start_loc_list: shared list of key/value start locations within
@@ -89,22 +130,39 @@ class PackedQKVInputs(NamedTuple):
     query: torch.Tensor
     key: torch.Tensor
     value: torch.Tensor
+<<<<<<< HEAD
     q_start_loc_list: Optional[List[int]]
     kv_start_loc_list: Optional[List[int]]
     q_seq_lens: Optional[List[int]]
     kv_seq_lens: Optional[List[int]]
+=======
+    q_start_loc_list: Optional[list[int]]
+    kv_start_loc_list: Optional[list[int]]
+    q_seq_lens: Optional[list[int]]
+    kv_seq_lens: Optional[list[int]]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class PackedQKVO(NamedTuple):
     '''
+<<<<<<< HEAD
     Data structure for representing packed attention inputs, 
+=======
+    Data structure for representing packed attention inputs,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     alongside packed known-correct attention output
 
     Attributes:
 
+<<<<<<< HEAD
         * packed_qkv: packed (number_of_tokens x num_heads 
                       x head_size) attention inputs
         * ideal_output: packed (number_of_tokens x num_heads 
+=======
+        * packed_qkv: packed (number_of_tokens x num_heads
+                      x head_size) attention inputs
+        * ideal_output: packed (number_of_tokens x num_heads
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                         x head_size) known-correct attention output
     '''
 
@@ -134,7 +192,11 @@ class PhaseTestParameters(NamedTuple):
 
     Attributes:
 
+<<<<<<< HEAD
         * packed_qkvo: packed (number_of_tokens x num_heads 
+=======
+        * packed_qkvo: packed (number_of_tokens x num_heads
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        x head_size) attention inputs & known-correct
                        output
         * kv_mmap: KV cache memory mapping, specific to this test phase &
@@ -146,7 +208,11 @@ class PhaseTestParameters(NamedTuple):
 
 
 def maybe_make_int_tensor(
+<<<<<<< HEAD
     _list: Optional[List[int]],
+=======
+    _list: Optional[list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     device: Union[torch.device, str],
 ) -> torch.Tensor:
     '''
@@ -162,7 +228,11 @@ def maybe_make_int_tensor(
 
 
 def maybe_make_long_tensor(
+<<<<<<< HEAD
     _list: Optional[List[int]],
+=======
+    _list: Optional[list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     device: Union[torch.device, str],
 ) -> torch.Tensor:
     '''
@@ -177,7 +247,11 @@ def maybe_make_long_tensor(
         _list, dtype=torch.long, device=device)
 
 
+<<<<<<< HEAD
 def maybe_max(_list: Optional[List]) -> Optional[Number]:
+=======
+def maybe_max(_list: Optional[list]) -> Optional[Number]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     Returns:
 
@@ -195,7 +269,11 @@ def make_causal_mask(
     Create a q_max_seq_len x kv_max_seq_len causal mask
 
     Arguments:
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     * q_max_seq_len: query max seq len
     * kv_max_seq_len: key/value max seq len
 
@@ -232,8 +310,13 @@ def ref_masked_attention(query: torch.Tensor,
                          value: torch.Tensor,
                          scale: float,
                          custom_mask: Optional[torch.Tensor] = None,
+<<<<<<< HEAD
                          q_seq_lens: Optional[List] = None,
                          kv_seq_lens: Optional[List] = None) -> torch.Tensor:
+=======
+                         q_seq_lens: Optional[list] = None,
+                         kv_seq_lens: Optional[list] = None) -> torch.Tensor:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     "Golden" masked attention reference. Supports two types of masking:
 
@@ -295,10 +378,17 @@ def make_qkv(
     num_heads: int,
     head_size: int,
     device: Union[torch.device, str],
+<<<<<<< HEAD
     force_kv_seq_lens: Optional[List[int]] = None,
     attn_type: AttentionType = AttentionType.ENCODER_DECODER,
     force_max_len: bool = False,
 ) -> Tuple[QKVInputs, QKVInputs, QKVInputs]:
+=======
+    force_kv_seq_lens: Optional[list[int]] = None,
+    attn_type: AttentionType = AttentionType.ENCODER_DECODER,
+    force_max_len: bool = False,
+) -> tuple[QKVInputs, QKVInputs, QKVInputs]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     Construct QKV test tensors for self- and cross-attention.
 
@@ -320,9 +410,15 @@ def make_qkv(
     * max_kv_seq_len: max key/value seq len
     * num_heads
     * head_size
+<<<<<<< HEAD
     * is_encoder_decoder_attn: if True, query seqlen may differ from 
       key/value seqlen (as is often the case for cross-attention); 
       o/w, query/key/value seqlens match at each batch index 
+=======
+    * is_encoder_decoder_attn: if True, query seqlen may differ from
+      key/value seqlen (as is often the case for cross-attention);
+      o/w, query/key/value seqlens match at each batch index
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       (max_kv_seq_len is unused)
     * force_kv_seq_lens: if not None, overrides kv sequence lengths
     * attn_type: encoder, decoder self, or enc/dec cross attention
@@ -429,8 +525,13 @@ def make_qkv(
 
 
 def pack_tensor(
+<<<<<<< HEAD
         unpacked_tensor: torch.Tensor, seq_lens: List[int],
         device: Union[torch.device, str]) -> Tuple[torch.Tensor, List[int]]:
+=======
+        unpacked_tensor: torch.Tensor, seq_lens: list[int],
+        device: Union[torch.device, str]) -> tuple[torch.Tensor, list[int]]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     Pack a batch_size x padded_seq_len x num_heads x head_size tensor into an
     unpadded number_of_tokens x num_heads x head_size tensor, where
@@ -469,7 +570,11 @@ def pack_qkv(qkv: QKVInputs, device: Union[torch.device,
     Individually pack each of Q, K and V, each with dimensions batch_size x
     padded_seq_len x num_heads x head_size, into respective number_of_tokens x
     num_heads x head_size tensors.
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     For Q, number_of_tokens = sum(q_seq_lens).
 
     For K and V, number_of_tokens = sum(kv_seq_lens)
@@ -537,11 +642,19 @@ def make_backend(backend_name: str) -> AttentionBackend:
 
 
 def _make_metadata_tensors(
+<<<<<<< HEAD
     seq_lens: Optional[List[int]],
     context_lens: Optional[List[int]],
     encoder_seq_lens: Optional[List[int]],
     device: Union[torch.device, str],
 ) -> Tuple[torch.Tensor, torch.Tensor, Any, Any, Optional[torch.Tensor],
+=======
+    seq_lens: Optional[list[int]],
+    context_lens: Optional[list[int]],
+    encoder_seq_lens: Optional[list[int]],
+    device: Union[torch.device, str],
+) -> tuple[torch.Tensor, torch.Tensor, Any, Any, Optional[torch.Tensor],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
            torch.Tensor, torch.Tensor, Optional[int]]:
     '''
     Build scalar & tensor values required to build attention metadata structure.
@@ -619,9 +732,15 @@ def make_kv_cache(num_blocks: int,
     Returns:
 
     * kv_cache: 2 x num_blocks x (block_size * num_heads * head_size)
+<<<<<<< HEAD
     *     for backend 'XFORMERS' 
     * kv_cache: 2 x num_blocks x block_size x num_heads x head_size
     *     for backend 'FLASH_ATTN'  
+=======
+    *     for backend 'XFORMERS'
+    * kv_cache: 2 x num_blocks x block_size x num_heads x head_size
+    *     for backend 'FLASH_ATTN'
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     if backend == 'XFORMERS':
         kv_cache = torch.rand(
@@ -654,7 +773,11 @@ def make_empty_block_tables_tensor(device: Union[torch.device, str]):
     return torch.tensor([], device=device)
 
 
+<<<<<<< HEAD
 def split_slot_mapping(slot_mapping_list: torch.Tensor, seq_lens: List[int],
+=======
+def split_slot_mapping(slot_mapping_list: torch.Tensor, seq_lens: list[int],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        device: Union[torch.device, str]):
     '''
     Split a slot mapping into valid prefill- and decode-phase slot mappings.
@@ -662,6 +785,7 @@ def split_slot_mapping(slot_mapping_list: torch.Tensor, seq_lens: List[int],
     Context:
     * Your goal is to test (1) prefill of N prompts, with prompt-lengths
       {K_i \\forall i \\in [0,N)}, followed by (2) decoding of a single token
+<<<<<<< HEAD
       for all N prompts (N tokens total); the resultant sequence lengths 
       after decode would be {K_i + 1 for i \\in [0,N)}
     * The test you want to do requires (1) having the prefill slot mapping 
@@ -670,29 +794,55 @@ def split_slot_mapping(slot_mapping_list: torch.Tensor, seq_lens: List[int],
       decoded tokens
     
     This function consumes a single 1D slot mapping, which is the 
+=======
+      for all N prompts (N tokens total); the resultant sequence lengths
+      after decode would be {K_i + 1 for i \\in [0,N)}
+    * The test you want to do requires (1) having the prefill slot mapping
+      for all tokens present during prefill, the number of which is
+      M = \\sum_i{K_i}, and (2) having the decode slot mapping for all N
+      decoded tokens
+
+    This function consumes a single 1D slot mapping, which is the
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     concatenation of N slot mappings each of length K_i + 1 (corresponding
     to the  sequence lengths after decode), with a total length of
     P = \\sum_i{K_i + 1} = M + N
 
     The prefill-phase slot mapping results from excising the (K_i + 1)-th entry
+<<<<<<< HEAD
     from each of the N subsequences in the slot mapping (i.e. omitting the 
+=======
+    from each of the N subsequences in the slot mapping (i.e. omitting the
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     decoded token's mapping.)
 
     The N excised entries are appended to obtain the decode-phase slot mapping
 
     Arguments:
 
+<<<<<<< HEAD
     * slot_mapping_list: Length-P 1D slot mapping (as List) reflecting all N
       post-decode sequences
     * seq_lens: List of N post-decode sequence lengths (K_i + 1 in the 
+=======
+    * slot_mapping_list: Length-P 1D slot mapping (as list) reflecting all N
+      post-decode sequences
+    * seq_lens: list of N post-decode sequence lengths (K_i + 1 in the
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       description above)
     * device: cuda, cpu, etc.
 
     Returns:
 
+<<<<<<< HEAD
     * prefill_slot_mapping: Length-M 1D slot mapping (as Tensor) 
       reflecting all N prefill prompts
     * decode_slot_mapping: Length-N 1D slot mapping (as Tensor) reflecting 
+=======
+    * prefill_slot_mapping: Length-M 1D slot mapping (as Tensor)
+      reflecting all N prefill prompts
+    * decode_slot_mapping: Length-N 1D slot mapping (as Tensor) reflecting
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
       all N decoded tokens
     '''
 
@@ -712,9 +862,15 @@ def split_slot_mapping(slot_mapping_list: torch.Tensor, seq_lens: List[int],
 
 def make_block_tables_slot_mapping(
         block_size: int,
+<<<<<<< HEAD
         seq_lens: List[int],
         device: Union[torch.device, str],
         block_base_addr: int = 0) -> Tuple[torch.Tensor, List[int], int]:
+=======
+        seq_lens: list[int],
+        device: Union[torch.device, str],
+        block_base_addr: int = 0) -> tuple[torch.Tensor, list[int], int]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     '''
     Construct fake block tables & slot mappings.
 
@@ -725,7 +881,11 @@ def make_block_tables_slot_mapping(
 
     Then the minimum KV cache size in blocks is
 
+<<<<<<< HEAD
     total_cache_blocks = sum(num_blocks for all seqs) 
+=======
+    total_cache_blocks = sum(num_blocks for all seqs)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     Then, the blocktable mapping counts downward from
 
@@ -734,7 +894,11 @@ def make_block_tables_slot_mapping(
     to
 
     block_base_addr
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     The constructed block-tables and slot-mapping are sized to the
     lengths of the sequences in their entirety (as reflected by seq_lens),
@@ -749,7 +913,11 @@ def make_block_tables_slot_mapping(
 
     Return:
 
+<<<<<<< HEAD
     * block_tables_tensor: block table for sequence   
+=======
+    * block_tables_tensor: block table for sequence
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     * slot_mapping_list: slot mapping for sequence
     * max_block_idx: the highest block address within this block table
     '''
@@ -794,7 +962,11 @@ def make_block_tables_slot_mapping(
 def make_test_metadata(
     attn_backend: _Backend,
     is_prompt: bool,
+<<<<<<< HEAD
     seq_lens: Optional[List[int]],
+=======
+    seq_lens: Optional[list[int]],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     decoder_test_params: Optional[PhaseTestParameters],
     device: Union[torch.device, str],
     encoder_test_params: Optional[PhaseTestParameters] = None,
@@ -807,7 +979,11 @@ def make_test_metadata(
     encoder_test_params and cross_test_params arguments allow encoder
     attention and enc/dec cross-attention (respectively) to use distinct
     metadata values from decoder self-attention (decoder_test_params.)
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if encoder_test_params and cross_test_params are None, the attention
     metadata will support decoder-only scenario.
 
@@ -820,7 +996,11 @@ def make_test_metadata(
     * attn_backend_name: Backend for sourcing attention kernels
     * is_prompt: prefill if True, o/w decode
     * seq_lens: list of token counts for each sequence
+<<<<<<< HEAD
     * decoder_test_params: decoder self-attention test params; 
+=======
+    * decoder_test_params: decoder self-attention test params;
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                            this function requires
                            kv_mmap (memory mapping) field
     * device: CPU or CUDA device
@@ -1043,7 +1223,11 @@ def fp8_allclose(
 # Marlin MoE test utils
 
 
+<<<<<<< HEAD
 def stack_and_dev(tensors: List[torch.Tensor]):
+=======
+def stack_and_dev(tensors: list[torch.Tensor]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     dev = tensors[0].device
     return torch.stack(tensors, dim=0).to(dev)
 
@@ -1053,7 +1237,11 @@ def compute_max_diff(output, output_ref):
         torch.abs(output_ref))
 
 
+<<<<<<< HEAD
 def torch_moe(a, w1, w2, score, topk):
+=======
+def torch_moe(a, w1, w2, score, topk, expert_map):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     B, D = a.shape
     a = a.view(B, -1, D).repeat(1, topk, 1).reshape(-1, D)
     out = torch.zeros(B * topk, w2.shape[1], dtype=a.dtype, device=a.device)
@@ -1061,6 +1249,11 @@ def torch_moe(a, w1, w2, score, topk):
     topk_weight, topk_ids = torch.topk(score, topk)
     topk_weight = topk_weight.view(-1)
     topk_ids = topk_ids.view(-1)
+<<<<<<< HEAD
+=======
+    if expert_map is not None:
+        topk_ids = expert_map[topk_ids]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     for i in range(w1.shape[0]):
         mask = topk_ids == i
         if mask.sum():
@@ -1088,12 +1281,21 @@ def torch_moe_single(a, w, score, topk):
 # and a patched version of allclose that supports fp8 types.
 def opcheck(op: Union[torch._ops.OpOverload, torch._ops.OpOverloadPacket,
                       torch._library.custom_ops.CustomOpDef],
+<<<<<<< HEAD
             args: Tuple[Any, ...],
             kwargs: Optional[Dict[str, Any]] = None,
             *,
             test_utils: Union[str, Sequence[str]] = ALL_OPCHECK_TEST_UTILS,
             raise_exception: bool = True,
             cond: bool = True) -> Dict[str, str]:
+=======
+            args: tuple[Any, ...],
+            kwargs: Optional[dict[str, Any]] = None,
+            *,
+            test_utils: Union[str, Sequence[str]] = ALL_OPCHECK_TEST_UTILS,
+            raise_exception: bool = True,
+            cond: bool = True) -> dict[str, str]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     with unittest.mock.patch('torch.allclose', new=fp8_allclose):
         return torch.library.opcheck(
             op,
@@ -1118,7 +1320,11 @@ def baseline_scaled_mm(a: torch.Tensor,
                        b: torch.Tensor,
                        scale_a: torch.Tensor,
                        scale_b: torch.Tensor,
+<<<<<<< HEAD
                        out_dtype: Type[torch.dtype],
+=======
+                       out_dtype: type[torch.dtype],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                        bias: Optional[torch.Tensor] = None) -> torch.Tensor:
 
     # We treat N-dimensional group scaling as extended numpy-style broadcasting

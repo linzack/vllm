@@ -52,7 +52,12 @@ class SmallerTpProposerWorker(ProposerWorkerBase):
         """Create a SmallerTpProposerWorker.
 
         Args:
+<<<<<<< HEAD
             worker (MultiStepWorker): an actual worker wrapped with this class
+=======
+            worker (~vllm.spec_decode.multi_step_worker.MultiStepWorker): an
+            actual worker wrapped with this class
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             draft_ranks (List[int]): if this value is given, only the GPU ranks
             written in this value participate in draft generation
         """

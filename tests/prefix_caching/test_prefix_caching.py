@@ -4,10 +4,16 @@
 Run `pytest tests/prefix_caching/test_prefix_caching.py`.
 """
 
+<<<<<<< HEAD
+=======
+from __future__ import annotations
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 import pytest
 
 from tests.conftest import VllmRunner
 from tests.core.utils import SchedulerProxy, create_dummy_prompt
+<<<<<<< HEAD
 from tests.kernels.utils import override_backend_env_variable
 from vllm import SamplingParams, TokensPrompt
 from vllm.core.scheduler import Scheduler
@@ -17,6 +23,29 @@ from ..models.utils import check_outputs_equal
 
 MODELS = [
     "facebook/opt-125m",
+=======
+from vllm import SamplingParams, TokensPrompt
+from vllm.core.scheduler import Scheduler
+from vllm.engine.llm_engine import LLMEngine
+from vllm.platforms import current_platform
+from vllm.utils import STR_BACKEND_ENV_VAR
+
+from ..models.utils import check_outputs_equal
+
+
+@pytest.fixture(scope="function", autouse=True)
+def use_v0_only(monkeypatch: pytest.MonkeyPatch):
+    """
+    This module relies on V0 internals, so set VLLM_USE_V1=0.
+    """
+    with monkeypatch.context() as m:
+        m.setenv('VLLM_USE_V1', '0')
+        yield
+
+
+MODELS = [
+    "distilbert/distilgpt2",
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ]
 
 UNSTABLE_PROMPT_SEQUENCE = [
@@ -46,13 +75,18 @@ def test_mixed_requests(
     cached_position: int,
     enable_chunked_prefill: bool,
     block_size: int,
+<<<<<<< HEAD
     monkeypatch,
+=======
+    monkeypatch: pytest.MonkeyPatch,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 ) -> None:
     """
     Test the case when some sequences have the prefix cache hit
     and the others don't. The cached position determines where
     the sequence is at among the batch of prefills.
     """
+<<<<<<< HEAD
     override_backend_env_variable(monkeypatch, backend)
 
     with hf_runner(model, dtype=dtype) as hf_model:
@@ -95,12 +129,65 @@ def test_mixed_requests(
         name_0="hf",
         name_1="vllm",
     )
+=======
+    if backend == "FLASHINFER" and current_platform.is_rocm():
+        pytest.skip("Flashinfer does not support ROCm/HIP.")
+    if backend == "XFORMERS" and current_platform.is_rocm():
+        pytest.skip("Xformers does not support ROCm/HIP.")
+    with monkeypatch.context() as m:
+        m.setenv(STR_BACKEND_ENV_VAR, backend)
+
+        with hf_runner(model, dtype=dtype) as hf_model:
+            hf_outputs = hf_model.generate_greedy(example_prompts, max_tokens)
+
+        cached_prompt = example_prompts[cached_position]
+        with vllm_runner(
+                model,
+                dtype=dtype,
+                enable_prefix_caching=True,
+                enable_chunked_prefill=enable_chunked_prefill,
+                block_size=block_size,
+        ) as vllm_model:
+            # Run the first prompt so the cache is populated
+            vllm_outputs = vllm_model.generate_greedy([cached_prompt],
+                                                      max_tokens)
+
+            # Run all the promopts
+            greedy_params = SamplingParams(temperature=0.0,
+                                           max_tokens=max_tokens)
+            req_outputs = vllm_model.model.generate(example_prompts,
+                                                    greedy_params)
+
+            # Verify number of cached tokens
+            for i in range(len(req_outputs)):
+                if i == cached_position:
+                    expected_num_cached_tokens = (
+                        len(req_outputs[i].prompt_token_ids) //
+                        block_size) * block_size
+                else:
+                    expected_num_cached_tokens = 0
+                assert (req_outputs[i].num_cached_tokens ==
+                        expected_num_cached_tokens)
+
+            vllm_outputs = [(
+                output.prompt_token_ids + list(output.outputs[0].token_ids),
+                output.prompt + output.outputs[0].text,
+            ) for output in req_outputs]
+
+        check_outputs_equal(
+            outputs_0_lst=hf_outputs,
+            outputs_1_lst=vllm_outputs,
+            name_0="hf",
+            name_1="vllm",
+        )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.parametrize("backend", ["FLASH_ATTN", "FLASHINFER", "XFORMERS"])
 def test_unstable_prompt_sequence(
     vllm_runner,
     backend: str,
+<<<<<<< HEAD
     monkeypatch,
 ) -> None:
     override_backend_env_variable(monkeypatch, backend)
@@ -114,6 +201,27 @@ def test_unstable_prompt_sequence(
         for prompt in UNSTABLE_PROMPT_SEQUENCE:
             vllm_model.generate(TokensPrompt(prompt_token_ids=prompt),
                                 SamplingParams(max_tokens=1))
+=======
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+
+    if backend == "FLASHINFER" and current_platform.is_rocm():
+        pytest.skip("Flashinfer does not support ROCm/HIP.")
+    if backend == "XFORMERS" and current_platform.is_rocm():
+        pytest.skip("Xformers does not support ROCm/HIP.")
+    with monkeypatch.context() as m:
+        m.setenv(STR_BACKEND_ENV_VAR, backend)
+
+        with vllm_runner(
+                "Qwen/Qwen2.5-0.5B-Instruct",
+                enable_chunked_prefill=True,
+                enable_prefix_caching=True,
+                max_model_len=4096,
+        ) as vllm_model:
+            for prompt in UNSTABLE_PROMPT_SEQUENCE:
+                vllm_model.generate(TokensPrompt(prompt_token_ids=prompt),
+                                    SamplingParams(max_tokens=1))
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.parametrize("model", MODELS)

@@ -8,7 +8,10 @@ from aiohttp import web
 
 
 class RoundRobinProxy:
+<<<<<<< HEAD
 
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def __init__(self, target_ports):
         self.target_ports = target_ports
         self.port_cycle = itertools.cycle(self.target_ports)
@@ -21,6 +24,7 @@ class RoundRobinProxy:
             try:
                 # Forward the request
                 async with session.request(
+<<<<<<< HEAD
                         method=request.method,
                         url=target_url,
                         headers=request.headers,
@@ -29,6 +33,17 @@ class RoundRobinProxy:
                     # Start sending the response
                     resp = web.StreamResponse(status=response.status,
                                               headers=response.headers)
+=======
+                    method=request.method,
+                    url=target_url,
+                    headers=request.headers,
+                    data=request.content,
+                ) as response:
+                    # Start sending the response
+                    resp = web.StreamResponse(
+                        status=response.status, headers=response.headers
+                    )
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                     await resp.prepare(request)
 
                     # Stream the response content
@@ -45,11 +60,19 @@ class RoundRobinProxy:
 async def main():
     proxy = RoundRobinProxy([8100, 8200])
     app = web.Application()
+<<<<<<< HEAD
     app.router.add_route('*', '/{path:.*}', proxy.handle_request)
 
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, 'localhost', 8000)
+=======
+    app.router.add_route("*", "/{path:.*}", proxy.handle_request)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "localhost", 8000)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     await site.start()
 
     print("Proxy server started on http://localhost:8000")
@@ -58,5 +81,9 @@ async def main():
     await asyncio.Event().wait()
 
 
+<<<<<<< HEAD
 if __name__ == '__main__':
+=======
+if __name__ == "__main__":
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     asyncio.run(main())

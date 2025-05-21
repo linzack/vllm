@@ -4,17 +4,28 @@ import base64
 import mimetypes
 import os
 from tempfile import NamedTemporaryFile, TemporaryDirectory
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Dict, NamedTuple, Optional, Tuple
+=======
+from typing import TYPE_CHECKING, NamedTuple, Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import numpy as np
 import pytest
 from PIL import Image, ImageChops
+<<<<<<< HEAD
 from transformers import AutoConfig, AutoTokenizer
 
 from vllm.multimodal.inputs import PlaceholderRange
 from vllm.multimodal.utils import (MediaConnector,
                                    merge_and_sort_multimodal_metadata,
                                    repeat_and_pad_placeholder_tokens)
+=======
+
+from vllm.multimodal.inputs import PlaceholderRange
+from vllm.multimodal.utils import (MediaConnector,
+                                   merge_and_sort_multimodal_metadata)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 if TYPE_CHECKING:
     from vllm.multimodal.hasher import MultiModalHashDict
@@ -28,9 +39,20 @@ TEST_IMAGE_URLS = [
     "https://upload.wikimedia.org/wikipedia/commons/0/0b/RGBA_comp.png",
 ]
 
+<<<<<<< HEAD
 
 @pytest.fixture(scope="module")
 def url_images() -> Dict[str, Image.Image]:
+=======
+TEST_VIDEO_URLS = [
+    "https://www.bogotobogo.com/python/OpenCV_Python/images/mean_shift_tracking/slow_traffic_small.mp4",
+    "https://filesamples.com/samples/video/avi/sample_640x360.avi",
+]
+
+
+@pytest.fixture(scope="module")
+def url_images() -> dict[str, Image.Image]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     connector = MediaConnector()
 
     return {
@@ -39,7 +61,11 @@ def url_images() -> Dict[str, Image.Image]:
     }
 
 
+<<<<<<< HEAD
 def get_supported_suffixes() -> Tuple[str, ...]:
+=======
+def get_supported_suffixes() -> tuple[str, ...]:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # We should at least test the file types mentioned in GPT-4 with Vision
     OPENAI_SUPPORTED_SUFFIXES = ('.png', '.jpeg', '.jpg', '.webp', '.gif')
 
@@ -66,7 +92,11 @@ async def test_fetch_image_http(image_url: str):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("image_url", TEST_IMAGE_URLS)
 @pytest.mark.parametrize("suffix", get_supported_suffixes())
+<<<<<<< HEAD
 async def test_fetch_image_base64(url_images: Dict[str, Image.Image],
+=======
+async def test_fetch_image_base64(url_images: dict[str, Image.Image],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                                   image_url: str, suffix: str):
     connector = MediaConnector()
     url_image = url_images[image_url]
@@ -136,6 +166,7 @@ async def test_fetch_image_local_files(image_url: str):
                 f"file://{temp_dir}/../{os.path.basename(image_url)}")
 
 
+<<<<<<< HEAD
 @pytest.mark.parametrize("model", ["llava-hf/llava-v1.6-mistral-7b-hf"])
 def test_repeat_and_pad_placeholder_tokens(model):
     config = AutoConfig.from_pretrained(model)
@@ -199,6 +230,18 @@ def test_repeat_and_pad_placeholder_tokens(model):
         assert new_prompt == expected_prompt
         assert new_token_ids == expected_token_ids
         assert ranges == expected_ranges
+=======
+@pytest.mark.asyncio
+@pytest.mark.parametrize("video_url", TEST_VIDEO_URLS)
+@pytest.mark.parametrize("num_frames", [-1, 32, 1800])
+async def test_fetch_video_http(video_url: str, num_frames: int):
+    connector = MediaConnector()
+
+    video_sync = connector.fetch_video(video_url, num_frames=num_frames)
+    video_async = await connector.fetch_video_async(video_url,
+                                                    num_frames=num_frames)
+    assert np.array_equal(video_sync, video_async)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 # Used for the next two tests related to `merge_and_sort_multimodal_metadata`.
@@ -222,7 +265,11 @@ def test_merge_and_sort_multimodal_metadata():
                 ]
             },
             mm_hashes={"image": ["hash1", "hash2"]},
+<<<<<<< HEAD
             expected_modalities=["image"],
+=======
+            expected_modalities=["image", "image"],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             expected_ranges=[
                 PlaceholderRange(offset=0, length=2),
                 PlaceholderRange(offset=3, length=2),
@@ -239,7 +286,11 @@ def test_merge_and_sort_multimodal_metadata():
                 ]
             },
             mm_hashes=None,
+<<<<<<< HEAD
             expected_modalities=["image"],
+=======
+            expected_modalities=["image", "image"],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             expected_ranges=[
                 PlaceholderRange(offset=0, length=2),
                 PlaceholderRange(offset=2, length=2),
@@ -264,7 +315,11 @@ def test_merge_and_sort_multimodal_metadata():
                 "image": ["image_hash1", "image_hash2"],
                 "audio": ["audio_hash1", "audio_hash2"],
             },
+<<<<<<< HEAD
             expected_modalities=["audio", "image"],
+=======
+            expected_modalities=["audio", "audio", "image", "image"],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             expected_ranges=[
                 PlaceholderRange(offset=0, length=2),
                 PlaceholderRange(offset=2, length=3),
@@ -290,7 +345,11 @@ def test_merge_and_sort_multimodal_metadata():
                 ]
             },
             mm_hashes=None,
+<<<<<<< HEAD
             expected_modalities=["audio", "image"],
+=======
+            expected_modalities=["audio", "audio", "image", "image"],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             expected_ranges=[
                 PlaceholderRange(offset=0, length=2),
                 PlaceholderRange(offset=2, length=3),
@@ -321,7 +380,13 @@ def test_merge_and_sort_multimodal_metadata():
                 "audio": ["audio_hash1"],
                 "video": ["video_hash1", "video_hash2", "video_hash3"]
             },
+<<<<<<< HEAD
             expected_modalities=["audio", "video", "image"],
+=======
+            expected_modalities=[
+                "audio", "video", "video", "video", "image", "image"
+            ],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             expected_ranges=[
                 PlaceholderRange(offset=0, length=2),
                 PlaceholderRange(offset=3, length=4),
@@ -367,12 +432,28 @@ def test_merge_and_sort_multimodal_metadata_with_interleaving():
                 "image": ["image_hash1", "image_hash2"],
                 "audio": ["audio_hash1", "audio_hash2"],
             },
+<<<<<<< HEAD
             expected_modalities=[],
             expected_ranges=[],
             expected_hashes=None,
         ),
 
         # <image> <image> <video> <audio> <image>
+=======
+            expected_modalities=["image", "audio", "image", "audio"],
+            expected_ranges=[
+                PlaceholderRange(offset=0, length=4),
+                PlaceholderRange(offset=5, length=2),
+                PlaceholderRange(offset=8, length=2),
+                PlaceholderRange(offset=11, length=4),
+            ],
+            expected_hashes=[
+                "image_hash1", "audio_hash1", "image_hash2", "audio_hash2"
+            ],
+        ),
+
+        # <image> <image> <audio> <video> <image>
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         TestCase(
             mm_positions={
                 "image": [
@@ -388,6 +469,7 @@ def test_merge_and_sort_multimodal_metadata_with_interleaving():
                 ]
             },
             mm_hashes=None,
+<<<<<<< HEAD
             expected_modalities=[],
             expected_ranges=[],
             expected_hashes=None,
@@ -400,3 +482,56 @@ def test_merge_and_sort_multimodal_metadata_with_interleaving():
                                                case.mm_hashes)
 
         assert "Interleaved mixed-modality" in str(ex_info.value)
+=======
+            expected_modalities=["image", "image", "audio", "video", "image"],
+            expected_ranges=[
+                PlaceholderRange(offset=0, length=2),
+                PlaceholderRange(offset=2, length=3),
+                PlaceholderRange(offset=5, length=2),
+                PlaceholderRange(offset=8, length=5),
+                PlaceholderRange(offset=20, length=4),
+            ],
+            expected_hashes=None,
+        ),
+
+        # <image> <audio> <video> <image> with hashes
+        TestCase(
+            mm_positions={
+                "image": [
+                    PlaceholderRange(offset=0, length=2),
+                    PlaceholderRange(offset=18, length=4),
+                ],
+                "audio": [
+                    PlaceholderRange(offset=6, length=2),
+                ],
+                "video": [
+                    PlaceholderRange(offset=10, length=5),
+                ]
+            },
+            mm_hashes={
+                "image": ["image_hash1", "image_hash2"],
+                "audio": ["audio_hash1"],
+                "video": ["video_hash1"],
+            },
+            expected_modalities=["image", "audio", "video", "image"],
+            expected_ranges=[
+                PlaceholderRange(offset=0, length=2),
+                PlaceholderRange(offset=6, length=2),
+                PlaceholderRange(offset=10, length=5),
+                PlaceholderRange(offset=18, length=4),
+            ],
+            expected_hashes=[
+                "image_hash1", "audio_hash1", "video_hash1", "image_hash2"
+            ],
+        ),
+    ]
+
+    for (mm_positions, mm_hashes, expected_modalities, expected_ranges,
+         expected_hashes) in test_cases:
+        modalities, ranges, hashes = merge_and_sort_multimodal_metadata(
+            mm_positions, mm_hashes)
+
+        assert modalities == expected_modalities
+        assert ranges == expected_ranges
+        assert hashes == expected_hashes
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

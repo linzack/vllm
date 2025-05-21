@@ -1,10 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
+<<<<<<< HEAD
 
 import os
 
 import pytest
 
 from ..utils import compare_two_settings, fork_new_process_for_each_test
+=======
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import pytest
+
+from ..utils import compare_two_settings, create_new_process_for_each_test
+
+if TYPE_CHECKING:
+    from typing_extensions import LiteralString
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @pytest.mark.parametrize("PP_SIZE, MODEL_NAME", [
@@ -14,6 +27,7 @@ from ..utils import compare_two_settings, fork_new_process_for_each_test
     "FLASH_ATTN",
     "FLASHINFER",
 ])
+<<<<<<< HEAD
 @fork_new_process_for_each_test
 def test_pp_cudagraph(PP_SIZE, MODEL_NAME, ATTN_BACKEND):
     cudagraph_args = [
@@ -30,3 +44,27 @@ def test_pp_cudagraph(PP_SIZE, MODEL_NAME, ATTN_BACKEND):
     eager_args = cudagraph_args + ["--enforce-eager"]
 
     compare_two_settings(MODEL_NAME, eager_args, cudagraph_args)
+=======
+@create_new_process_for_each_test()
+def test_pp_cudagraph(
+    monkeypatch: pytest.MonkeyPatch,
+    PP_SIZE: int,
+    MODEL_NAME: str,
+    ATTN_BACKEND: LiteralString,
+):
+    with monkeypatch.context() as m:
+        cudagraph_args = [
+            # use half precision for speed and memory savings in CI environment
+            "--dtype",
+            "float16",
+            "--pipeline-parallel-size",
+            str(PP_SIZE),
+            "--distributed-executor-backend",
+            "mp",
+        ]
+        m.setenv("VLLM_ATTENTION_BACKEND", ATTN_BACKEND)
+
+        eager_args = cudagraph_args + ["--enforce-eager"]
+
+        compare_two_settings(MODEL_NAME, eager_args, cudagraph_args)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

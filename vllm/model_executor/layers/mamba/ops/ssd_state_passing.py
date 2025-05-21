@@ -6,8 +6,13 @@
 # ruff: noqa: E501
 
 import torch
+<<<<<<< HEAD
 import triton
 import triton.language as tl
+=======
+
+from vllm.triton_utils import tl, triton
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @triton.autotune(
@@ -150,8 +155,11 @@ def _state_passing_fwd(
             #   are used for continuous batching. In which case we
             #   require seq_idx to be provided
             assert seq_idx is not None, ""
+<<<<<<< HEAD
             assert initial_states.shape == (seq_idx.max().item() + 1, nheads,
                                             dim)
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         else:
             # - this is the regular batching case, where initial
             #   states are used are for each example of the batch.

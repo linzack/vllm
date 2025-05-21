@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 from numba import jit
 
+<<<<<<< HEAD
 
 class NgramProposer:
 
@@ -12,6 +13,32 @@ class NgramProposer:
         context_token_ids: np.ndarray,
         n: int,
         k: int,
+=======
+from vllm.config import VllmConfig
+
+
+class NgramProposer:
+
+    def __init__(self, vllm_config: VllmConfig):
+        # Minimum length of the n-gram to match.
+        self.min_n = vllm_config.speculative_config.prompt_lookup_min
+        # Maximum length of the n-gram to match.
+        self.max_n = vllm_config.speculative_config.prompt_lookup_max
+        # Number of tokens follow the match. If there are less than k
+        # tokens follow the match, we will return the maximum amount of
+        # tokens until the end.
+        self.k = vllm_config.speculative_config.num_speculative_tokens
+        # Maximum length of the model.
+        self.max_model_len = vllm_config.model_config.max_model_len
+
+        # Trigger Numba JIT compilation for N-gram proposer.
+        # This usually takes less than 1 second.
+        self.propose(np.zeros(1024, dtype=np.int32))
+
+    def propose(
+        self,
+        context_token_ids: np.ndarray,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> Optional[np.ndarray]:
         """Proposes the next sequence of tokens based on n-gram pattern 
         matching in the context. The function finds matches of the last n 
@@ -21,25 +48,55 @@ class NgramProposer:
         Args:
             context_token_ids: Numpy array of token IDs representing the 
                                context sequence.
+<<<<<<< HEAD
             n: Length of the n-gram to match.
             k: Number of tokens follow the match. If there are less 
                than k tokens follow the match, we will return 
                the maximum amount of tokens until the end.
         
+=======
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         Returns:
             np.ndarray: The sequence of tokens that followed 
                         the matched n-gram in the context.
             None: If no matching n-gram pattern is found.
+<<<<<<< HEAD
         
         Example:
             If context_token_ids = [1,2,3,4,2,3], n = 2, and k = 4:
+=======
+
+        Example:
+            If context_token_ids = [1,2,3,4,2,3], min_n = 2, max_n = 3, and
+            k = 4:
+            - The last 3 (= max_n) tokens [4,2,3] cannot find a match.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             - The last 2 tokens [2,3] will be matched against the previous 
               4 tokens [1,2,3,4].
             - Finding a match of [2,3] would return the tokens that 
               followed that pattern. Here we will return [4,2,3] because 
               we only have three tokens after the match.
         """
+<<<<<<< HEAD
         return _find_subarray_kmp(context_token_ids, n, k)
+=======
+        # Do not generate draft tokens beyond the max model length.
+        k = min(self.k, self.max_model_len - context_token_ids.shape[0])
+        if k <= 0:
+            return None
+
+        # TODO(woosuk): Optimize this.
+        for n in range(self.max_n, self.min_n - 1, -1):
+            result = _find_subarray_kmp(context_token_ids, n, k)
+            if result is not None:
+                return result
+        return None
+
+    def load_model(self, *args, **kwargs):
+        # No model to load.
+        pass
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 @jit(nopython=True)

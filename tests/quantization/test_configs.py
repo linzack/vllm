@@ -5,7 +5,10 @@ Run `pytest tests/quantization/test_configs.py --forked`.
 """
 
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Tuple
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 
@@ -53,7 +56,11 @@ MODEL_ARG_EXPTYPES = [
 
 
 @pytest.mark.parametrize("model_arg_exptype", MODEL_ARG_EXPTYPES)
+<<<<<<< HEAD
 def test_auto_gptq(model_arg_exptype: Tuple[str, None, str]) -> None:
+=======
+def test_auto_gptq(model_arg_exptype: tuple[str, None, str]) -> None:
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     model_path, quantization_arg, expected_type = model_arg_exptype
 
     try:

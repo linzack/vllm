@@ -8,6 +8,16 @@ import pytest
 
 from vllm import SamplingParams
 
+<<<<<<< HEAD
+=======
+
+@pytest.fixture(autouse=True)
+def v1(run_with_both_engines):
+    """We can run both engines for this test."""
+    pass
+
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 # We also test with llama because it has generation_config to specify EOS
 # (past regression).
 MODELS = ["distilbert/distilgpt2", "meta-llama/Llama-3.2-1B"]

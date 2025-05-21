@@ -4,6 +4,7 @@ import copy
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 from functools import cached_property
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional, Set, Union
 
 import msgspec
@@ -12,6 +13,17 @@ from typing_extensions import Annotated
 
 from vllm.logger import init_logger
 from vllm.logits_process import LogitsProcessor
+=======
+from typing import Annotated, Any, Optional, Union
+
+import msgspec
+from pydantic import BaseModel
+from typing_extensions import deprecated
+
+from vllm.logger import init_logger
+from vllm.logits_process import LogitsProcessor
+from vllm.transformers_utils.tokenizer import AnyTokenizer
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 logger = init_logger(__name__)
 
@@ -29,13 +41,20 @@ class SamplingType(IntEnum):
 @dataclass
 class GuidedDecodingParams:
     """One of these fields will be used to build a logit processor."""
+<<<<<<< HEAD
     json: Optional[Union[str, Dict]] = None
     regex: Optional[str] = None
     choice: Optional[List[str]] = None
+=======
+    json: Optional[Union[str, dict]] = None
+    regex: Optional[str] = None
+    choice: Optional[list[str]] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     grammar: Optional[str] = None
     json_object: Optional[bool] = None
     """These are other options that can be set"""
     backend: Optional[str] = None
+<<<<<<< HEAD
     whitespace_pattern: Optional[str] = None
 
     @staticmethod
@@ -43,13 +62,34 @@ class GuidedDecodingParams:
         json: Optional[Union[Dict, BaseModel, str]] = None,
         regex: Optional[str] = None,
         choice: Optional[List[str]] = None,
+=======
+    backend_was_auto: bool = False
+    disable_fallback: bool = False
+    disable_any_whitespace: bool = False
+    disable_additional_properties: bool = False
+    whitespace_pattern: Optional[str] = None
+    structural_tag: Optional[str] = None
+
+    @staticmethod
+    def from_optional(
+        json: Optional[Union[dict, BaseModel, str]] = None,
+        regex: Optional[str] = None,
+        choice: Optional[list[str]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         grammar: Optional[str] = None,
         json_object: Optional[bool] = None,
         backend: Optional[str] = None,
         whitespace_pattern: Optional[str] = None,
+<<<<<<< HEAD
     ) -> Optional["GuidedDecodingParams"]:
         if all(arg is None
                for arg in (json, regex, choice, grammar, json_object)):
+=======
+        structural_tag: Optional[str] = None,
+    ) -> Optional["GuidedDecodingParams"]:
+        if all(arg is None for arg in (json, regex, choice, grammar,
+                                       json_object, structural_tag)):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             return None
         # Extract json schemas from pydantic models
         if isinstance(json, (BaseModel, type(BaseModel))):
@@ -62,6 +102,7 @@ class GuidedDecodingParams:
             json_object=json_object,
             backend=backend,
             whitespace_pattern=whitespace_pattern,
+<<<<<<< HEAD
         )
 
     @property
@@ -83,6 +124,11 @@ class GuidedDecodingParams:
         decoding backend"""
         return "no-fallback" in self.backend_options()
 
+=======
+            structural_tag=structural_tag,
+        )
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def __post_init__(self):
         """Validate that some fields are mutually exclusive."""
         guide_count = sum([
@@ -94,13 +140,41 @@ class GuidedDecodingParams:
                 "You can only use one kind of guided decoding but multiple are "
                 f"specified: {self.__dict__}")
 
+<<<<<<< HEAD
+=======
+        if self.backend is not None and ":" in self.backend:
+            self._extract_backend_options()
+
+    @deprecated(
+        "Passing guided decoding backend options inside backend in the format "
+        "'backend:...' is deprecated. This will be removed in v0.10.0. Please "
+        "use the dedicated arguments '--disable-fallback', "
+        "'--disable-any-whitespace' and '--disable-additional-properties' "
+        "instead.")
+    def _extract_backend_options(self):
+        """Extract backend options from the backend string."""
+        assert isinstance(self.backend, str)
+        self.backend, options = self.backend.split(":")
+        options_set = set(options.strip().split(","))
+        if "no-fallback" in options_set:
+            self.disable_fallback = True
+        if "disable-any-whitespace" in options_set:
+            self.disable_any_whitespace = True
+        if "no-additional-properties" in options_set:
+            self.disable_additional_properties = True
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 class RequestOutputKind(Enum):
     # Return entire output so far in every RequestOutput
     CUMULATIVE = 0
     # Return only deltas in each RequestOutput
     DELTA = 1
+<<<<<<< HEAD
     # Do not return intermediate RequestOuputs
+=======
+    # Do not return intermediate RequestOutput
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     FINAL_ONLY = 2
 
 
@@ -120,7 +194,11 @@ class SamplingParams(
         best_of: Number of output sequences that are generated from the prompt.
             From these `best_of` sequences, the top `n` sequences are returned.
             `best_of` must be greater than or equal to `n`. By default,
+<<<<<<< HEAD
             `best_of` is set to `n`.
+=======
+            `best_of` is set to `n`. Warning, this is only supported in V0.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         presence_penalty: Float that penalizes new tokens based on whether they
             appear in the generated text so far. Values > 0 encourage the model
             to use new tokens, while values < 0 encourage the model to repeat
@@ -139,17 +217,30 @@ class SamplingParams(
         top_p: Float that controls the cumulative probability of the top tokens
             to consider. Must be in (0, 1]. Set to 1 to consider all tokens.
         top_k: Integer that controls the number of top tokens to consider. Set
+<<<<<<< HEAD
             to -1 to consider all tokens.
+=======
+            to 0 (or -1) to consider all tokens.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         min_p: Float that represents the minimum probability for a token to be
             considered, relative to the probability of the most likely token.
             Must be in [0, 1]. Set to 0 to disable this.
         seed: Random seed to use for the generation.
+<<<<<<< HEAD
         stop: List of strings that stop the generation when they are generated.
             The returned output will not contain the stop strings.
         stop_token_ids: List of tokens that stop the generation when they are
             generated. The returned output will contain the stop tokens unless
             the stop tokens are special tokens.
         bad_words: List of words that are not allowed to be generated.
+=======
+        stop: list of strings that stop the generation when they are generated.
+            The returned output will not contain the stop strings.
+        stop_token_ids: list of tokens that stop the generation when they are
+            generated. The returned output will contain the stop tokens unless
+            the stop tokens are special tokens.
+        bad_words: list of words that are not allowed to be generated.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             More precisely, only the last token of a corresponding
             token sequence is not allowed when the next generated token
             can complete the sequence.
@@ -172,12 +263,22 @@ class SamplingParams(
         skip_special_tokens: Whether to skip special tokens in the output.
         spaces_between_special_tokens: Whether to add spaces between special
             tokens in the output.  Defaults to True.
+<<<<<<< HEAD
         logits_processors: List of functions that modify logits based on
             previously generated tokens, and optionally prompt tokens as
             a first argument.
         truncate_prompt_tokens: If set to an integer k, will use only the last k
             tokens from the prompt (i.e., left truncation). Defaults to None
             (i.e., no truncation).
+=======
+        logits_processors: list of functions that modify logits based on
+            previously generated tokens, and optionally prompt tokens as
+            a first argument.
+        truncate_prompt_tokens: If set to -1, will use the truncation size
+            supported by the model. If set to an integer k, will use only
+            the last k tokens from the prompt (i.e., left truncation).
+            Defaults to None (i.e., no truncation).
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         guided_decoding: If provided, the engine will construct a guided
             decoding logits processor from these parameters. Defaults to None.
         logit_bias: If provided, the engine will construct a logits processor
@@ -185,6 +286,12 @@ class SamplingParams(
         allowed_token_ids: If provided, the engine will construct a logits
             processor which only retains scores for the given token ids.
             Defaults to None.
+<<<<<<< HEAD
+=======
+        extra_args: Arbitrary additional args, that can be used by custom
+            sampling implementations. Not used by any in-tree sampling
+            implementations.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     n: int = 1
@@ -195,12 +302,20 @@ class SamplingParams(
     repetition_penalty: float = 1.0
     temperature: float = 1.0
     top_p: float = 1.0
+<<<<<<< HEAD
     top_k: int = -1
     min_p: float = 0.0
     seed: Optional[int] = None
     stop: Optional[Union[str, List[str]]] = None
     stop_token_ids: Optional[List[int]] = None
     bad_words: Optional[List[str]] = None
+=======
+    top_k: int = 0
+    min_p: float = 0.0
+    seed: Optional[int] = None
+    stop: Optional[Union[str, list[str]]] = None
+    stop_token_ids: Optional[list[int]] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ignore_eos: bool = False
     max_tokens: Optional[int] = 16
     min_tokens: int = 0
@@ -212,8 +327,13 @@ class SamplingParams(
     detokenize: bool = True
     skip_special_tokens: bool = True
     spaces_between_special_tokens: bool = True
+<<<<<<< HEAD
     # Optional[List[LogitsProcessor]] type. We use Any here because
     # Optional[List[LogitsProcessor]] type is not supported by msgspec.
+=======
+    # Optional[list[LogitsProcessor]] type. We use Any here because
+    # Optional[list[LogitsProcessor]] type is not supported by msgspec.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     logits_processors: Optional[Any] = None
     include_stop_str_in_output: bool = False
     truncate_prompt_tokens: Optional[Annotated[int, msgspec.Meta(ge=1)]] = None
@@ -222,12 +342,26 @@ class SamplingParams(
     # The below fields are not supposed to be used as an input.
     # They are set in post_init.
     output_text_buffer_length: int = 0
+<<<<<<< HEAD
     _all_stop_token_ids: Set[int] = msgspec.field(default_factory=set)
 
     # Fields used to construct logits processors
     guided_decoding: Optional[GuidedDecodingParams] = None
     logit_bias: Optional[Dict[int, float]] = None
     allowed_token_ids: Optional[List[int]] = None
+=======
+    _all_stop_token_ids: set[int] = msgspec.field(default_factory=set)
+
+    # Fields used to construct logits processors
+    guided_decoding: Optional[GuidedDecodingParams] = None
+    logit_bias: Optional[dict[int, float]] = None
+    allowed_token_ids: Optional[list[int]] = None
+    extra_args: Optional[dict[str, Any]] = None
+
+    # Fields used for bad words
+    bad_words: Optional[list[str]] = None
+    _bad_words_token_ids: Optional[list[list[int]]] = None
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     @staticmethod
     def from_optional(
@@ -238,12 +372,21 @@ class SamplingParams(
         repetition_penalty: Optional[float] = 1.0,
         temperature: Optional[float] = 1.0,
         top_p: Optional[float] = 1.0,
+<<<<<<< HEAD
         top_k: int = -1,
         min_p: float = 0.0,
         seed: Optional[int] = None,
         stop: Optional[Union[str, List[str]]] = None,
         stop_token_ids: Optional[List[int]] = None,
         bad_words: Optional[List[str]] = None,
+=======
+        top_k: int = 0,
+        min_p: float = 0.0,
+        seed: Optional[int] = None,
+        stop: Optional[Union[str, list[str]]] = None,
+        stop_token_ids: Optional[list[int]] = None,
+        bad_words: Optional[list[str]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         include_stop_str_in_output: bool = False,
         ignore_eos: bool = False,
         max_tokens: Optional[int] = 16,
@@ -253,13 +396,23 @@ class SamplingParams(
         detokenize: bool = True,
         skip_special_tokens: bool = True,
         spaces_between_special_tokens: bool = True,
+<<<<<<< HEAD
         logits_processors: Optional[List[LogitsProcessor]] = None,
+=======
+        logits_processors: Optional[list[LogitsProcessor]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         truncate_prompt_tokens: Optional[Annotated[int,
                                                    msgspec.Meta(ge=1)]] = None,
         output_kind: RequestOutputKind = RequestOutputKind.CUMULATIVE,
         guided_decoding: Optional[GuidedDecodingParams] = None,
+<<<<<<< HEAD
         logit_bias: Optional[Union[Dict[int, float], Dict[str, float]]] = None,
         allowed_token_ids: Optional[List[int]] = None,
+=======
+        logit_bias: Optional[Union[dict[int, float], dict[str, float]]] = None,
+        allowed_token_ids: Optional[list[int]] = None,
+        extra_args: Optional[dict[str, Any]] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     ) -> "SamplingParams":
         if logit_bias is not None:
             # Convert token_id to integer
@@ -301,6 +454,10 @@ class SamplingParams(
             guided_decoding=guided_decoding,
             logit_bias=logit_bias,
             allowed_token_ids=allowed_token_ids,
+<<<<<<< HEAD
+=======
+            extra_args=extra_args,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         )
 
     def __post_init__(self) -> None:
@@ -328,13 +485,17 @@ class SamplingParams(
 
         if self.seed == -1:
             self.seed = None
+<<<<<<< HEAD
         else:
             self.seed = self.seed
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         if self.stop is None:
             self.stop = []
         elif isinstance(self.stop, str):
             self.stop = [self.stop]
+<<<<<<< HEAD
         else:
             self.stop = list(self.stop)
 
@@ -351,6 +512,20 @@ class SamplingParams(
         self.logprobs = 1 if self.logprobs is True else self.logprobs
         self.prompt_logprobs = (1 if self.prompt_logprobs is True else
                                 self.prompt_logprobs)
+=======
+
+        if self.stop_token_ids is None:
+            self.stop_token_ids = []
+
+        if self.bad_words is None:
+            self.bad_words = []
+
+        if self.logprobs is True:
+            self.logprobs = 1
+
+        if self.prompt_logprobs is True:
+            self.prompt_logprobs = 1
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
         # Number of characters to hold back for stop string evaluation
         # until sequence is finished.
@@ -362,11 +537,20 @@ class SamplingParams(
         if self.temperature < _SAMPLING_EPS:
             # Zero temperature means greedy sampling.
             self.top_p = 1.0
+<<<<<<< HEAD
             self.top_k = -1
             self.min_p = 0.0
             self._verify_greedy_sampling()
         # eos_token_id is added to this by the engine
         self._all_stop_token_ids = set(self.stop_token_ids)
+=======
+            self.top_k = 0
+            self.min_p = 0.0
+            self._verify_greedy_sampling()
+
+        # eos_token_id is added to this by the engine
+        self._all_stop_token_ids.update(self.stop_token_ids)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     def _verify_args(self) -> None:
         if not isinstance(self.n, int):
@@ -380,16 +564,29 @@ class SamplingParams(
         if not -2.0 <= self.frequency_penalty <= 2.0:
             raise ValueError("frequency_penalty must be in [-2, 2], got "
                              f"{self.frequency_penalty}.")
+<<<<<<< HEAD
         if not 0.0 < self.repetition_penalty <= 2.0:
             raise ValueError("repetition_penalty must be in (0, 2], got "
                              f"{self.repetition_penalty}.")
+=======
+        if self.repetition_penalty <= 0.0:
+            raise ValueError(
+                "repetition_penalty must be greater than zero, got "
+                f"{self.repetition_penalty}.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         if self.temperature < 0.0:
             raise ValueError(
                 f"temperature must be non-negative, got {self.temperature}.")
         if not 0.0 < self.top_p <= 1.0:
             raise ValueError(f"top_p must be in (0, 1], got {self.top_p}.")
+<<<<<<< HEAD
         if self.top_k < -1 or self.top_k == 0:
             raise ValueError(f"top_k must be -1 (disable), or at least 1, "
+=======
+        # quietly accept -1 as disabled, but prefer 0
+        if self.top_k < -1:
+            raise ValueError(f"top_k must be 0 (disable), or at least 1, "
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
                              f"got {self.top_k}.")
         if not isinstance(self.top_k, int):
             raise TypeError(
@@ -417,6 +614,13 @@ class SamplingParams(
                 and self.truncate_prompt_tokens < 1):
             raise ValueError(f"truncate_prompt_tokens must be >= 1, "
                              f"got {self.truncate_prompt_tokens}")
+<<<<<<< HEAD
+=======
+        assert isinstance(self.stop_token_ids, list)
+        if not all(isinstance(st_id, int) for st_id in self.stop_token_ids):
+            raise ValueError(f"stop_token_ids must contain only integers, "
+                             f"got {self.stop_token_ids}.")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         assert isinstance(self.stop, list)
         if any(not stop_str for stop_str in self.stop):
             raise ValueError("stop cannot contain an empty string.")
@@ -435,7 +639,11 @@ class SamplingParams(
 
     def update_from_generation_config(
             self,
+<<<<<<< HEAD
             generation_config: Dict[str, Any],
+=======
+            generation_config: dict[str, Any],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             model_eos_token_id: Optional[int] = None) -> None:
         """Update if there are non-default values from generation_config"""
 
@@ -459,6 +667,45 @@ class SamplingParams(
                     eos_ids.update(self.stop_token_ids)
                     self.stop_token_ids = list(eos_ids)
 
+<<<<<<< HEAD
+=======
+    def update_from_tokenizer(self, tokenizer: AnyTokenizer) -> None:
+        if not self.bad_words:
+            return
+        self._bad_words_token_ids = []
+        for bad_word in self.bad_words:
+            # To prohibit words both at the beginning
+            # and in the middle of text
+            # (related to add_prefix_space tokenizer parameter)
+            for add_prefix_space in [False, True]:
+                prefix = " " if add_prefix_space else ""
+                prompt = prefix + bad_word.lstrip()
+                prompt_token_ids = tokenizer.encode(text=prompt,
+                                                    add_special_tokens=False)
+
+                # If no space at the beginning
+                # or if prefix space produces a new word token
+                if (not add_prefix_space) or (
+                        add_prefix_space and prompt_token_ids[0]
+                        != self._bad_words_token_ids[-1][0]
+                        and len(prompt_token_ids) == len(
+                            self._bad_words_token_ids[-1])):
+                    self._bad_words_token_ids.append(prompt_token_ids)
+
+        invalid_token_ids = [
+            token_id for bad_words_token_ids in self._bad_words_token_ids
+            for token_id in bad_words_token_ids
+            if token_id < 0 or token_id > tokenizer.max_token_id
+        ]
+        if len(invalid_token_ids) > 0:
+            raise ValueError(
+                f"The model vocabulary size is {tokenizer.max_token_id+1},"
+                f" but the following tokens"
+                f" were specified as bad: {invalid_token_ids}."
+                f" All token id values should be integers satisfying:"
+                f" 0 <= token_id <= {tokenizer.max_token_id}.")
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     @cached_property
     def sampling_type(self) -> SamplingType:
         if self.temperature < _SAMPLING_EPS:
@@ -468,9 +715,20 @@ class SamplingParams(
         return SamplingType.RANDOM
 
     @property
+<<<<<<< HEAD
     def all_stop_token_ids(self) -> Set[int]:
         return self._all_stop_token_ids
 
+=======
+    def all_stop_token_ids(self) -> set[int]:
+        return self._all_stop_token_ids
+
+    @property
+    def bad_words_token_ids(self) -> Optional[list[list[int]]]:
+        # For internal use only. Backward compatibility not guaranteed
+        return self._bad_words_token_ids
+
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     def clone(self) -> "SamplingParams":
         """Deep copy, but maybe not the LogitsProcessor objects.
 
@@ -510,7 +768,12 @@ class SamplingParams(
             "spaces_between_special_tokens="
             f"{self.spaces_between_special_tokens}, "
             f"truncate_prompt_tokens={self.truncate_prompt_tokens}, "
+<<<<<<< HEAD
             f"guided_decoding={self.guided_decoding})")
+=======
+            f"guided_decoding={self.guided_decoding}, "
+            f"extra_args={self.extra_args})")
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 
 class BeamSearchParams(

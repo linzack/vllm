@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tests for H2OVL's multimodal preprocessing kwargs."""
+<<<<<<< HEAD
 from typing import Mapping, Optional
+=======
+from collections.abc import Mapping
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 from PIL import Image
@@ -9,9 +14,14 @@ from transformers import PretrainedConfig
 from vllm.multimodal import MULTIMODAL_REGISTRY
 from vllm.multimodal.image import rescale_image_size
 from vllm.multimodal.processing import BaseMultiModalProcessor
+<<<<<<< HEAD
 from vllm.transformers_utils.tokenizer import cached_tokenizer_from_config
 
 from ....conftest import _ImageAssets
+=======
+
+from ....conftest import ImageTestAssets
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from ...utils import build_model_context
 
 
@@ -95,14 +105,22 @@ def _run_check(
     tokenizer = processor.info.get_tokenizer()
     config = processor.info.get_hf_config()
 
+<<<<<<< HEAD
+=======
+    prompt = "<image>" * len(images)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     mm_data = {"image": images}
 
     total_expected_num_patches = sum(
         _get_expected_num_patches(config, image, len(images), min_num, max_num)
         for image in images)
 
+<<<<<<< HEAD
     processed_inputs = processor.apply("<image>" * len(images), mm_data,
                                        mm_processor_kwargs)
+=======
+    processed_inputs = processor.apply(prompt, mm_data, mm_processor_kwargs)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Ensure we have the right number of placeholders per num_crops size
     image_token_id = tokenizer.convert_tokens_to_ids("<IMG_CONTEXT>")
@@ -137,7 +155,11 @@ def _run_check(
 @pytest.mark.parametrize("kwargs_on_init", [True, False])
 def test_processor_override(
     model_id: str,
+<<<<<<< HEAD
     image_assets: _ImageAssets,
+=======
+    image_assets: ImageTestAssets,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     size_factors: list[int],
     min_dynamic_patch: int,
     max_dynamic_patch: int,
@@ -151,6 +173,7 @@ def test_processor_override(
     }
 
     ctx = build_model_context(
+<<<<<<< HEAD
         model_name=model_id,
         tokenizer_name=model_id,
         trust_remote_code=True,
@@ -162,6 +185,13 @@ def test_processor_override(
         ctx.model_config,
         tokenizer=tokenizer,
     )
+=======
+        model_id,
+        mm_processor_kwargs=mm_processor_kwargs if kwargs_on_init else None,
+        limit_mm_per_prompt={"image": len(size_factors)},
+    )
+    processor = MULTIMODAL_REGISTRY.create_processor(ctx.model_config)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     hf_processor_mm_kwargs = {} if kwargs_on_init else mm_processor_kwargs
 
     min_num = min_dynamic_patch if dynamic_image_size else 1

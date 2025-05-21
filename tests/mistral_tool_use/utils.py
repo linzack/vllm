@@ -1,21 +1,35 @@
 # SPDX-License-Identifier: Apache-2.0
 
+<<<<<<< HEAD
 from typing import Dict, List, Optional
+=======
+from typing import Optional
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from typing_extensions import TypedDict
 
 
 class ServerConfig(TypedDict, total=False):
     model: str
+<<<<<<< HEAD
     arguments: List[str]
+=======
+    arguments: list[str]
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     system_prompt: Optional[str]
     supports_parallel: Optional[bool]
     supports_rocm: Optional[bool]
 
 
+<<<<<<< HEAD
 ARGS: List[str] = ["--max-model-len", "1024"]
 
 CONFIGS: Dict[str, ServerConfig] = {
+=======
+ARGS: list[str] = ["--max-model-len", "1024"]
+
+CONFIGS: dict[str, ServerConfig] = {
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     "mistral": {
         "model":
         "mistralai/Mistral-7B-Instruct-v0.3",

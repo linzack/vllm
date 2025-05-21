@@ -1,15 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import weakref
+<<<<<<< HEAD
 from typing import List
+=======
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 import pytest
 
 from vllm import LLM, PoolingParams, PoolingRequestOutput
+<<<<<<< HEAD
 from vllm.config import LoadFormat
 from vllm.distributed import cleanup_dist_env_and_memory
 
 MODEL_NAME = "s3://vllm-ci-model-weights/e5-mistral-7b-instruct"
+=======
+from vllm.distributed import cleanup_dist_env_and_memory
+
+MODEL_NAME = "intfloat/multilingual-e5-small"
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 PROMPTS = [
     "Hello, my name is",
@@ -33,11 +42,19 @@ def llm():
     # pytest caches the fixture so we use weakref.proxy to
     # enable garbage collection
     llm = LLM(model=MODEL_NAME,
+<<<<<<< HEAD
               load_format=LoadFormat.RUNAI_STREAMER,
               max_num_batched_tokens=32768,
               tensor_parallel_size=1,
               gpu_memory_utilization=0.75,
               enforce_eager=True)
+=======
+              max_num_batched_tokens=32768,
+              tensor_parallel_size=1,
+              gpu_memory_utilization=0.75,
+              enforce_eager=True,
+              seed=0)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     with llm.deprecate_legacy_api():
         yield weakref.proxy(llm)
@@ -47,8 +64,13 @@ def llm():
     cleanup_dist_env_and_memory()
 
 
+<<<<<<< HEAD
 def assert_outputs_equal(o1: List[PoolingRequestOutput],
                          o2: List[PoolingRequestOutput]):
+=======
+def assert_outputs_equal(o1: list[PoolingRequestOutput],
+                         o2: list[PoolingRequestOutput]):
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     assert [o.outputs for o in o1] == [o.outputs for o in o2]
 
 

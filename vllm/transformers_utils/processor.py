@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from functools import lru_cache
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Union, cast
+=======
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
 from transformers.processing_utils import ProcessorMixin
 from typing_extensions import TypeVar
@@ -33,7 +37,12 @@ class HashableList(list):
 
 
 def _merge_mm_kwargs(model_config: "ModelConfig", **kwargs):
+<<<<<<< HEAD
     base_kwargs = model_config.mm_processor_kwargs
+=======
+    mm_config = model_config.get_multimodal_config()
+    base_kwargs = mm_config.mm_processor_kwargs
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     if base_kwargs is None:
         base_kwargs = {}
 
@@ -53,6 +62,10 @@ def _merge_mm_kwargs(model_config: "ModelConfig", **kwargs):
 def get_processor(
     processor_name: str,
     *args: Any,
+<<<<<<< HEAD
+=======
+    revision: Optional[str] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     trust_remote_code: bool = False,
     processor_cls: Union[type[_P], tuple[type[_P], ...]] = ProcessorMixin,
     **kwargs: Any,
@@ -69,6 +82,10 @@ def get_processor(
         processor = processor_factory.from_pretrained(
             processor_name,
             *args,
+<<<<<<< HEAD
+=======
+            revision=revision,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             trust_remote_code=trust_remote_code,
             **kwargs,
         )
@@ -105,8 +122,69 @@ def cached_processor_from_config(
 ) -> _P:
     return cached_get_processor(
         model_config.model,
+<<<<<<< HEAD
+=======
+        revision=model_config.revision,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         trust_remote_code=model_config.trust_remote_code,
         processor_cls=processor_cls,  # type: ignore[arg-type]
+        **_merge_mm_kwargs(model_config, **kwargs),
+    )
+
+
+<<<<<<< HEAD
+def get_image_processor(
+    processor_name: str,
+    *args: Any,
+=======
+def get_feature_extractor(
+    processor_name: str,
+    *args: Any,
+    revision: Optional[str] = None,
+    trust_remote_code: bool = False,
+    **kwargs: Any,
+):
+    """Load an audio feature extractor for the given model name 
+    via HuggingFace."""
+    # don't put this import at the top level
+    # it will call torch.cuda.device_count()
+    from transformers import AutoFeatureExtractor
+    from transformers.feature_extraction_utils import FeatureExtractionMixin
+    try:
+        feature_extractor = AutoFeatureExtractor.from_pretrained(
+            processor_name,
+            *args,
+            revision=revision,
+            trust_remote_code=trust_remote_code,
+            **kwargs)
+    except ValueError as e:
+        # If the error pertains to the processor class not existing or not
+        # currently being imported, suggest using the --trust-remote-code flag.
+        # Unlike AutoTokenizer, AutoImageProcessor does not separate such errors
+        if not trust_remote_code:
+            err_msg = (
+                "Failed to load the feature extractor. If the feature "
+                "extractor is a custom extractor not yet available in the "
+                "HuggingFace transformers library, consider setting "
+                "`trust_remote_code=True` in LLM or using the "
+                "`--trust-remote-code` flag in the CLI.")
+            raise RuntimeError(err_msg) from e
+        else:
+            raise e
+    return cast(FeatureExtractionMixin, feature_extractor)
+
+
+cached_get_feature_extractor = lru_cache(get_feature_extractor)
+
+
+def cached_feature_extractor_from_config(
+    model_config: "ModelConfig",
+    **kwargs: Any,
+):
+    return cached_get_feature_extractor(
+        model_config.model,
+        revision=model_config.revision,
+        trust_remote_code=model_config.trust_remote_code,
         **_merge_mm_kwargs(model_config, **kwargs),
     )
 
@@ -114,6 +192,8 @@ def cached_processor_from_config(
 def get_image_processor(
     processor_name: str,
     *args: Any,
+    revision: Optional[str] = None,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     trust_remote_code: bool = False,
     **kwargs: Any,
 ):
@@ -127,6 +207,10 @@ def get_image_processor(
         processor = AutoImageProcessor.from_pretrained(
             processor_name,
             *args,
+<<<<<<< HEAD
+=======
+            revision=revision,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
             trust_remote_code=trust_remote_code,
             **kwargs)
     except ValueError as e:
@@ -156,6 +240,7 @@ def cached_image_processor_from_config(
 ):
     return cached_get_image_processor(
         model_config.model,
+<<<<<<< HEAD
         trust_remote_code=model_config.trust_remote_code,
         **_merge_mm_kwargs(model_config, **kwargs),
     )
@@ -191,6 +276,9 @@ def cached_video_processor_from_config(
 ):
     return cached_get_video_processor(
         model_config.model,
+=======
+        revision=model_config.revision,
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
         trust_remote_code=model_config.trust_remote_code,
         **_merge_mm_kwargs(model_config, **kwargs),
     )

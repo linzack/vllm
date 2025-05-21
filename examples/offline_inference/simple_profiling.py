@@ -18,8 +18,13 @@ prompts = [
 # Create a sampling params object.
 sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
+<<<<<<< HEAD
 if __name__ == "__main__":
 
+=======
+
+def main():
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     # Create an LLM.
     llm = LLM(model="facebook/opt-125m", tensor_parallel_size=1)
 
@@ -32,11 +37,27 @@ if __name__ == "__main__":
     llm.stop_profile()
 
     # Print the outputs.
+<<<<<<< HEAD
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text
         print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
+=======
+    print("-" * 50)
+    for output in outputs:
+        prompt = output.prompt
+        generated_text = output.outputs[0].text
+        print(f"Prompt: {prompt!r}\nGenerated text: {generated_text!r}")
+        print("-" * 50)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 
     # Add a buffer to wait for profiler in the background process
     # (in case MP is on) to finish writing profiling output.
     time.sleep(10)
+<<<<<<< HEAD
+=======
+
+
+if __name__ == "__main__":
+    main()
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea

@@ -1,8 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+<<<<<<< HEAD
 from typing import Dict, List, Optional, Type
 
+=======
+from typing import Optional
+
+from vllm.model_executor.layers.quantization.kernels.scaled_mm.aiter import (
+    AiterScaledMMLinearKernel)
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
 from vllm.model_executor.layers.quantization.kernels.scaled_mm.cutlass import (
     CutlassScaledMMLinearKernel)
 from vllm.model_executor.layers.quantization.kernels.scaled_mm.ScaledMMLinearKernel import (  # noqa: E501
@@ -14,10 +21,17 @@ from vllm.model_executor.layers.quantization.kernels.scaled_mm.xla import (
 from vllm.platforms import PlatformEnum, current_platform
 
 # in priority/performance order (when available)
+<<<<<<< HEAD
 _POSSIBLE_KERNELS: Dict[PlatformEnum, List[Type[ScaledMMLinearKernel]]] = {
     PlatformEnum.CPU: [CutlassScaledMMLinearKernel],
     PlatformEnum.CUDA: [CutlassScaledMMLinearKernel],
     PlatformEnum.ROCM: [TritonScaledMMLinearKernel],
+=======
+_POSSIBLE_KERNELS: dict[PlatformEnum, list[type[ScaledMMLinearKernel]]] = {
+    PlatformEnum.CPU: [CutlassScaledMMLinearKernel],
+    PlatformEnum.CUDA: [CutlassScaledMMLinearKernel],
+    PlatformEnum.ROCM: [AiterScaledMMLinearKernel, TritonScaledMMLinearKernel],
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     PlatformEnum.TPU: [XLAScaledMMLinearKernel],
 }
 
@@ -25,9 +39,15 @@ _POSSIBLE_KERNELS: Dict[PlatformEnum, List[Type[ScaledMMLinearKernel]]] = {
 def choose_scaled_mm_linear_kernel(
         config: ScaledMMLinearLayerConfig,
         compute_capability: Optional[int] = None
+<<<<<<< HEAD
 ) -> Type[ScaledMMLinearKernel]:
     """
     Choose an ScalledMMLinearKernel that can implement the given config for the 
+=======
+) -> type[ScaledMMLinearKernel]:
+    """
+    Choose an ScaledMMLinearKernel that can implement the given config for the 
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     given compute capability. Attempts to choose the best kernel in terms of 
     performance.
 
@@ -42,7 +62,11 @@ def choose_scaled_mm_linear_kernel(
         ValueError: If no kernel can implement the given config.
 
     Returns:
+<<<<<<< HEAD
         Type[ScaledMMLinearKernel]: Chosen kernel.
+=======
+        type[ScaledMMLinearKernel]: Chosen kernel.
+>>>>>>> eca18691d2fe29c4f6c1b466709eda9f123116ea
     """
 
     if compute_capability is None:
